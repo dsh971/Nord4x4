@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Shuimo onboarding week</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Noto+Serif+SC:wght@300;400;500;600&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#1C3B57}a:hover{color:#1F6357}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; padding: 20px 24px 32px; background: #F9F8F4; color: #1C1B1A; font-family: Inter, sans-serif; display: flex; flex-direction: column">
+
+  <div style="display: flex; align-items: center; gap: 12px; height: 44px">
+    <a href="ShuimoHeart.dc.html" aria-label="Back" style="width: 44px; height: 44px; display: flex; align-items: center; color: #5C564E">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"></path></svg>
+    </a>
+    <div style="display: flex; gap: 4px; flex: 1" aria-label="Onboarding progress">
+      <div style="flex: 1; height: 3px; background: #1C1B1A"></div><div style="flex: 1; height: 3px; background: #1C1B1A"></div><div style="flex: 1; height: 3px; background: #1C1B1A"></div><div style="flex: 1; height: 3px; background: #1C1B1A"></div>
+    </div>
+  </div>
+
+  <div style="margin-top: 28px; font-size: 11px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: #6E6962">Your week</div>
+  <h1 style="margin: 10px 0 0; font-family: 'Noto Serif SC', serif; font-weight: 300; font-size: 34px; line-height: 1.2">Pick <span style="font-weight: 600; color: #0E0D0C">three</span> days to row.</h1>
+
+  <div style="display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 6px; margin-top: 24px">
+    <button aria-pressed="true" style="height: 44px; border-radius: 2px; border: none; background: #1C3B57; color: #F9F8F4; font-family: Inter, sans-serif; font-weight: 500; font-size: 14px">M</button>
+    <button aria-pressed="false" style="height: 44px; border-radius: 2px; border: 1px solid rgba(28,27,26,0.14); background: #FFFFFF; color: #5C564E; font-family: Inter, sans-serif; font-weight: 500; font-size: 14px">T</button>
+    <button aria-pressed="true" style="height: 44px; border-radius: 2px; border: none; background: #1C3B57; color: #F9F8F4; font-family: Inter, sans-serif; font-weight: 500; font-size: 14px">W</button>
+    <button aria-pressed="false" style="height: 44px; border-radius: 2px; border: 1px solid rgba(28,27,26,0.14); background: #FFFFFF; color: #5C564E; font-family: Inter, sans-serif; font-weight: 500; font-size: 14px">T</button>
+    <button aria-pressed="false" style="height: 44px; border-radius: 2px; border: 1px solid rgba(28,27,26,0.14); background: #FFFFFF; color: #5C564E; font-family: Inter, sans-serif; font-weight: 500; font-size: 14px">F</button>
+    <button aria-pressed="true" style="height: 44px; border-radius: 2px; border: none; background: #1C3B57; color: #F9F8F4; font-family: Inter, sans-serif; font-weight: 500; font-size: 14px">S</button>
+    <button aria-pressed="false" style="height: 44px; border-radius: 2px; border: 1px solid rgba(28,27,26,0.14); background: #FFFFFF; color: #5C564E; font-family: Inter, sans-serif; font-weight: 500; font-size: 14px">S</button>
+  </div>
+
+  <div style="margin-top: 8px; font-size: 13px; color: #5C564E"><span style="font-weight: 600; color: #1C1B1A">3 of 3 picked.</span> Hard sessions go on days with a rest day between.</div>
+
+  <div style="margin-top: 20px; font-size: 13px; font-weight: 500; color: #5C564E">Easy row length</div>
+  <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 2px; margin-top: 8px; padding: 2px; border-radius: 4px; background: #F1F0EB; border: 1px solid rgba(28,27,26,0.08)">
+    <button style="height: 40px; border-radius: 2px; border: none; background: transparent; color: #5C564E; font-family: Inter, sans-serif; font-weight: 500; font-size: 14px">20 min</button>
+    <button style="height: 40px; border-radius: 2px; border: 1px solid rgba(28,27,26,0.14); background: #FFFFFF; color: #1C1B1A; font-family: Inter, sans-serif; font-weight: 500; font-size: 14px">30 min</button>
+    <button style="height: 40px; border-radius: 2px; border: none; background: transparent; color: #5C564E; font-family: Inter, sans-serif; font-weight: 500; font-size: 14px">45 min</button>
+  </div>
+
+  <div style="margin-top: 6px; font-size: 12px; color: #6E6962">Change it on any easy row; we remember your last choice.</div>
+
+  <div style="margin-top: 16px; padding: 10px 12px; border: 1px dashed rgba(28,27,26,0.4); font-size: 13px; line-height: 1.45; color: #5C564E">
+    <div style="font-size: 10px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; color: #6E6962">Variant · when days clash</div>
+    <div style="margin-top: 4px; color: #9F5217; font-weight: 500">Fri, Sat and Sun leave no rest day between your two hard sessions. Pick days with a gap.</div>
+  </div>
+
+  <div style="margin-top: 20px; font-size: 11px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: #6E6962">Your first week</div>
+  <div style="margin-top: 8px; border-top: 1px solid #1C1B1A">
+    <div style="display: flex; align-items: center; gap: 14px; padding: 12px 0; border-bottom: 1px solid rgba(28,27,26,0.14)">
+      <div style="width: 6px; height: 32px; background: #4A8475"></div>
+      <div style="width: 40px; font-size: 13px; color: #6E6962">Mon</div>
+      <div style="flex: 1"><div style="font-weight: 500; font-size: 15px">Easy row</div><div style="font-size: 13px; color: #6E6962">30 min at 105–120 bpm</div></div>
+    </div>
+    <div style="display: flex; align-items: center; gap: 14px; padding: 12px 0; border-bottom: 1px solid rgba(28,27,26,0.14)">
+      <div style="width: 6px; height: 32px; background: #C66B22"></div>
+      <div style="width: 40px; font-size: 13px; color: #6E6962">Wed</div>
+      <div style="flex: 1"><div style="font-weight: 500; font-size: 15px">Four 1′ pushes</div><div style="font-size: 13px; color: #6E6962">25 min · push at 147–156 bpm</div></div>
+    </div>
+    <div style="display: flex; align-items: center; gap: 14px; padding: 12px 0; border-bottom: 1px solid rgba(28,27,26,0.14)">
+      <div style="width: 6px; height: 32px; background: #4A8475"></div>
+      <div style="width: 40px; font-size: 13px; color: #6E6962">Sat</div>
+      <div style="flex: 1"><div style="font-weight: 500; font-size: 15px">Easy row</div><div style="font-size: 13px; color: #6E6962">30 min at 105–120 bpm</div></div>
+    </div>
+  </div>
+
+  <div style="flex: 1"></div>
+  <a href="ShuimoHome.dc.html" style="height: 48px; border-radius: 4px; background: #1E4D2B; color: #F9F8F4; font-weight: 500; font-size: 16px; display: flex; align-items: center; justify-content: center; gap: 10px; text-decoration: none">
+    <svg width="26" height="17" viewBox="0 0 64 40" fill="none" stroke="#F9F8F4" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 24 Q32 38 60 24"></path><path d="M4 24 Q2 14 8 10"></path><path d="M60 24 Q62 14 56 10"></path><path d="M32 28V4"></path><path d="M20 6h24v14H20z"></path></svg>
+    Set out for Iceland
+  </a>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {};
+  }
+}
+</script>
+</body>
+</html>

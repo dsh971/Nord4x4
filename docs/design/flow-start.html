@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Nor4x4 start flow</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Noto+Serif+SC:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  body { margin: 0; padding: 32px 24px; background: #F9F8F4; color: #1C1B1A; font-family: Inter, sans-serif; }
+  h1 { font-family: 'Noto Serif SC', serif; font-weight: 400; font-size: 28px; margin: 0; }
+  p { color: #5C564E; font-size: 14px; margin: 6px 0 20px; max-width: 760px; }
+  .legend { display: flex; flex-wrap: wrap; gap: 16px; font-size: 13px; color: #5C564E; margin-bottom: 16px; }
+  .legend span::before { content: ""; display: inline-block; width: 12px; height: 12px; margin-right: 6px; vertical-align: -1px; border: 1px solid #1C1B1A; }
+  .legend .screen::before { background: #FFFFFF; }
+  .legend .decision::before { background: #F1F0EB; transform: rotate(45deg) scale(0.8); }
+  .legend .gate::before { background: #FBE6D3; border-color: #C66B22; }
+  .legend .casual::before { background: #E3EEEA; border-color: #4A8475; }
+  .legend .start::before { background: #1E4D2B; border-color: #1E4D2B; }
+</style>
+</head>
+<body>
+<h1>Opening the app → starting a row</h1>
+<p>Board numbers match <code>README.md</code> in this folder. Requirements: R1, R5, R6, R21, R23, R55–R58, R60, flows F1, F4 and F5 in <code>docs/brainstorms/2026-10-29-nor4x4-rebuild-requirements.md</code>. Health and strap questions appear only the first time they matter, not during onboarding.</p>
+<div class="legend"><span class="screen">Screen (4x4 path)</span><span class="casual">Screen (Just row)</span><span class="decision">Decision</span><span class="gate">One-time setup</span><span class="start">Rowing starts</span></div>
+<pre class="mermaid">
+flowchart TD
+  open([Open the app]) --> first{First launch?}
+
+  first -- Yes --> voyage["1.0 Row from Bergen to Iceland<br/>pick a path"]
+  voyage -- "Train with the 4x4" --> m["1.1 The method<br/>(can skip)"]
+  voyage -- "Just row" --> chr["1.3c Max heart rate<br/>or Row by feel"]
+
+  m --> lv["1.2 Name and level"]
+  lv --> hr["1.3 Max heart rate<br/>age or known max → zones"]
+  hr --> wk["1.4 Your week<br/>3 days · easy-row length"]
+  wk --> clash{Days force hard<br/>sessions back to back?}
+  clash -- Yes --> warn["Warning: pick days with a gap"] --> wk
+  clash -- No --> setout["Set out for Iceland"] --> home
+
+  chr --> chome
+
+  first -- No --> path{Which path?}
+  path -- 4x4 --> missed{7+ days<br/>since the last row?}
+  path -- Just row --> chome["2.11 Casual home<br/>effort · length · route"]
+  missed -- Yes --> moved["2.4b Welcome back<br/>pick up where I left off<br/>or ease back in"] --> home
+  missed -- No --> home
+
+  home{Rowing day?<br/>missed sessions wait}
+  home -- Yes --> today["2.1 Home · today's card"]
+  home -- No --> rest["2.4 Rest day"]
+
+  today -- "Set out" --> hard{Hard session?}
+  today -- "Row freely" --> strapq
+  rest -- "Row freely" --> strapq
+  hard -- No, easy row --> strapq
+  hard -- Yes --> hasked
+
+  chome -- "Set out" --> chard{Hard effort?}
+  chard -- "No, Easy or Intermediate" --> strapq
+  chard -- Yes --> hasked
+
+  hasked{Health check<br/>answered?}
+  hasked -- No --> health["2.5 Health check<br/>7 yes/no questions"]
+  health --> anyyes{Any yes?}
+  hasked -- Yes --> anyyes
+  anyyes -- No --> strapq
+  anyyes -- "Yes · 4x4" --> locked["2.6 Pushes locked<br/>row an easy row instead"] --> strapq
+  anyyes -- "Yes · Just row" --> hidden["Hard hidden on the picker<br/>pick Easy or Intermediate"] --> chome
+
+  strapq{Asked about<br/>a strap before?}
+  strapq -- Yes --> seated
+  strapq -- No --> bt{Bluetooth<br/>available?}
+  bt -- Yes --> prompt["2.7 Strap prompt<br/>pair a heart-rate strap"]
+  bt -- No --> btoff["2.8 Bluetooth unavailable"]
+  prompt -- "Pair strap or Row by the plan" --> seated
+  btoff -- "Row by the plan" --> seated
+
+  seated["3.1 Get seated<br/>stroke demo loops<br/>20 s hold, caller counts last 5"]
+  seated -- "Timer ends or Start now" --> row([Rowing starts · warm-up])
+
+  classDef screen fill:#FFFFFF,stroke:#1C1B1A,color:#1C1B1A;
+  classDef casual fill:#E3EEEA,stroke:#4A8475,color:#1C1B1A;
+  classDef decision fill:#F1F0EB,stroke:#1C1B1A,color:#1C1B1A;
+  classDef gate fill:#FBE6D3,stroke:#C66B22,color:#1C1B1A;
+  classDef start fill:#1E4D2B,stroke:#1E4D2B,color:#F9F8F4;
+  class voyage,m,lv,hr,wk,warn,setout,moved,today,rest,seated screen;
+  class chr,chome,hidden casual;
+  class first,path,clash,missed,home,hard,chard,hasked,anyyes,strapq,bt decision;
+  class health,locked,prompt,btoff gate;
+  class open,row start;
+</pre>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.min.js"></script>
+<script>
+  mermaid.initialize({
+    startOnLoad: true,
+    theme: "base",
+    flowchart: { curve: "basis", nodeSpacing: 36, rankSpacing: 44 },
+    themeVariables: { fontFamily: "Inter, sans-serif", fontSize: "14px", lineColor: "#5C564E", primaryTextColor: "#1C1B1A", edgeLabelBackground: "#F9F8F4" }
+  });
+</script>
+</body>
+</html>

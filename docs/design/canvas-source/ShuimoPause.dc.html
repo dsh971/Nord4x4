@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Shuimo pause</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Noto+Serif+SC:wght@300;400;500;600&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#1C3B57}a:hover{color:#1F6357}
+</style>
+</helmet>
+<div style="width: 844px; height: 390px; position: relative; overflow: hidden; background: #F9F8F4; color: #1C1B1A; font-family: Inter, sans-serif">
+
+  <svg width="844" height="390" viewBox="0 0 844 390" style="position: absolute; inset: 0" aria-hidden="true">
+    <rect width="844" height="390" fill="#F9F8F4"></rect>
+    <rect x="0" y="176" width="844" height="214" fill="#5D8AA8" opacity="0.12"></rect>
+    <path fill="#336D49" opacity="0.24" d="M470 172 C500 130 530 70 570 36 C590 20 606 26 620 46 C640 80 670 120 740 160 C680 172 610 166 560 174 C530 178 500 176 470 172 Z"></path>
+    <polygon points="10,390 392,205 422,198 452,205 834,390" fill="#A0522D" opacity="0.28"></polygon>
+    <path d="M10 390 L392 205 M834 390 L452 205" stroke="#1C1B1A" stroke-width="8" stroke-linecap="round" opacity="0.8"></path>
+    <path d="M262 0 L582 0 L570 96 L274 96 Z" fill="#F9F8F4" stroke="#1C1B1A" stroke-width="2"></path>
+    <rect x="0" y="0" width="844" height="390" fill="#1C1B1A" opacity="0.45"></rect>
+  </svg>
+
+  <div role="dialog" aria-label="Paused" style="position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 680px; box-sizing: border-box; display: flex; gap: 28px; background: #FFFFFF; border: 1px solid rgba(28,27,26,0.14); border-radius: 6px; padding: 22px 26px">
+    <div style="flex: 1; display: flex; flex-direction: column">
+      <div style="font-size: 12px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: #9F5217">Paused · push 2 of 3</div>
+      <div style="font-family: 'Noto Serif SC', serif; font-weight: 400; font-size: 40px; line-height: 1.1; margin-top: 6px; font-variant-numeric: tabular-nums">1:48 <span style="font-family: Inter, sans-serif; font-size: 16px; color: #5C564E">left in this push</span></div>
+      <div style="font-size: 13px; color: #6E6962; margin-top: 4px">Paused by a long press. The ship waits for you.</div>
+      <a href="ShuimoRow.dc.html" style="margin-top: 16px; height: 56px; border-radius: 4px; background: #1E4D2B; color: #F9F8F4; font-weight: 600; font-size: 18px; display: flex; align-items: center; justify-content: center; text-decoration: none">Resume</a>
+      <div style="display: flex; gap: 10px; margin-top: 10px">
+        <a href="ShuimoRow.dc.html" style="flex: 1; height: 48px; box-sizing: border-box; border-radius: 4px; border: 1px solid rgba(28,27,26,0.26); background: #FFFFFF; color: #1C1B1A; font-weight: 500; font-size: 15px; display: flex; align-items: center; justify-content: center; text-decoration: none">Restart this push</a>
+        <a href="ShuimoPartly.dc.html" aria-label="Hold to end session" style="flex: 1; height: 48px; box-sizing: border-box; position: relative; overflow: hidden; border-radius: 4px; border: 1px solid #A62B2B; background: #FFFFFF; color: #A62B2B; font-weight: 500; font-size: 15px; display: flex; align-items: center; justify-content: center; text-decoration: none">
+          <span aria-hidden="true" style="position: absolute; left: 0; top: 0; bottom: 0; width: 40%; background: rgba(166,43,43,0.14)"></span>
+          <span style="position: relative">Hold to end session</span>
+        </a>
+      </div>
+      <div style="font-size: 12px; color: #6E6962; margin-top: 6px">Ending early saves this as Partly rowed. The ship stays put.</div>
+    </div>
+    <div style="width: 240px; border-left: 1px solid rgba(28,27,26,0.14); padding-left: 24px; display: flex; flex-direction: column">
+      <div style="display: flex; justify-content: space-between; align-items: baseline">
+        <div style="font-size: 12px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: #6E6962">Sound</div>
+        <a href="ShuimoSettings.dc.html" style="font-size: 13px; text-decoration: none">Open mixer</a>
+      </div>
+      <div style="display: grid; gap: 2px; margin-top: 10px; padding: 2px; border-radius: 4px; background: #F1F0EB; border: 1px solid rgba(28,27,26,0.08)">
+        <button style="height: 44px; border-radius: 2px; border: none; background: transparent; color: #5C564E; font-family: Inter, sans-serif; font-weight: 500; font-size: 14px">Full ship</button>
+        <button aria-pressed="true" style="height: 44px; border-radius: 2px; border: 1px solid rgba(28,27,26,0.14); background: #FFFFFF; color: #1C1B1A; font-family: Inter, sans-serif; font-weight: 600; font-size: 14px">Cues only</button>
+        <button style="height: 44px; border-radius: 2px; border: none; background: transparent; color: #5C564E; font-family: Inter, sans-serif; font-weight: 500; font-size: 14px">Silent</button>
+      </div>
+      <div style="margin-top: 12px; padding: 10px 12px; background: #F1F0EB; font-size: 13px; line-height: 1.4; color: #1C1B1A">
+        <div style="font-weight: 600">Your music is playing</div>
+        <div style="color: #5C564E; margin-top: 2px">Sea, crew and drum are off. Horn and caller still play. Full ship returns when your music stops.</div>
+      </div>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":844,"height":390}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {};
+  }
+}
+</script>
+</body>
+</html>

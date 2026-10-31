@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Shuimo health check</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Noto+Serif+SC:wght@300;400;500;600&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#1C3B57}a:hover{color:#1F6357}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; background: #F9F8F4; color: #1C1B1A; font-family: Inter, sans-serif; display: flex; flex-direction: column; overflow: hidden; position: relative">
+  <div style="padding: 20px 24px 0">
+    <div style="display: flex; align-items: center; height: 44px"><svg width="30" height="20" viewBox="0 0 64 40" fill="none" stroke="#1C1B1A" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 24 Q32 38 60 24"></path><path d="M4 24 Q2 14 8 10"></path><path d="M60 24 Q62 14 56 10"></path><path d="M32 28V4"></path><path d="M20 6h24v14H20z"></path></svg></div>
+    <div style="margin-top: 14px"><div style="font-size: 11px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: #6E6962">Before your first push</div></div>
+    <h1 style="margin: 10px 0 0; font-family: 'Noto Serif SC', serif; font-weight: 300; font-size: 30px; line-height: 1.2">A quick health <span style="font-weight: 600; color: #0E0D0C">check</span>.</h1>
+    <p style="margin: 10px 0 0; font-size: 14px; line-height: 1.5; color: #5C564E">Pushes take you close to your max heart rate. Your answers stay on this phone.</p>
+  </div>
+  <div style="margin: 14px 24px 0; border-top: 1px solid #1C1B1A">
+    <div style="display: flex; align-items: center; gap: 14px; padding: 9px 0; border-bottom: 1px solid rgba(28,27,26,0.14)">
+      <div style="flex: 1; font-size: 14px; line-height: 1.35">Has a doctor said you have a heart condition or high blood pressure?</div>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2px; padding: 2px; width: 96px; flex: none; border-radius: 4px; background: #F1F0EB; border: 1px solid rgba(28,27,26,0.08)">
+          <button style="height: 36px; border-radius: 2px; font-family: Inter, sans-serif; font-size: 13px; border: 1px solid rgba(28,27,26,0.14); background: #FFFFFF; color: #1C1B1A; font-weight: 600">No</button>
+          <button style="height: 36px; border-radius: 2px; font-family: Inter, sans-serif; font-size: 13px; border: none; background: transparent; color: #5C564E; font-weight: 500">Yes</button>
+        </div>
+    </div>
+    <div style="display: flex; align-items: center; gap: 14px; padding: 9px 0; border-bottom: 1px solid rgba(28,27,26,0.14)">
+      <div style="flex: 1; font-size: 14px; line-height: 1.35">Do you get chest pain at rest, in daily life, or when you exercise?</div>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2px; padding: 2px; width: 96px; flex: none; border-radius: 4px; background: #F1F0EB; border: 1px solid rgba(28,27,26,0.08)">
+          <button style="height: 36px; border-radius: 2px; font-family: Inter, sans-serif; font-size: 13px; border: 1px solid rgba(28,27,26,0.14); background: #FFFFFF; color: #1C1B1A; font-weight: 600">No</button>
+          <button style="height: 36px; border-radius: 2px; font-family: Inter, sans-serif; font-size: 13px; border: none; background: transparent; color: #5C564E; font-weight: 500">Yes</button>
+        </div>
+    </div>
+    <div style="display: flex; align-items: center; gap: 14px; padding: 9px 0; border-bottom: 1px solid rgba(28,27,26,0.14)">
+      <div style="flex: 1; font-size: 14px; line-height: 1.35">Have you lost balance from dizziness or lost consciousness in the last year?</div>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2px; padding: 2px; width: 96px; flex: none; border-radius: 4px; background: #F1F0EB; border: 1px solid rgba(28,27,26,0.08)">
+          <button style="height: 36px; border-radius: 2px; font-family: Inter, sans-serif; font-size: 13px; border: 1px solid rgba(28,27,26,0.14); background: #FFFFFF; color: #1C1B1A; font-weight: 600">No</button>
+          <button style="height: 36px; border-radius: 2px; font-family: Inter, sans-serif; font-size: 13px; border: none; background: transparent; color: #5C564E; font-weight: 500">Yes</button>
+        </div>
+    </div>
+    <div style="display: flex; align-items: center; gap: 14px; padding: 9px 0; border-bottom: 1px solid rgba(28,27,26,0.14)">
+      <div style="flex: 1; font-size: 14px; line-height: 1.35">Do you have another long-term medical condition?</div>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2px; padding: 2px; width: 96px; flex: none; border-radius: 4px; background: #F1F0EB; border: 1px solid rgba(28,27,26,0.08)">
+          <button style="height: 36px; border-radius: 2px; font-family: Inter, sans-serif; font-size: 13px; border: 1px solid rgba(28,27,26,0.14); background: #FFFFFF; color: #1C1B1A; font-weight: 600">No</button>
+          <button style="height: 36px; border-radius: 2px; font-family: Inter, sans-serif; font-size: 13px; border: none; background: transparent; color: #5C564E; font-weight: 500">Yes</button>
+        </div>
+    </div>
+    <div style="display: flex; align-items: center; gap: 14px; padding: 9px 0; border-bottom: 1px solid rgba(28,27,26,0.14)">
+      <div style="flex: 1; font-size: 14px; line-height: 1.35">Do you take medicine for a long-term condition?</div>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2px; padding: 2px; width: 96px; flex: none; border-radius: 4px; background: #F1F0EB; border: 1px solid rgba(28,27,26,0.08)">
+          <button style="height: 36px; border-radius: 2px; font-family: Inter, sans-serif; font-size: 13px; border: 1px solid rgba(28,27,26,0.14); background: #FFFFFF; color: #1C1B1A; font-weight: 600">No</button>
+          <button style="height: 36px; border-radius: 2px; font-family: Inter, sans-serif; font-size: 13px; border: none; background: transparent; color: #5C564E; font-weight: 500">Yes</button>
+        </div>
+    </div>
+    <div style="display: flex; align-items: center; gap: 14px; padding: 9px 0; border-bottom: 1px solid rgba(28,27,26,0.14)">
+      <div style="flex: 1; font-size: 14px; line-height: 1.35">Could exercise make a bone, joint or muscle problem worse?</div>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2px; padding: 2px; width: 96px; flex: none; border-radius: 4px; background: #F1F0EB; border: 1px solid rgba(28,27,26,0.08)">
+          <button style="height: 36px; border-radius: 2px; font-family: Inter, sans-serif; font-size: 13px; border: 1px solid rgba(28,27,26,0.14); background: #FFFFFF; color: #1C1B1A; font-weight: 600">No</button>
+          <button style="height: 36px; border-radius: 2px; font-family: Inter, sans-serif; font-size: 13px; border: none; background: transparent; color: #5C564E; font-weight: 500">Yes</button>
+        </div>
+    </div>
+    <div style="display: flex; align-items: center; gap: 14px; padding: 9px 0; border-bottom: 1px solid rgba(28,27,26,0.14)">
+      <div style="flex: 1; font-size: 14px; line-height: 1.35">Has a doctor said you should only exercise under supervision?</div>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2px; padding: 2px; width: 96px; flex: none; border-radius: 4px; background: #F1F0EB; border: 1px solid rgba(28,27,26,0.08)">
+          <button style="height: 36px; border-radius: 2px; font-family: Inter, sans-serif; font-size: 13px; border: 1px solid rgba(28,27,26,0.14); background: #FFFFFF; color: #1C1B1A; font-weight: 600">No</button>
+          <button style="height: 36px; border-radius: 2px; font-family: Inter, sans-serif; font-size: 13px; border: none; background: transparent; color: #5C564E; font-weight: 500">Yes</button>
+        </div>
+    </div>
+  </div>
+  <div style="flex: 1"></div>
+  <div style="padding: 0 24px 28px">
+    <p style="margin: 0 0 12px; font-size: 12px; line-height: 1.45; color: #6E6962">Nor4x4 isn't medical advice. A "yes" keeps pushes locked until you've spoken to a doctor; easy rows stay open. Change your answers any time in Settings.</p>
+    <a href="ShuimoStrapPrompt.dc.html" style="height: 48px; border-radius: 4px; background: #1E4D2B; color: #F9F8F4; font-weight: 500; font-size: 16px; display: flex; align-items: center; justify-content: center; gap: 10px; text-decoration: none">Continue</a>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {};
+  }
+}
+</script>
+</body>
+</html>

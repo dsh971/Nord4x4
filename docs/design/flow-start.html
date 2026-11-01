@@ -20,7 +20,7 @@
 </head>
 <body>
 <h1>Opening the app → starting a row</h1>
-<p>Board numbers match <code>README.md</code> in this folder. Requirements: R1, R5, R6, R21, R23, R55–R58, R60, flows F1, F4 and F5 in <code>docs/brainstorms/2026-10-29-nor4x4-rebuild-requirements.md</code>. Health and strap questions appear only the first time they matter, not during onboarding.</p>
+<p>Board numbers match <code>README.md</code> in this folder. Requirements: R1, R4–R6, R21, R23, R49, R55–R58, R60, R61, flows F1, F4 and F5 in <code>docs/brainstorms/2026-10-29-nor4x4-rebuild-requirements.md</code>. The health check comes before the first row on either path, and the strap question at the first Set out; neither is part of onboarding.</p>
 <div class="legend"><span class="screen">Screen (4x4 path)</span><span class="casual">Screen (Just row)</span><span class="decision">Decision</span><span class="gate">One-time setup</span><span class="start">Rowing starts</span></div>
 <pre class="mermaid">
 flowchart TD
@@ -31,41 +31,37 @@ flowchart TD
   voyage -- "Just row" --> chr["1.3c Max heart rate<br/>or Row by feel"]
 
   m --> lv["1.2 Name and level"]
-  lv --> hr["1.3 Max heart rate<br/>age or known max → zones"]
+  lv --> hr["1.3 Max heart rate<br/>age or known max · medication option"]
   hr --> wk["1.4 Your week<br/>3 days · easy-row length"]
-  wk --> clash{Days force hard<br/>sessions back to back?}
-  clash -- Yes --> warn["Warning: pick days with a gap"] --> wk
-  clash -- No --> setout["Set out for Iceland"] --> home
+  wk --> setout["Set out for Iceland"] --> home
 
   chr --> chome
 
   first -- No --> path{Which path?}
-  path -- 4x4 --> missed{7+ days<br/>since the last row?}
+  path -- 4x4 --> gap{Days since<br/>the last row?}
   path -- Just row --> chome["2.11 Casual home<br/>effort · length · route"]
-  missed -- Yes --> moved["2.4b Welcome back<br/>pick up where I left off<br/>or ease back in"] --> home
-  missed -- No --> home
+  gap -- "under 7" --> home
+  gap -- "7–27" --> back["2.4b Welcome back<br/>pick up, or ease back in<br/>(default from 14 days)"] --> home
+  gap -- "28 or more" --> reset["Plan goes back two weeks<br/>health check asked again"] --> home
 
   home{Rowing day?<br/>missed sessions wait}
   home -- Yes --> today["2.1 Home · today's card"]
   home -- No --> rest["2.4 Rest day"]
 
-  today -- "Set out" --> hard{Hard session?}
-  today -- "Row freely" --> strapq
-  rest -- "Row freely" --> strapq
-  hard -- No, easy row --> strapq
-  hard -- Yes --> hasked
-
-  chome -- "Set out" --> chard{Hard effort?}
-  chard -- "No, Easy or Intermediate" --> strapq
-  chard -- Yes --> hasked
+  today -- "Set out" --> hasked
+  rest -- "Row it now" --> hasked
+  today -- "Row freely" --> hasked
+  rest -- "Row freely" --> hasked
+  chome -- "Set out" --> hasked
 
   hasked{Health check<br/>answered?}
-  hasked -- No --> health["2.5 Health check<br/>7 yes/no questions"]
+  hasked -- No --> health["2.5 Health check<br/>PAR-Q+ · before the first row"]
   health --> anyyes{Any yes?}
   hasked -- Yes --> anyyes
   anyyes -- No --> strapq
-  anyyes -- "Yes · 4x4" --> locked["2.6 Pushes locked<br/>row an easy row instead"] --> strapq
-  anyyes -- "Yes · Just row" --> hidden["Hard hidden on the picker<br/>pick Easy or Intermediate"] --> chome
+  anyyes -- "Heart, chest pain<br/>or fainting" --> blocked["All rowing paused<br/>until a doctor clears you"]
+  anyyes -- "Other yes · 4x4" --> locked["2.6 Pushes locked<br/>easy row instead, ship still moves"] --> strapq
+  anyyes -- "Other yes · Just row" --> hidden["Hard hidden on the picker"] --> strapq
 
   strapq{Asked about<br/>a strap before?}
   strapq -- Yes --> seated
@@ -75,7 +71,7 @@ flowchart TD
   prompt -- "Pair strap or Row by the plan" --> seated
   btoff -- "Row by the plan" --> seated
 
-  seated["3.1 Get seated<br/>stroke demo loops<br/>20 s hold, caller counts last 5"]
+  seated["3.1 Get seated<br/>stroke demo loops · stop line<br/>20 s hold, five drum beats count in"]
   seated -- "Timer ends or Start now" --> row([Rowing starts · warm-up])
 
   classDef screen fill:#FFFFFF,stroke:#1C1B1A,color:#1C1B1A;
@@ -83,10 +79,10 @@ flowchart TD
   classDef decision fill:#F1F0EB,stroke:#1C1B1A,color:#1C1B1A;
   classDef gate fill:#FBE6D3,stroke:#C66B22,color:#1C1B1A;
   classDef start fill:#1E4D2B,stroke:#1E4D2B,color:#F9F8F4;
-  class voyage,m,lv,hr,wk,warn,setout,moved,today,rest,seated screen;
+  class voyage,m,lv,hr,wk,setout,back,reset,today,rest,seated screen;
   class chr,chome,hidden casual;
-  class first,path,clash,missed,home,hard,chard,hasked,anyyes,strapq,bt decision;
-  class health,locked,prompt,btoff gate;
+  class first,path,gap,home,hasked,anyyes,strapq,bt decision;
+  class health,locked,blocked,prompt,btoff gate;
   class open,row start;
 </pre>
 <script src="https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.min.js"></script>

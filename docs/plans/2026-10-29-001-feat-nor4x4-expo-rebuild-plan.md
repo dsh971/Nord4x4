@@ -2,7 +2,7 @@
 title: "feat: Rebuild Nor4x4 as an Expo rowing voyage"
 type: feat
 date: 2026-10-29
-updated: 2026-10-31
+updated: 2026-11-02
 origin: docs/brainstorms/2026-10-29-nor4x4-rebuild-requirements.md
 ---
 
@@ -27,13 +27,15 @@ The build tests the riskiest bet first. A **rowable slice** (one hardcoded sessi
 - the scope decisions: PM5 after v1, missed sessions wait;
 - the five-reviewer skeptic review: all verdicts ISSUES, 20 P1s, all resolved in the requirements (R1–R64, AE1–AE19).
 
+**Changes on 2026-11-02.** The seven-question health check became one safety warning before the first row, with a single medication question. Locks, blocks and doctor clearance are dropped (U15); the PAR-Q+ quiz is deferred to M4.
+
 What the skeptic review changed in this plan:
 
 - **Sound:** no spoken caller. The signal table (R40) has signals that never mute (R41) and a Silent mode that lets the app suspend (R43).
 - **Safety:**
   - Effort-led coaching with an estimated max or heart-rate medication (R30, R50).
   - Max HR corrects in both directions (R37).
-  - A PAR-Q+ health check before the first row, which can block every row (R5).
+  - A safety warning before the first row, with one medication question and no locks (R5).
   - A stop-warning line (R61).
   - Long-break tiers (R60).
   - One easy band of 60–70% (R57).
@@ -69,8 +71,8 @@ All 64 origin requirements carry forward (R11 is now a deferral). Grouped for tr
 
 - **R1–R7. Onboarding.**
   - The voyage-first choice between two paths, the method explainer, and name and level (Beginner only in v1).
-  - Max heart rate with a medication option. On the casual path max heart rate is optional ("Row by feel").
-  - The PAR-Q+ health check before the first row.
+  - Max heart rate. On the casual path max heart rate is optional ("Row by feel").
+  - The safety warning and medication question before the first row.
   - The strap prompt at the first Set out.
   - The weekly plan.
 - **R8–R17. Training program.**
@@ -123,7 +125,7 @@ Origin actors A1 and A2, flows F1–F5, and acceptance examples AE1–AE19 are h
 | **M1 · Rowable slice** | Rowing in the voyage is fun and readable | U1–U7 | The builder rows the slice 3–5 times and two other rowers row it once each. Each row is rated for enjoyment and readability at 1 m, and the go/change verdict is written in `docs/spikes/rowable-slice.md` | 5–7 weeks |
 | **M2 · My own coach** | The program and both paths work day to day, with no sensors | U8–U20 | Two weeks of daily use with no blocking bugs. At weeks 4–6 the builder is still rowing about three times a week (the bet's second gate) | 9–12 weeks |
 | **M3 · Full v1** | Strap, Apple Health, polish, TestFlight | U21–U23 | TestFlight installed by the builder and about five testers, whose CSV exports come back; release checklist complete | 5–7 weeks plus art |
-| **M4 · App Store** (follow-up) | Public release | Not planned here | Legal review of the health check, store listing, privacy label | — |
+| **M4 · App Store** (follow-up) | Public release | Not planned here | Legal review of the safety warning (and the PAR-Q+ quiz, if added), store listing, privacy label | — |
 
 M1 is a hard gate: if the slice isn't fun, the scene and sound change before M2 starts. The estimates come from the plan review and assume an experienced builder; final art could double M3.
 
@@ -200,11 +202,11 @@ M1 is a hard gate: if the slice isn't fun, the scene and sound change before M2 
 flowchart TB
   subgraph Routes["app/ (Expo Router)"]
     OB[onboarding group]
-    MAIN[home, settings, health check]
+    MAIN[home, settings, safety warning]
     SES[session: get seated, row, complete]
   end
   subgraph Features["src/features"]
-    FOB[onboarding + health check]
+    FOB[onboarding + safety warning]
     FRT[route + casual home]
     FROW[rowing UI + gauge]
     FSET[settings + export]
@@ -278,7 +280,7 @@ nor4x4-app/
   app/
     _layout.tsx
     (onboarding)/  voyage, method, level, heart, week
-    (main)/        index (4x4 route or casual home), settings, health-check
+    (main)/        index (4x4 route or casual home), settings, safety-warning
     session/[id]/  get-seated, row, complete
   src/
     design/        tokens.ts, typography.ts, components/
@@ -302,7 +304,7 @@ nor4x4-app/
 
 ### M1 · Rowable slice
 
-### U1. Coach review of the program, zones, benchmark and health check
+### U1. Coach review of the program, zones, benchmark and safety warning
 
 **Goal:** Get the numbers reviewed while they are still one table and nothing depends on them.
 
@@ -318,7 +320,7 @@ nor4x4-app/
   - the Beginner table (R10) and the easy-row formats (R13, R14);
   - the one easy band at 60–70%, and the casual zones of 70–80% and 80–85% (R57);
   - the benchmark row: 12 min at 20 spm in weeks 1 and 8 (R45);
-  - the PAR-Q+ wording and which answers block every row (R5);
+  - the safety-warning wording and the medication question (R5);
   - the long-break tiers (R60).
 - Ask:
   - Should perceived effort or HR lead for beginners with an estimated max?
@@ -343,7 +345,7 @@ nor4x4-app/
 - Modify: `docs/design/canvas-source/`, `docs/design/tools/boards.json`, `docs/design/screens/`, `docs/design/README.md`
 
 **Approach:**
-- The boards cover the requirements. `docs/design/README.md` maps each of the 36 boards to its requirement IDs, and `docs/design/flow-start.html` charts both paths.
+- The boards cover the requirements. `docs/design/README.md` maps each of the 35 boards to its requirement IDs, and `docs/design/flow-start.html` charts both paths.
 - The spec records:
   - tokens and the ship icon;
   - the interval shape;
@@ -353,7 +355,6 @@ nor4x4-app/
   - the signal banners;
   - motion.
 - Design the states the README lists as missing:
-  - the "all rowing paused until a doctor clears you" state;
   - the effort-only coaching notice after a medication yes;
   - the path-switch confirmation;
   - the 28-day return;
@@ -568,7 +569,7 @@ nor4x4-app/
 - Repositories expose domain types only; nothing above services sees SQL.
 - The profile holds:
   - path, name, level, age or known max, the max-HR source, and the medication flag;
-  - the health-check answers and the doctor-cleared date;
+  - the date the safety warning was last acknowledged;
   - rowing days and the remembered easy-row length, plus the last casual effort and length;
   - sound settings, the stroke-demo flag and the hold time.
 - The onboarding draft is saved after each step.
@@ -664,11 +665,10 @@ nor4x4-app/
   - It can be rowed on any day ("Row it now"), with at most one plan session per day.
   - A missed session never moves the ship.
 - **Spacing rule (R9):** if the last completed row was a hard session yesterday and the waiting session is hard, swap in the next easy row. If no easy row remains, suggest rest or Row freely.
-- **Locked hard sessions (R5):** a locked hard session is replaced by an easy row that still moves the ship.
 - **Long break (R60):** counts days since the last completed plan or casual row; Row freely doesn't count.
   - 7–13 days: the choice, defaulting to "Pick up".
   - 14–27 days: the choice, defaulting to "Ease back in".
-  - 28 days or more: the plan goes back two plan weeks and the health check must be answered again.
+  - 28 days or more: the plan goes back two plan weeks and the safety warning is due again (R5).
 - **Route position:** counts completed rows only.
 - **Voyage end:** both paths end at 23 stops. Finishing the Beginner voyage offers a repeat or Just row.
 - **Switching paths (R59):** switching to the 4x4 path starts the plan at week 1 with the ship where it is, and stretches the route.
@@ -683,7 +683,7 @@ nor4x4-app/
 - Covers AE15 and AE18:
   - 8 days away offers "Pick up" by default, and both choices leave the ship in place;
   - 20 days away defaults to "Ease back in";
-  - 30 days away in week 5 resumes at week 3 and requires the health check again.
+  - 30 days away in week 5 resumes at week 3 and marks the safety warning due again.
 - 6 days away doesn't ask, and a Row freely session doesn't reset the gap.
 - Covers AE11. A Partly rowed session stays next and the ship does not move; it counts toward the tally.
 - Covers AE12. A 20-minute Easy and a 60-minute Hard casual row each move the ship one stop.
@@ -744,15 +744,14 @@ nor4x4-app/
 
 **Approach:**
 - Both path cards carry equal weight.
-- "Train with the 4x4" runs method, name and level (Beginner only; others shown as coming later), heart with the medication option, and week.
+- "Train with the 4x4" runs method, name and level (Beginner only; others shown as coming later), heart, and week.
 - "Just row" runs heart only; it can be skipped with "Row by feel".
 - The draft is saved after each step.
-- There is no health or pairing step during onboarding. They come at the first row (U15, U21).
+- There is no safety or pairing step during onboarding. They come at the first row (U15, U21).
 
 **Test scenarios:**
 - Completing the 4x4 path with age 34 and days Mon, Wed, Sat creates a profile with max 184 and the 23-session voyage.
 - Covers F5. Just row, then Row by feel, creates a casual profile in effort mode and lands on the casual home.
-- Ticking the medication option sets effort mode for every row.
 - Intermediate and Expert can't be selected.
 - Relaunching mid-onboarding resumes at the last unfinished step on the same path.
 
@@ -797,38 +796,36 @@ nor4x4-app/
 
 **Verification:** Home matches boards 2.1, 2.1e, 2.4, 2.4b, 2.11 and 2.11f, with seeded data for weeks 1, 3 and 8 and a casual profile.
 
-### U15. Health check, locks and clearance
+### U15. First-row warning and medication question
 
-**Goal:** Ask the PAR-Q+ questions before the first row, block or lock by answer, and give one way to lift each.
+**Goal:** Show the safety warning with the medication question before the first row, and again after a 28-day break.
 
-**Requirements:** R5, R60, AE8, AE13, AE16
+**Requirements:** R5, R30, R60, R61, AE8, AE13, AE16, AE18
 
 **Dependencies:** U1, U8, U11, U14
 
 **Files:**
-- Create: `app/(main)/health-check.tsx`, `src/features/onboarding/healthCheck/`
-- Test: `src/features/onboarding/__tests__/healthCheck.test.tsx`
+- Create: `app/(main)/safety-warning.tsx`, `src/features/onboarding/safetyWarning/`
+- Test: `src/features/onboarding/__tests__/safetyWarning.test.tsx`
 
 **Approach:**
-- **When it appears:** at the first Set out, Row it now or Row freely on either path, and again after a 28-day break.
-- **Answering:** nothing is pre-selected, toggles are 44 pt with `accessibilityState`, and Continue stays disabled until all seven are answered.
-- **Heart condition, chest pain or fainting:** every row is blocked until "A doctor has cleared me" in Settings.
-- **Other yes:** hard sessions lock (replaced by easy rows that move the ship) and casual Hard is hidden.
-- **Medication yes:** effort mode for every row.
+- **When it appears:** at the first Set out, Row it now or Row freely on either path, and again when U11 marks it due after a 28-day break.
+- **Answering:** the medication question has nothing pre-selected, Yes and No are 44 pt with `accessibilityState`, and "I understand" stays disabled until it is answered.
+- **Acknowledging** saves the answer and the date. Nothing is ever locked or blocked.
+- **Medication yes:** effort mode for every row on both paths (KTD21), with every effort still available.
 
 **Test scenarios:**
-- Continue stays disabled with six of seven answered.
-- Covers AE16. A chest-pain yes blocks every row on both paths; confirming clearance lifts it.
-- Covers AE8. A joint-problem yes locks hard sessions, and today's hard session becomes an easy row that moves the ship.
-- Covers AE13. A medication yes on the casual path hides Hard and sets effort mode.
-- Changing an answer to "no" in Settings lifts its lock without re-asking.
-- The check isn't shown again until a 28-day break.
+- Covers AE8. On a fresh profile the first Set out shows the warning; "I understand" stays disabled until the question is answered, and "no" leaves HR coaching on.
+- Covers AE13. A medication yes on the casual path shows every effort as perceived effort, all three can start, and coaching mode is effort.
+- Covers AE16. After "I understand", later rows go straight to the strap prompt or Get seated, and no row is blocked.
+- Covers AE18. A 30-day break shows the warning again before the next row.
+- Changing the medication answer in Settings switches coaching mode without showing the warning again.
 
-**Verification:** The screens match boards 2.5 and 2.6 and the clearance state from U2.
+**Verification:** The screen matches board 2.5, and VoiceOver reads the warning, the question and both choices.
 
 ### U16. Settings and export
 
-**Goal:** Let the rower edit the path, profile, health answers, sound and session options, and export their rows.
+**Goal:** Let the rower edit the path, profile, heart-rate medication, sound and session options, and export their rows.
 
 **Requirements:** R24, R37, R41, R42, R47, R59, R63, R64
 
@@ -1063,7 +1060,7 @@ nor4x4-app/
 **Approach:**
 - End-to-end Maestro flows run in test mode.
 - Manual device runs cover audio, the strap, Health, checkpoints after a force-quit, and iPhone backup and restore.
-- A VoiceOver pass covers onboarding, home, the health check and pause.
+- A VoiceOver pass covers onboarding, home, the safety warning and pause.
 - A deaf-user pass confirms each signal's visual twin.
 - A performance pass covers the rough sea state.
 - **Release work:**
@@ -1075,8 +1072,8 @@ nor4x4-app/
 - Testers send back their CSV exports for the strategy metrics.
 
 **Test scenarios:**
-- Fresh install, 4x4 path: onboarding, health check, the first session, then complete; home shows the next session.
-- Fresh install, Just row: onboarding, health check, a Hard row with the strap prompt, then complete; the ship moves one stop.
+- Fresh install, 4x4 path: onboarding, safety warning, the first session, then complete; home shows the next session.
+- Fresh install, Just row: onboarding, safety warning, a Hard row with the strap prompt, then complete; the ship moves one stop.
 - A simulated eight-week voyage with two missed sessions and one 10-day break ends with "Sail the voyage again" and "Just row from here".
 - Force-quitting mid-session and relaunching offers to resume from the checkpoint.
 
@@ -1096,7 +1093,8 @@ nor4x4-app/
   - an Apple Watch app;
   - effort-reactive scenes, and rival or chase mechanics;
   - Android;
-  - PM5 support.
+  - PM5 support;
+  - the PAR-Q+ health questionnaire with locks and doctor clearance, for M4 (board 2.6 kept in `docs/design/deferred/`).
 - **Outside this product's identity:** paid features, live instructors or filmed video, social features and accounts, and on-water rowing.
 - **Dropped from this plan after review:** the separate history screen (the route shows past sessions), and the speculative Expert 5×4 variant.
 - **Kept after review (decided 2026-10-31):** music detection, easy-row format rotation and both orientations. The plan reviewer suggested cutting them, and the builder decided to keep them. Missed sessions use the simpler "they wait" rule.
@@ -1131,7 +1129,7 @@ nor4x4-app/
 | Shaders drain battery or drop frames in 45–60 minute rows | One water shader with an intensity; cache static layers; profile the rough state |
 | The charcoal ease-off glow reads as dimming | Tested in the slice; teal is the fallback |
 | Estimated max HR is wrong by 10+ bpm | Effort leads with an estimated max; max self-corrects both ways (KTD21, R37) |
-| Health check wording is not legally reviewed | U1 coach review for v1; legal review before M4 |
+| Safety-warning wording is not legally reviewed | U1 coach review for v1; legal review before M4 |
 | Benchmark distances depend on the rower's monitor | Distance is optional; HR and enjoyment cover the rest |
 | Nobody owns the final art | The builder makes the slice art; final art is a costed item in `STRATEGY.md` |
 | Scope is large for one builder (about 5–6 months) | Beginner only, PM5 deferred, "missed sessions wait"; M2 usable without sensors |
@@ -1159,7 +1157,7 @@ nor4x4-app/
 
 - **Project:**
   - Origin requirements: `docs/brainstorms/2026-10-29-nor4x4-rebuild-requirements.md`. Strategy, including costs: `STRATEGY.md`.
-  - Design: `docs/design/README.md` maps each of the 36 boards to its requirement IDs. Screenshots are in `docs/design/screens/` and the flow chart is `docs/design/flow-start.html`. Live canvas: https://claude.ai/artifact/F5M3koEizjUmoML6iApBQ5
+  - Design: `docs/design/README.md` maps each of the 35 boards to its requirement IDs. Screenshots are in `docs/design/screens/` and the flow chart is `docs/design/flow-start.html`. Live canvas: https://claude.ai/artifact/F5M3koEizjUmoML6iApBQ5
   - Current behaviour reference: `../Nor4x4/Nor4x4/Catalog.swift`, `../Nor4x4/Nor4x4/WorkoutManager.swift`, `../Nor4x4/Nor4x4/TimerView.swift`, `../Nor4x4/Nor4x4/LevelSelectionView.swift`.
   - ShuimoDS at `../../ShuimoDS/`: `Sumi-Design-System/colors_and_type.css`, `Sumi-Design-System/README.md`, `Sumi-Design-System/assets/mountains.svg` (procedural wash technique).
 - **Platform:**
@@ -1181,4 +1179,4 @@ nor4x4-app/
   - Seiler: polarized distribution.
 
   None tested one hard session a week in untrained adults.
-- **PAR-Q+**, the current version.
+- **PAR-Q+**, the current version: informed the R5 warning wording; the full quiz is deferred.

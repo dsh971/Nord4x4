@@ -1,6 +1,6 @@
 ---
 name: Nor4x4
-last_updated: 2026-10-31
+last_updated: 2026-11-02
 ---
 
 # Nor4x4 Strategy
@@ -19,7 +19,7 @@ Make every row a scene in a viking voyage, not a class. Story, sound, and progre
 
 **Secondary:** Casual rowers who just want an enjoyable row with no program (the "Just row" path: steady efforts, no schedule).
 
-**v1 audience:** the builder plus about 5 TestFlight testers. An App Store release is a later milestone, and it needs legal review of the health check and a store listing.
+**v1 audience:** the builder plus about 5 TestFlight testers. An App Store release is a later milestone, and it needs legal review of the safety warning and a store listing.
 
 ## Key metrics
 
@@ -66,7 +66,7 @@ Free to users, so every cost is the builder's:
 | Cost | Plan | Fallback |
 |---|---|---|
 | Apple Developer Program (needed for TestFlight) | Pay the annual fee | None; required |
-| Coach review of the program and health check | One paid review before program work | A qualified friend, with the numbers kept conservative |
+| Coach review of the program and safety warning | One paid review before program work | A qualified friend, with the numbers kept conservative |
 | Sound (horn, drum, crew, bells) | Royalty-free or CC0 libraries, plus recordings of friends for the crew | Library sounds only |
 | Final illustration and animation art | Commissioned or self-made, after the slice proves the bet | Placeholder paintings, polished by the builder |
-| Legal review of the health check | Only before an App Store release | No store release |
+| Legal review of the safety warning | Only before an App Store release | No store release |

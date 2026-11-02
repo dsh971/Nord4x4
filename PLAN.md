@@ -1,12 +1,87 @@
-# PLAN — Skeptic review fixes, with no spoken caller
+# PLAN — Health check becomes a warning plus one question
+
+Goal: replace the seven-question health quiz with one warning screen before the first row, keeping only the medication question. Docs and design only; no app code.
+
+## Decision (from you, 2026-10-31)
+
+Middle ground: before the rower's first row on either path, one screen shows:
+- a warning;
+- one question: "Do you take medicine that affects your heart rate?";
+- an "I understand" button.
+
+No quiz, no locks, no blocks.
+
+## Proposed defaults (change any before I start)
+
+1. **Warning wording** (coach to review in U1): "Pushes go close to your max heart rate. If you have a heart condition, chest pain, dizziness or fainting, are pregnant, or are over 45 and new to hard exercise, talk to a doctor first. Stop and rest if you feel chest pain, dizziness or unusual breathlessness."
+2. **The medication question is asked in one place, on the warning screen.**
+   - The "affected by medication" option comes off the max-HR step (1.3 and 1.3c). Casual rowers can skip that step with Row by feel, so the warning screen is the only place every rower sees it.
+   - It stays editable in Settings.
+   - "Yes" means effort-only coaching on every row, as before (R30, KTD21).
+3. **The stop line stays** on Get seated and the pause sheet (R61).
+4. **After a 28-day break,** the plan still goes back two weeks and the warning screen shows again. There is no quiz.
+5. **Dropped:**
+   - the seven questions;
+   - "blocks every row" and "A doctor has cleared me";
+   - hard-session locks and the hidden Hard effort;
+   - locked hard sessions replaced by easy rows.
+
+   The PAR-Q+ quiz is noted under "Deferred for later" for a possible App Store release (M4).
+6. **Board 2.6 (pushes locked)** moves to `docs/design/deferred/`. Board 2.5 becomes the warning screen.
+
+## Phase A — Requirements
+
+`docs/brainstorms/2026-10-29-nor4x4-rebuild-requirements.md`:
+- **Rewrites:**
+  - R5 becomes the warning, the one question and "I understand".
+  - R4 loses the medication option.
+  - R47 swaps health answers and clearance for "Heart-rate medication" and the warning.
+  - R57's "medication" wording follows.
+  - R60's 28-day tier shows the warning again.
+  - The Key Decision "Safety before targets" is updated.
+- **Examples:** AE8 becomes the warning acknowledgement, AE13 the medication yes (effort mode), and AE16 becomes "no row is blocked; the warning shows once".
+- **F2 and F5:** "health check" becomes "warning".
+- **Deferred:** the PAR-Q+ quiz, for M4.
+
+## Phase B — Boards and flow chart
+
+- **2.5:** rebuilt as the warning screen, with the warning, the medication yes/no (nothing pre-selected, 44 pt) and "I understand".
+- **2.6:** moved to `docs/design/deferred/` with a README line.
+- **1.3 and 1.3c:** the medication checkbox comes off.
+- **2.2 Settings:** "Health check" becomes "Heart-rate medication · No".
+- **Flow chart:** the quiz branch (any yes, paused, locked, hidden) collapses to "First row? → 2.5 warning → strap".
+- **README:** board table and the "Not yet designed" list (the clearance and locked states are gone).
+- **Regenerate:** `screens/`.
+
+## Phase C — Build plan
+
+`docs/plans/2026-10-29-001-feat-nor4x4-expo-rebuild-plan.md`:
+- U15 shrinks to "First-row warning and medication question".
+- U11 drops the locked-hard-session swap.
+- U8 drops the health answers and clearance date, and keeps the medication flag and the date the warning was acknowledged.
+- U13 loses the medication option.
+- U1 reviews the warning wording, not the PAR-Q+.
+- The risk row "health check not legally reviewed" now refers to the warning.
+- Deferred gains the PAR-Q+ quiz for M4.
+
+## Verification
+
+```
+python3 -I docs/design/tools/check_boards.py docs/design/canvas-source      # All boards pass
+python3 -m unittest discover -s docs/design/tools                           # OK
+grep -rn "PAR-Q\|cleared me\|Pushes locked" docs/brainstorms docs/plans docs/design/canvas-source   # only deferred mentions
+```
+Plus: a script checks every R and AE ID is still referenced; 2.5, 2.2, 1.3, 1.3c and the flow chart rendered and viewed.
+
+## Done · skeptic review fixes, with no spoken caller (Phases A–C, completed 2026-10-31)
 
 Goal: resolve the 5-reviewer skeptic review (2026-10-31, all verdicts ISSUES, 20 P1s) and apply the pending "no spoken caller" change in one pass. It covers the requirements, strategy, boards, flow chart and build plan. Docs and design only; no app code.
 
 Each decision below has a **proposed default**. Approve all, or name the ones to change.
 
-## Decisions
+### Decisions
 
-### Sound and cues (replaces the pending no-caller plan)
+#### Sound and cues (replaces the pending no-caller plan)
 
 - **S1. No spoken caller.** The horn and the drum carry every cue, the crew chants on the stroke, and the screen carries the details. A spoken caller goes to "Deferred for later".
 - **S2. Signal vocabulary.** Each sound has an on-screen twin (R51):
@@ -30,7 +105,7 @@ Each decision below has a **proposed default**. Approve all, or name the ones to
 - **S5. The charcoal glow is provisional.** Board 3.2b shows it, but the M1 slice tests it against the painting. If it reads as dimming, switch to teal.
 - **S6. Crew calls in English ("Heave!", "Hold!").** The mixer's "Caller" slider becomes "Signals".
 
-### Safety (training reviewer, P1s)
+#### Safety (training reviewer, P1s)
 
 - **H1. "Stop if" warning.** Chest pain or pressure, dizziness, unusual breathlessness or palpitations mean stop and rest. It appears on Get seated before every hard session or Hard casual row, and on the pause sheet.
 - **H2. With an estimated max, effort leads.**
@@ -56,7 +131,7 @@ Each decision below has a **proposed default**. Approve all, or name the ones to
   - The casual path is described as "steady efforts", not polarized.
   - The push target follows R10 week by week.
 
-### Definitions (requirements and boards reviewers)
+#### Definitions (requirements and boards reviewers)
 
 - **D1. A day is the device's local calendar day.** A session belongs to the day it started.
 - **D2. The waiting session can be rowed on any day, rest days included.** The rest-day board gets "Row it now" as well as Row freely. Two consequences:
@@ -76,7 +151,7 @@ Each decision below has a **proposed default**. Approve all, or name the ones to
 - **D7. Short on time** counts as completing that hard session, but isn't allowed on the retest. The 1×4 session is 19 min (10 + 4 + 5).
 - **D8. R9 fallback:** when the waiting session is hard and no easy row remains, today suggests rest or Row freely.
 
-### Scope and strategy (strategy and plan reviewers)
+#### Scope and strategy (strategy and plan reviewers)
 
 - **V1. v1 is for the builder plus about 5 TestFlight testers.** App Store release is a later milestone (M4), which adds legal review of the health check and the store listing. STRATEGY.md says so.
 - **V2. Beginner only in v1.** Intermediate and Expert have no program (R11) and move to "Deferred". When the Beginner voyage ends, it offers a repeat or Just row.
@@ -97,7 +172,7 @@ Each decision below has a **proposed default**. Approve all, or name the ones to
   - New requirement R64.
 - **V7. Kept as you decided:** music detection, easy-row format rotation, and both orientations. The cuts the plan reviewer suggested are noted but not applied.
 
-### Build plan (plan reviewer)
+#### Build plan (plan reviewer)
 
 - **B1. Ducking spike with the screen locked.** 20 cues, measuring how long the music takes to return to full volume. The fallback is written down now: no ducking, cues mixed over the music.
 - **B2. Move the HR and rower interfaces and their fakes to U6.** M2 needs them.
@@ -118,7 +193,7 @@ Each decision below has a **proposed default**. Approve all, or name the ones to
 - **B6. Missing dependencies:** U17 needs U18, U8 and U11; U16 needs U13 and U15.
 - **B7. Effort estimate in the plan:** M1 5–7 weeks, M2 9–12, M3 5–7 plus art.
 
-### Boards (design reviewer)
+#### Boards (design reviewer)
 
 - **G1. Settings and health check:**
   - A Path row in Settings (2.2), with a confirm sheet saying "the ship stays where it is".
@@ -144,7 +219,7 @@ Each decision below has a **proposed default**. Approve all, or name the ones to
   - The 1.4 clash text is replaced by the R9 rule.
   - The flow chart node "caller counts last 5".
 
-### Small fixes (no decision needed)
+#### Small fixes (no decision needed)
 
 - AE1 gets consistent numbers: HR in zone by 0:50.
 - R14 rounds long rows to 5 minutes.
@@ -153,7 +228,7 @@ Each decision below has a **proposed default**. Approve all, or name the ones to
 - Cool-down copy: "keep paddling, don't stand straight up".
 - The plan title becomes "Rebuild Nor4x4 as an Expo rowing voyage".
 
-## Phase A — Requirements and strategy
+### Phase A — Requirements and strategy
 
 - **`docs/brainstorms/2026-10-29-nor4x4-rebuild-requirements.md`:**
   - S1–S6, H1–H7, D1–D8, V2, V3, and the small fixes.
@@ -162,14 +237,14 @@ Each decision below has a **proposed default**. Approve all, or name the ones to
   - New examples: AE16–AE19 for the health-check blocks, a first row on a rest day, the long-break tiers and lowering max HR.
 - **`STRATEGY.md`:** V1, V4, V5, V6; a retest metric that matches V3; "The voyage" track loses "caller".
 
-## Phase B — Boards and flow chart
+### Phase B — Boards and flow chart
 
 - **Boards:** G1–G7, S2/S5 (3.2b), H1 (stop warning on 3.1 and 3.5), H5 (2.6), D2 ("Row it now" on 2.4), and the D4 copy.
 - **Retest:** 2.10 shows the distance-based result from V3.
 - **Flow chart:** a first row on any day, the long-break tiers, the health-check blocks, and no caller.
 - **Regenerate:** `screens/`, then update the README board table.
 
-## Phase C — Build plan
+### Phase C — Build plan
 
 **`docs/plans/2026-10-29-001-feat-nor4x4-expo-rebuild-plan.md`:**
 - B1–B7 and V2 (Beginner-only content in U9).
@@ -177,7 +252,7 @@ Each decision below has a **proposed default**. Approve all, or name the ones to
 - Unit test scenarios for H2, H3, H6, D1–D8 and S3.
 - Title fix.
 
-## Verification
+### Verification
 
 ```
 python3 -I docs/design/tools/check_boards.py docs/design/canvas-source      # All boards pass

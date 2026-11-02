@@ -37,7 +37,7 @@ The current SwiftUI app does not solve this. It is a stock-looking interval time
 - **Role play is the main thing.** Scene, sound, and route carry the motivation, and the training plan serves the voyage. When the two compete for effort, the voyage wins.
 - **Hands-free and sensor-free by default.** Every screen in rowing mode must work at 1 m with no touch and no sensors. Sensors improve the experience but are never required.
 - **No spoken voice.** Horn calls, drum signals and crew chants carry every cue, and the screen carries the details. Every cue has both a sound and a visual twin.
-- **Value before setup.** Onboarding asks only what the first session needs. Health questions and sensor pairing come at the first "Set out".
+- **Value before setup.** Onboarding asks only what the first session needs. The safety warning and sensor pairing come at the first "Set out".
 - **Safety before targets.**
   - When max HR is estimated, or heart-rate medication makes bpm unreliable, perceived effort leads and heart rate is only information.
   - Warning symptoms always mean stop.
@@ -72,15 +72,14 @@ The current SwiftUI app does not solve this. It is a stock-looking interval time
   - "Just row" continues to max heart rate only, which can be skipped.
 - R2. The method step frames the 4x4 as what the voyage builds up to. It explains the 4x4's shape and that most rows are easy ones, says that Beginners start with 1-minute pushes and build up over eight weeks, and can be skipped.
 - R3. The name-and-level step collects the rower's name (used in greetings) and their level. In v1 only Beginner is selectable; Intermediate and Expert are shown as coming later. Level can be changed in Settings once more levels exist.
-- R4. The max-HR step accepts age (with the estimated max shown) or a known max, plus a "My heart rate is affected by medication" option.
+- R4. The max-HR step accepts age (with the estimated max shown) or a known max.
   - It then shows the Steady and Push zones in bpm with their color.
   - On the casual path it shows the three effort zones (R57) instead, and offers "Row by feel" to skip it.
-- R5. Before the rower's first row on either path, a health check and disclaimer appear. They follow the PAR-Q+ questions, with the official qualifiers and with notes for anyone over 45 who isn't used to vigorous exercise and anyone who is pregnant or temporarily ill.
-  - **Answering:** no answer is pre-selected, and Continue stays disabled until all seven are answered.
-  - **"Yes" to a heart condition, chest pain, or fainting or dizziness:** blocks every row until the rower confirms "A doctor has cleared me" in Settings.
-  - **Any other "yes":** locks hard sessions and hides Hard on the casual effort picker. Easy rows and Easy and Intermediate casual rows stay open. On the 4x4 path, a locked hard session is replaced by an easy row that moves the ship, so the voyage continues.
-  - **"Yes" to the medication question, or the R4 medication option:** switches every row to effort-only coaching (R30) and suggests asking a doctor about heart-rate targets.
-  - **Changing answers:** they can be revisited in Settings; answering "no" or confirming clearance lifts the matching lock.
+- R5. Before the rower's first row on either path, one warning screen appears:
+  - **The warning:** "Pushes go close to your max heart rate. If you have a heart condition, chest pain, dizziness or fainting, are pregnant, or are over 45 and new to hard exercise, talk to a doctor first. Stop and rest if you feel chest pain, dizziness or unusual breathlessness."
+  - **One question:** "Do you take medicine that affects your heart rate?", with no answer pre-selected. "Yes" switches every row to effort-only coaching (R30) and suggests asking a doctor about heart-rate targets.
+  - **One button:** "I understand", enabled once the question is answered.
+  - **Nothing is locked or blocked.** The answer can be changed in Settings.
 - R6. At the first "Set out", the app asks whether the rower is wearing a heart-rate strap and offers pairing. Pairing is also in Settings and can always be skipped ("Row by the plan").
 - R7. The weekly step collects three rowing days and an easy-row length (20, 30, or 45 min), then previews the first week. Hard sessions are spaced by R9, so no choice of days needs a warning.
 
@@ -112,7 +111,7 @@ The current SwiftUI app does not solve this. It is a stock-looking interval time
 - R14. From week 2, one easy row per week is a long row at 1.5× the remembered easy-row length, rounded to the nearest 5 minutes and labelled as a long row on its card.
 - R15. Easy-row length defaults to the most recent choice; the card lets the rower change it for any session, and that choice becomes the new default.
 - R16. The rower can swap an easy row's format on its card before starting.
-- R17. Program numbers, zone bands, the benchmark protocol and the health-check wording are drafts until reviewed by a rowing coach or exercise physiologist, before program work is built.
+- R17. Program numbers, zone bands, the benchmark protocol and the safety-warning wording are drafts until reviewed by a rowing coach or exercise physiologist, before program work is built.
 
 **Home and voyage**
 
@@ -126,7 +125,7 @@ The current SwiftUI app does not solve this. It is a stock-looking interval time
 - R60. After 7 or more days without a completed row on the 4x4 path, home asks once how to resume. The ship never moves until the next row is completed, there is no option to skip ahead, and the casual path never asks.
   - **7–13 days:** "Pick up where I left off" (the default) continues with the waiting session. "Ease back in" first repeats the previous week's sessions; repeated sessions are real rows and move the ship when rowed.
   - **14–27 days:** the same choice, with "Ease back in" as the default.
-  - **28 days or more:** the plan goes back two weeks and the health check (R5) is asked again.
+  - **28 days or more:** the plan goes back two weeks and the warning screen (R5) shows again.
 - R62. Definitions used across the app:
   - **Day:** the device's local calendar day. A session belongs to the day it started.
   - **Missed:** a rowing day ended with no completed plan session.
@@ -141,7 +140,7 @@ The current SwiftUI app does not solve this. It is a stock-looking interval time
 - R56. The casual path sails the same route as the 4x4 path. Every completed casual row moves the ship one stop, whatever its effort or length; a Partly rowed casual row does not (R54).
 - R57. Before each casual row, home shows an effort picker (Easy, Intermediate, Hard) and a length picker (20, 30, 45, or 60 min). Both default to the last choice.
   - Each effort is one steady row in its own zone: Easy 60–70% (the same band as Steady), Intermediate 70–80%, Hard 80–85% of max HR.
-  - Zones show in bpm when max HR is known and medication isn't affecting it; otherwise they show as perceived effort (R30).
+  - Zones show in bpm when max HR is known and the rower hasn't answered "yes" to the medication question (R5); otherwise they show as perceived effort (R30).
 - R58. The rowing scene follows the chosen effort: calm water for Easy, an open swell for Intermediate, and rough water with spray for Hard. Each must be visibly different at 1 m. Warm-up and cool-down use the calm scene.
 - R59. The rower can switch paths in Settings, with a confirmation, and the ship keeps its place on the route either way.
   - **Switching to the 4x4 path** asks for level and days, then starts the plan at week 1. The route stretches so landfall comes at the end of the plan.
@@ -238,10 +237,9 @@ The current SwiftUI app does not solve this. It is a stock-looking interval time
 **Settings and data**
 
 - R47. Settings holds:
-  - the path (R59), name, level, max HR and the medication option;
+  - the path (R59), name, level, max HR and heart-rate medication (R5);
   - rowing days;
   - heart-rate strap pairing;
-  - health check answers and "A doctor has cleared me";
   - the Get seated hold time, the sound mixer with the music behaviour, and the stroke-demo switch;
   - Apple Health export, "Export my rows" (R63), and voyage restart.
 - R63. "Export my rows" writes a CSV of every session to the iOS share sheet, so testers can send their data back. Each row has the date, path, session, length, completion, enjoyment, entered distance, and average and peak HR.
@@ -263,7 +261,7 @@ The current SwiftUI app does not solve this. It is a stock-looking interval time
   - **Trigger:** Rower taps "Set out" on today's hard session.
   - **Actors:** A1, optionally A2
   - **Steps:**
-    1. Health check if not yet answered, then the strap prompt if never asked.
+    1. The warning screen on the first row, then the strap prompt if never asked.
     2. Get seated with the stroke demo and the stop line.
     3. Warm-up with pickups.
     4. For each push: the horn and edge pulse 10 s before, "Heave!" at the start, the work scene, the end-of-push horn, and the rest scene.
@@ -280,13 +278,13 @@ The current SwiftUI app does not solve this. It is a stock-looking interval time
   - **Actors:** A1
   - **Steps:**
     1. The first missed session waits as the next session, noted "Waiting from Wed".
-    2. After 7 or more days away, a one-time choice by tier: pick up where I left off, or ease back in. After 28 days or more, the plan goes back two weeks and the health check runs again.
+    2. After 7 or more days away, a one-time choice by tier: pick up where I left off, or ease back in. After 28 days or more, the plan goes back two weeks and the warning shows again.
     3. The voyage continues from the first unfinished session; the ship has not moved.
   - **Covered by:** R21, R18, R48, R60
 - F5. First launch, just row
   - **Trigger:** Rower opens the app for the first time and picks "Just row".
   - **Actors:** A1, optionally A2
-  - **Steps:** Voyage choice → max HR or "Row by feel" → casual home with effort and length pickers → "Set out" → health check (first row only) → strap prompt if never asked → Get seated → steady row in the effort's scene → session complete with rating → ship moves one stop.
+  - **Steps:** Voyage choice → max HR or "Row by feel" → casual home with effort and length pickers → "Set out" → warning screen (first row only) → strap prompt if never asked → Get seated → steady row in the effort's scene → session complete with rating → ship moves one stop.
   - **Covered by:** R1, R4, R5, R6, R23, R55–R58
 
 ---
@@ -302,17 +300,17 @@ The current SwiftUI app does not solve this. It is a stock-looking interval time
 - AE5. **Covers R21.** Given a missed Wednesday easy row, Saturday shows that easy row ("Waiting from Wed"), Saturday's own session moves to the next rowing day, nothing is doubled up, and the ship has not moved.
 - AE6. **Covers R9, R21.** Given a rower who rowed a hard session Monday and whose next waiting session on Tuesday is also hard, Tuesday shows the next easy row instead and the hard session follows it.
 - AE7. **Covers R30.** Given no heart-rate strap, during a push the gauge shows an effort cue such as "7–8 of 10 · single words only" in place of bpm, and at 90 s the crew calls "Hold!".
-- AE8. **Covers R5.** Given a rower who answers "yes" only to the joint-problem question, hard-session cards show the disclaimer and cannot start, and easy rows start normally. Changing the answer in Settings unlocks hard sessions.
+- AE8. **Covers R5.** Given a rower setting out for the first time, the warning screen appears; "I understand" stays disabled until the medication question is answered, and "no" leaves HR coaching on.
 - AE9. **Covers R23.** Given the default hold time, the session starts 20 s after Get seated begins, with five drum beats and big numbers counting the last five seconds; "Start now" starts it at once.
 - AE10. **Covers R32.** Given a long press anywhere mid-push, the session pauses and the pause sheet opens; a short tap does nothing.
 - AE11. **Covers R54.** Given a session ended from the pause sheet halfway through, it is saved as Partly rowed, the ship does not move, and the session stays next on the route.
 - AE12. **Covers R56, R57.** Given a casual rower who finishes a 20-minute Easy row, the ship moves one stop, the same as after a 60-minute Hard row, and the next row's pickers default to Easy and 20 min.
-- AE13. **Covers R5, R57.** Given a casual rower who answers "yes" to the medicine-for-a-long-term-condition question, the picker hides Hard, Easy and Intermediate start normally, and every row coaches by effort.
+- AE13. **Covers R5, R57.** Given a casual rower who answers "yes" to the medication question, every effort on the picker shows as perceived effort, all three efforts can start, and every row coaches by effort.
 - AE14. **Covers R59.** Given a casual rower three stops along who switches to the 4x4 path in Settings, the ship stays three stops along and the plan starts at week 1.
 - AE15. **Covers R60, R21.** Given a 4x4 rower back after 8 days away with the ship at Lerwick, home asks how to resume. Either choice leaves the ship at Lerwick until the next row is completed. "Ease back in" puts the previous week's sessions before the waiting one.
-- AE16. **Covers R5.** Given a rower who answers "yes" to chest pain, no row can start on either path until they confirm "A doctor has cleared me" in Settings.
+- AE16. **Covers R5.** Given a rower who has tapped "I understand", no row is ever locked or blocked by the warning, and it doesn't show again until a 28-day break.
 - AE17. **Covers R49, R62.** Given a rower with days Mon/Wed/Sat who finishes onboarding on a Tuesday, the rest-day state offers "Row it now". Rowing it moves the ship, and Wednesday shows the next session.
-- AE18. **Covers R60.** Given a 4x4 rower in week 5 back after 30 days away, the plan resumes at week 3 and the health check is asked again before the first row.
+- AE18. **Covers R60.** Given a 4x4 rower in week 5 back after 30 days away, the plan resumes at week 3 and the warning screen shows again before the first row.
 - AE19. **Covers R37.** Given a rower with an age-estimated max of 184 whose last three hard sessions all missed the push zone, session complete offers to lower max HR.
 
 ---
@@ -323,7 +321,8 @@ The current SwiftUI app does not solve this. It is a stock-looking interval time
 
 - iCloud sync of the voyage (the first item after v1).
 - Intermediate and Expert voyages (two hard sessions a week, a lighter fourth week, and a retest).
-- App Store release, including legal review of the health check and the store listing.
+- App Store release, including legal review of the safety warning and the store listing.
+- A PAR-Q+ health questionnaire with locks and doctor clearance, to reconsider for an App Store release.
 - A spoken caller voice.
 - Assessment or test rows to measure max HR.
 - Rotating 4×8 and 30/15 hard sessions.
@@ -373,4 +372,4 @@ The current SwiftUI app does not solve this. It is a stock-looking interval time
 - Rønnestad et al. 2015: 30/15 s short intervals outperformed 4×5 min in well-trained cyclists.
 - Seiler: polarized (about 80/20) intensity distribution.
 - **None of these studies tested one hard session a week in untrained adults**, which is the Beginner dose. The app must not imply study-sized gains.
-- PAR-Q+ (the current version) for the R5 health check.
+- PAR-Q+ (the current version) informed the R5 warning wording; a full questionnaire is deferred.

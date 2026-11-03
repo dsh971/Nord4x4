@@ -1,0 +1,6 @@
+docs/
+ios/
+android/
+.expo/
+package-lock.json
+*.md

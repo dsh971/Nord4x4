@@ -1,8 +1,99 @@
-# PLAN — Health check becomes a warning plus one question
+# PLAN — M1 · Rowable slice (U1–U7)
+
+**Status (2026-11-03):** Phase A done (packet ready; you still need to find and send it to a coach). Phase B done, with the review fixes applied. Next: Phase C.
+
+Goal: reach the M1 gate in `docs/plans/2026-10-29-001-feat-nor4x4-expo-rebuild-plan.md`. One hardcoded session (week 3 Beginner, 3×3′, 30 min) with the scene, drum, horn and crew is rowed on a real erg by you 3–5 times and by two other rowers once each. The go/change verdict goes in `docs/spikes/rowable-slice.md`.
+
+## What I can do here, and what needs you
+
+| Unit | I can do | Needs you |
+|---|---|---|
+| U1 coach review | Write the review packet | Find the coach, send it, bring back the answers |
+| U3 sound | Write the sound spec, shortlist CC0 or royalty-free files with licences | Pick the files, record the crew calls with friends |
+| U4a scaffold and spike | Expo project, strict TS, Jest, lint, test mode, the spike screen and the Swift module | Xcode selected, Apple signing, run the 5 checks on your iPhone with Spotify |
+| U2 design spec | Nothing in M1: it doesn't block the slice (U5 needs only the slice's tokens) | Held until M2 |
+| U4b strap and Health | Spike code | An H10 strap and the phone. **Not needed for the M1 gate**; I'd hold it until before M3 |
+| U5 tokens | Tokens, fonts and the slice's components, with tests | Compare the gallery screen with the boards |
+| U6 session engine | All of it: pure TypeScript, test-first | Nothing |
+| U7 slice | Scene, audio engine, rowing UI | The device build, and the rows on the erg |
+
+## Toolchain found on this Mac (2026-11-02)
+
+- Node 25.9, npm 11.12. Expo SDK 58 (58.0.23 after `expo install --fix` on 2026-11-03), matching KTD1.
+- Xcode.app is installed, but `xcode-select` points to the Command Line Tools. You'll need to run `! sudo xcode-select -s /Applications/Xcode.app` once before Phase C1.
+- No CocoaPods, EAS CLI or Maestro yet. `expo run:ios` installs CocoaPods itself; Maestro is installed in Phase C1 for the device runs; the EAS CLI waits for M3 (run as `npx eas-cli@latest`).
+
+## Proposed defaults (change any before I start)
+
+1. **Project location:** the Expo app lives at the root of `nor4x4-app`, beside `docs/` (as the build plan's Output Structure says).
+2. **Package manager:** npm.
+3. **Bundle ID:** `com.dsh971.nor4x4`. Display name "Nor4x4".
+4. **Builds:** local `npx expo run:ios --device` dev builds for M1; EAS only for TestFlight in M3.
+5. **Lint:** ESLint with `eslint-config-expo`, plus Prettier. No `any` (`@typescript-eslint/no-explicit-any` as an error).
+6. **Order:** U6 before U5, because the engine is pure TypeScript and fully testable here, and U7 needs both.
+7. **U4b waits** until before M3, as its own dependency line allows.
+
+## Phase A — U1 review packet
+
+- Create `docs/review/coach-review.md`: the Beginner table (R10), easy-row formats (R13, R14), zones (R57), the benchmark (R45), the warning wording and medication question (R5), the long-break tiers (R60), and the three questions. Results section left for the answers.
+- Verify: every number in the packet matches the requirements (a script compares the zone, week and benchmark values).
+
+## Phase B — U4a scaffold and test plumbing
+
+- `create-expo-app` (SDK 58, TypeScript), Expo Router, strict `tsconfig.json`, Jest (`jest-expo` for components, Node for domain), ESLint and Prettier, `app.config.ts`, `eas.json`.
+- `src/dev/testMode.ts` (KTD18) with its test: off in release, on when `EXPO_PUBLIC_TEST_MODE` is set in dev (`npm run start:test`).
+- `app/index.tsx` is a launch screen so the router can boot; U14 deletes it when `app/(main)/index.tsx` takes the `/` route.
+- Verify:
+  ```
+  npx tsc --noEmit
+  npx jest
+  npm run lint        # eslint .
+  npx expo-doctor
+  ```
+
+## Phase C — U4a native spike (needs your iPhone)
+
+- C1: install Maestro; Skia and react-native-audio-api config plugins, background audio, the `modules/other-audio` Swift module, and a dev-only spike screen that runs the five checks (two loops plus a one-shot over Spotify; 20 ducked cues with the screen locked; the other-audio hint; Silent mode suspend and recover; a full-screen shader at 60 fps).
+- C2: you run them; I write the results and the ducking decision (KTD9) into `docs/spikes/native-modules.md`.
+- Verify: `npx expo run:ios --device` builds; the spike doc records all five results.
+
+## Phase D — U6 session engine (test-first)
+
+- `src/domain/session/` (plan, machine, clock, summary, checkpoint) and `src/domain/sensors/` with fakes, exactly as U6 lists.
+- Every test scenario in U6 written first, including AE9, AE10, AE11 and the 40-minute simulated session.
+- Verify: `npx jest src/domain` passes, `npx tsc --noEmit` clean.
+
+## Phase E — U5 slice tokens and components
+
+- `src/design/tokens.ts` and `typography.ts` from Shuimo, Noto Serif SC and Inter in `assets/fonts/`, and the components the slice needs: Text, Button, IntervalShape, ZoneChip, ProgressStrip, ShipIcon. The rest of U5 waits for M2.
+- Tests: the IntervalShape ratio and empty list, ZoneChip word-plus-shape at 22 pt, contrast of every text-on-surface pair.
+- A dev-only gallery screen to compare with the boards.
+
+## Phase F — U3 sound spec and slice assets
+
+- `docs/design/sound-spec.md`: every ambience and signal with its visual twin, loudness targets, loop lengths, format, source and licence.
+- A shortlist of CC0 or royalty-free candidates for the slice set (horns, bells, drum hit and loop, calm sea), for you to pick. Crew "Heave!" and "Hold!" are yours to record.
+- Verify: every cue the U6 engine emits has a named asset and licence in the spec.
+
+## Phase G — U7 rowable slice
+
+- `app/session/slice.tsx`, the first-pass InkScene and AudioEngine on their final interfaces, CornerGauge, ProgressStrip, SignalBanner, EaseOffGlow, GetSeated with the stop line, and long-press pause.
+- Tests: U7's three gauge scenarios.
+- You row it; `docs/spikes/rowable-slice.md` records each row and the go/change verdict. **M1 gate.**
+
+## Verification (whole milestone)
+
+```
+npx tsc --noEmit && npx jest && npx eslint .
+python3 -I docs/design/tools/check_boards.py docs/design/canvas-source
+```
+Plus the device results in `docs/spikes/native-modules.md` and `docs/spikes/rowable-slice.md`.
+
+## Done · health check becomes a warning plus one question (Phases A–C, completed 2026-11-02)
 
 Goal: replace the seven-question health quiz with one warning screen before the first row, keeping only the medication question. Docs and design only; no app code.
 
-## Decision (from you, 2026-10-31)
+### Decision (from you, 2026-10-31)
 
 Middle ground: before the rower's first row on either path, one screen shows:
 - a warning;
@@ -11,7 +102,7 @@ Middle ground: before the rower's first row on either path, one screen shows:
 
 No quiz, no locks, no blocks.
 
-## Proposed defaults (change any before I start)
+### Proposed defaults (change any before I start)
 
 1. **Warning wording** (coach to review in U1): "Pushes go close to your max heart rate. If you have a heart condition, chest pain, dizziness or fainting, are pregnant, or are over 45 and new to hard exercise, talk to a doctor first. Stop and rest if you feel chest pain, dizziness or unusual breathlessness."
 2. **The medication question is asked in one place, on the warning screen.**
@@ -29,7 +120,7 @@ No quiz, no locks, no blocks.
    The PAR-Q+ quiz is noted under "Deferred for later" for a possible App Store release (M4).
 6. **Board 2.6 (pushes locked)** moves to `docs/design/deferred/`. Board 2.5 becomes the warning screen.
 
-## Phase A — Requirements
+### Phase A — Requirements
 
 `docs/brainstorms/2026-10-29-nor4x4-rebuild-requirements.md`:
 - **Rewrites:**
@@ -43,7 +134,7 @@ No quiz, no locks, no blocks.
 - **F2 and F5:** "health check" becomes "warning".
 - **Deferred:** the PAR-Q+ quiz, for M4.
 
-## Phase B — Boards and flow chart
+### Phase B — Boards and flow chart
 
 - **2.5:** rebuilt as the warning screen, with the warning, the medication yes/no (nothing pre-selected, 44 pt) and "I understand".
 - **2.6:** moved to `docs/design/deferred/` with a README line.
@@ -53,7 +144,7 @@ No quiz, no locks, no blocks.
 - **README:** board table and the "Not yet designed" list (the clearance and locked states are gone).
 - **Regenerate:** `screens/`.
 
-## Phase C — Build plan
+### Phase C — Build plan
 
 `docs/plans/2026-10-29-001-feat-nor4x4-expo-rebuild-plan.md`:
 - U15 shrinks to "First-row warning and medication question".
@@ -64,7 +155,7 @@ No quiz, no locks, no blocks.
 - The risk row "health check not legally reviewed" now refers to the warning.
 - Deferred gains the PAR-Q+ quiz for M4.
 
-## Verification
+### Verification
 
 ```
 python3 -I docs/design/tools/check_boards.py docs/design/canvas-source      # All boards pass

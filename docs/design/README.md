@@ -97,6 +97,7 @@ Screenshots are rendered at 2×. A casual Easy row uses the 3.4 scene. `flow-sta
 
 - `screens/`: PNG screenshots, the reference for reviews and verification.
 - `deferred/`: boards for features moved after v1 (3.1e PM5, 2.6 pushes locked), with a README saying why.
+- `icon/app-icon.svg`: the app icon (option 3b, chosen 2026-11-03: silk longship with a persimmon-striped sail on malachite). `assets/icon.png` is its 1024 px render, full-bleed with no transparency; iOS adds the rounded corners.
 - `flow-start.html`: flow chart from opening the app to the first row, for both paths (open in a browser; it loads mermaid from a CDN).
 - `canvas-source/`: the `.dc.html` source of each board. They need the canvas runtime to render as-is; the snapshot tool strips it.
 - `tools/boards.json`: the board list (number, file, size), the stale phrases to reject, and the gauge minimums.

@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024" role="img" aria-label="Silk longship with a persimmon-striped sail on a malachite sea">
+  <rect width="1024" height="1024" fill="#1E4D2B"></rect>
+  <defs>
+    <clipPath id="green-sail"><path d="M360 276 L664 276 Q690 392 664 508 L360 508 Q386 392 360 276 Z"></path></clipPath>
+  </defs>
+  <path d="M512 648 V246" stroke="#F9F8F4" stroke-width="18" stroke-linecap="round"></path>
+  <path d="M338 270 H686" stroke="#F9F8F4" stroke-width="16" stroke-linecap="round"></path>
+  <path d="M360 276 L664 276 Q690 392 664 508 L360 508 Q386 392 360 276 Z" fill="#F9F8F4"></path>
+  <g clip-path="url(#green-sail)" fill="#C66B22">
+    <rect x="384" y="270" width="34" height="250"></rect>
+    <rect x="452" y="270" width="34" height="250"></rect>
+    <rect x="520" y="270" width="34" height="250"></rect>
+    <rect x="588" y="270" width="34" height="250"></rect>
+  </g>
+  <g stroke="#F9F8F4" stroke-width="11" stroke-linecap="round" opacity="0.7">
+    <path d="M300 618 L248 742"></path>
+    <path d="M384 638 L346 762"></path>
+    <path d="M466 648 L440 776"></path>
+    <path d="M558 648 L584 776"></path>
+    <path d="M640 638 L678 762"></path>
+    <path d="M724 618 L776 742"></path>
+  </g>
+  <path d="M196 566 Q512 716 828 566 Q770 654 512 666 Q254 654 196 566 Z" fill="#F9F8F4"></path>
+  <path d="M800 588 C862 520 872 440 838 398 C812 368 772 380 778 414 C782 436 806 440 816 424" fill="none" stroke="#F9F8F4" stroke-width="26" stroke-linecap="round"></path>
+  <path d="M226 592 C176 532 176 470 204 436" fill="none" stroke="#F9F8F4" stroke-width="26" stroke-linecap="round"></path>
+  <path d="M110 790 Q300 752 512 778 T 914 768" fill="none" stroke="#F9F8F4" stroke-width="18" stroke-linecap="round" opacity="0.55"></path>
+  <path d="M190 848 Q380 822 560 840 T 860 834" fill="none" stroke="#F9F8F4" stroke-width="10" stroke-linecap="round" opacity="0.25"></path>
+</svg>

@@ -18,6 +18,11 @@ describe('launch screen', () => {
     expect(screen.queryByText('Test mode')).not.toBeOnTheScreen();
   });
 
+  it('links to the native spike screen in a development build', async () => {
+    await render(<LaunchScreen />);
+    expect(screen.getByRole('link', { name: 'Native spike' })).toBeOnTheScreen();
+  });
+
   it('labels the screen when the build runs in test mode', async () => {
     mockIsTestMode = true;
     await render(<LaunchScreen />);

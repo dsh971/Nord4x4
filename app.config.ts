@@ -21,7 +21,11 @@ const config: ExpoConfig = {
         'Nor4x4 saves each row to Apple Health as a rowing workout with its heart rate.',
     },
   },
-  plugins: ['expo-router'],
+  plugins: [
+    'expo-router',
+    // Background audio keeps a session's sound running with the screen locked (KTD7).
+    ['react-native-audio-api', { iosBackgroundMode: true }],
+  ],
   experiments: {
     typedRoutes: true,
   },

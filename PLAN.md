@@ -1,6 +1,6 @@
 # PLAN — M1 · Rowable slice (U1–U7)
 
-**Status (2026-11-03):** Phase A done (packet ready; you still need to find and send it to a coach). Phase B done, with the review fixes applied. Next: Phase C.
+**Status (2026-11-04):** Phase A done (packet ready; you still need to find and send it to a coach). Phase B done, with the review fixes applied. Phase C done: all five device checks pass, and ducking uses the switch-options release (`docs/spikes/native-modules.md`). Next: Phase D.
 
 Goal: reach the M1 gate in `docs/plans/2026-10-29-001-feat-nor4x4-expo-rebuild-plan.md`. One hardcoded session (week 3 Beginner, 3×3′, 30 min) with the scene, drum, horn and crew is rowed on a real erg by you 3–5 times and by two other rowers once each. The go/change verdict goes in `docs/spikes/rowable-slice.md`.
 
@@ -20,8 +20,9 @@ Goal: reach the M1 gate in `docs/plans/2026-10-29-001-feat-nor4x4-expo-rebuild-p
 ## Toolchain found on this Mac (2026-11-02)
 
 - Node 25.9, npm 11.12. Expo SDK 58 (58.0.23 after `expo install --fix` on 2026-11-03), matching KTD1.
-- Xcode.app is installed, but `xcode-select` points to the Command Line Tools. You'll need to run `! sudo xcode-select -s /Applications/Xcode.app` once before Phase C1.
-- No CocoaPods, EAS CLI or Maestro yet. `expo run:ios` installs CocoaPods itself; Maestro is installed in Phase C1 for the device runs; the EAS CLI waits for M3 (run as `npx eas-cli@latest`).
+- Xcode 27.2 (Swift 6.4.2), selected with `xcode-select`. Xcode 26.2 could not compile `expo-modules-jsi` 58.0.22.
+- CocoaPods 1.17.0 and Maestro 2.12.1 from Homebrew. Maestro needs `JAVA_HOME=/opt/homebrew/opt/openjdk@21`. The EAS CLI waits for M3 (run as `npx eas-cli@latest`).
+- Signing: free Personal Team; the profile expires after 7 days.
 
 ## Proposed defaults (change any before I start)
 
@@ -73,6 +74,7 @@ Goal: reach the M1 gate in `docs/plans/2026-10-29-001-feat-nor4x4-expo-rebuild-p
 
 - `docs/design/sound-spec.md`: every ambience and signal with its visual twin, loudness targets, loop lengths, format, source and licence.
 - A shortlist of CC0 or royalty-free candidates for the slice set (horns, bells, drum hit and loop, calm sea), for you to pick. Crew "Heave!" and "Hold!" are yours to record.
+- Brief from the 2026-11-04 listening test: the horn is horn-5 "war horn" (deep, with a growl and a valley echo), and the drum is drum-1 "taiko", one hit per stroke at the catch. The stand-ins are synthesized in `src/dev/spike/tones.ts`. Bells are still to choose.
 - Verify: every cue the U6 engine emits has a named asset and licence in the spec.
 
 ## Phase G — U7 rowable slice

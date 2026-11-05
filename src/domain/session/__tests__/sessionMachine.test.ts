@@ -71,7 +71,7 @@ describe('Get seated', () => {
 });
 
 describe('cues', () => {
-  it('sounds the horn 10 s before each push, never for a warm-up pickup, and heave as each push starts', () => {
+  it('sounds the horn 10 s before each push, never for a warm-up pickup, and the push-start strike as each push starts', () => {
     const { clock, machine } = rowingAt();
     const cues = runFor(machine, clock, 40 * MINUTE)
       .filter((event) => event.type === 'cueDue')
@@ -79,31 +79,35 @@ describe('cues', () => {
 
     expect(cues).toEqual([
       '9:50 horn 5',
-      '10:00 heave 5',
+      '10:00 pushStart 5',
       '14:00 pushEnd 5',
       '16:50 horn 7',
-      '17:00 heave 7',
+      '17:00 pushStart 7',
       '21:00 pushEnd 7',
       '23:50 horn 9',
-      '24:00 heave 9',
+      '24:00 pushStart 9',
       '28:00 pushEnd 9',
       '30:50 horn 11',
-      '31:00 heave 11',
+      '31:00 pushStart 11',
       '35:00 pushEnd 11',
     ]);
   });
 
-  it('calls "Hold!" 90 s into each push in effort mode, and never in HR mode (R30)', () => {
+  it('sounds the hold signal 90 s into each push in effort mode, and never in HR mode (R30)', () => {
     const plan = (coachingMode: 'hr' | 'effort') =>
       intervalPlan({ pushCount: 3, pushMs: 3 * MINUTE, restMs: 3 * MINUTE, coachingMode });
     const holdCues = (mode: 'hr' | 'effort') => {
       const { clock, machine } = rowingAt(plan(mode));
       return runFor(machine, clock, 30 * MINUTE)
-        .filter((event) => event.type === 'cueDue' && event.cue.kind === 'hold')
+        .filter((event) => event.type === 'cueDue' && event.cue.kind === 'holdEffort')
         .map(describeEvent);
     };
 
-    expect(holdCues('effort')).toEqual(['11:30 hold 5', '17:30 hold 7', '23:30 hold 9']);
+    expect(holdCues('effort')).toEqual([
+      '11:30 holdEffort 5',
+      '17:30 holdEffort 7',
+      '23:30 holdEffort 9',
+    ]);
     expect(holdCues('hr')).toEqual([]);
   });
 
@@ -111,7 +115,7 @@ describe('cues', () => {
     const { machine } = rowingAt(fourByFourPlan(), 9 * MINUTE + 45 * SECOND);
     expect(machine.upcomingCues(20 * SECOND).map(describeEvent)).toEqual([
       '9:50 horn 5',
-      '10:00 heave 5',
+      '10:00 pushStart 5',
     ]);
   });
 });
@@ -207,7 +211,7 @@ describe('clock jumps', () => {
     expect(machine.advance().map(describeEvent)).toEqual([
       '10:00 segmentEnded 4',
       '10:00 segmentStarted 5',
-      '10:00 heave 5',
+      '10:00 pushStart 5',
     ]);
   });
 });
@@ -260,28 +264,28 @@ describe('a full 4×4 session', () => {
       '9:50 horn 5',
       '10:00 segmentEnded 4',
       '10:00 segmentStarted 5',
-      '10:00 heave 5',
+      '10:00 pushStart 5',
       '14:00 segmentEnded 5',
       '14:00 pushEnd 5',
       '14:00 segmentStarted 6',
       '16:50 horn 7',
       '17:00 segmentEnded 6',
       '17:00 segmentStarted 7',
-      '17:00 heave 7',
+      '17:00 pushStart 7',
       '21:00 segmentEnded 7',
       '21:00 pushEnd 7',
       '21:00 segmentStarted 8',
       '23:50 horn 9',
       '24:00 segmentEnded 8',
       '24:00 segmentStarted 9',
-      '24:00 heave 9',
+      '24:00 pushStart 9',
       '28:00 segmentEnded 9',
       '28:00 pushEnd 9',
       '28:00 segmentStarted 10',
       '30:50 horn 11',
       '31:00 segmentEnded 10',
       '31:00 segmentStarted 11',
-      '31:00 heave 11',
+      '31:00 pushStart 11',
       '35:00 segmentEnded 11',
       '35:00 pushEnd 11',
       '35:00 segmentStarted 12',

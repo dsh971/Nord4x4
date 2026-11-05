@@ -18,7 +18,10 @@ export type PauseReason = 'longPress' | 'interruption';
 /** A signal the audio and screen play together (R40). Get seated count-ins carry their number. */
 export type Cue =
   | { readonly kind: 'countIn'; readonly count: number }
-  | { readonly kind: 'horn' | 'heave' | 'hold' | 'pushEnd'; readonly segmentIndex: number };
+  | {
+      readonly kind: 'horn' | 'pushStart' | 'holdEffort' | 'pushEnd';
+      readonly segmentIndex: number;
+    };
 
 /**
  * Everything the machine announces. `atMs` is session time: 0 is the moment rowing starts,
@@ -48,7 +51,7 @@ export type SessionSnapshot = {
 export const STALE_CUE_MS = 2_000;
 const COUNT_IN_BEATS = 5;
 const HORN_LEAD_MS = 10_000;
-const HOLD_CALL_AFTER_MS = 90_000;
+const HOLD_EFFORT_AFTER_MS = 90_000;
 
 /** Starts a session at Get seated, timed by `clock`; throws if the plan can't be rowed. */
 export function createSessionMachine(plan: SessionPlan, clock: MonotonicClock): SessionMachine {
@@ -281,14 +284,17 @@ function buildTimeline(
     events.push({ type: 'segmentStarted', segmentIndex, atMs: startMs });
     if (segment.type === 'push') {
       // Pickups inside the warm-up are pushes in miniature, but only real pushes get the war horn.
-      const cue = (kind: 'horn' | 'heave' | 'hold' | 'pushEnd', atMs: number): SessionEvent => ({
+      const cue = (
+        kind: 'horn' | 'pushStart' | 'holdEffort' | 'pushEnd',
+        atMs: number,
+      ): SessionEvent => ({
         type: 'cueDue',
         cue: { kind, segmentIndex },
         atMs,
       });
-      events.push(cue('horn', Math.max(0, startMs - HORN_LEAD_MS)), cue('heave', startMs));
-      if (plan.coachingMode === 'effort' && segment.durationMs > HOLD_CALL_AFTER_MS) {
-        events.push(cue('hold', startMs + HOLD_CALL_AFTER_MS));
+      events.push(cue('horn', Math.max(0, startMs - HORN_LEAD_MS)), cue('pushStart', startMs));
+      if (plan.coachingMode === 'effort' && segment.durationMs > HOLD_EFFORT_AFTER_MS) {
+        events.push(cue('holdEffort', startMs + HOLD_EFFORT_AFTER_MS));
       }
       if (endMs !== null) {
         events.push({ type: 'segmentEnded', segmentIndex, atMs: endMs }, cue('pushEnd', endMs));
@@ -305,6 +311,6 @@ function buildTimeline(
     });
   }
   // Array sort is stable, so events at the same moment keep the order they were built in:
-  // the old segment ends before the new one starts, and a push starts before its heave.
+  // the old segment ends before the new one starts, and a push starts before its push-start cue.
   return events.sort((a, b) => a.atMs - b.atMs);
 }

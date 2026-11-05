@@ -10,7 +10,7 @@ Every number below is a draft (R17). Nothing in the program engine is built unti
 
 ## For the reviewer: what Nor4x4 is
 
-- **The app:** a free iPhone app for indoor rowing machines. Each row is a scene in a viking voyage from Bergen to Iceland. Cues are sounds (horn, drum, crew calls) with an on-screen twin, so it works with no monitor and no spoken instructor.
+- **The app:** a free iPhone app for indoor rowing machines. Each row is a scene in a viking voyage from Bergen to Iceland. Cues are sounds (horn, drum, bells) with an on-screen twin, so it works with no monitor and no spoken instructor.
 - **Who rows it:** adults rowing at home for general health and stamina, rowing about twice a week and aiming for three. Most are new to interval training. Many have no heart-rate strap.
 - **Two paths:**
   - **Train with the 4x4:** an 8-week Beginner program, three rows a week, building to the Norwegian 4×4 (4 × 4 min hard, 3 min easy).
@@ -82,7 +82,7 @@ Worked example: age 34, so estimated max HR = 184 bpm.
 
 The Just row Hard effort is one continuous row at 80–85% for the whole chosen length (20 to 60 min).
 
-In effort mode, 90 s into each push a crew "Hold!" call and a "Hold this effort" banner tell the rower to settle, since there is no heart rate to show the ramp.
+In effort mode, 90 s into each push a short hold signal (a sound, not a voice) and a "Hold this effort" banner tell the rower to settle, since there is no heart rate to show the ramp.
 
 | Item | Keep / Change / Discuss | Notes |
 |---|---|---|

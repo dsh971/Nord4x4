@@ -15,7 +15,7 @@ origin: docs/brainstorms/2026-10-29-nor4x4-rebuild-requirements.md
 Build a new iOS-first Expo app that delivers the brainstormed Nor4x4: a role-play rowing app where every row is a scene in an ink-painted viking voyage.
 - **Two paths:** on the first screen, rowers pick the Beginner 4x4 program or "Just row" at an effort and length they choose. Either way the ship sails Bergen → Iceland.
 - **Hands-free:** it works at 1 m with or without a heart-rate strap.
-- **Signals, not speech:** there is no spoken voice. Horn calls, drum signals and crew chants carry every cue, each with an on-screen twin.
+- **Signals, not speech:** there is no human voice. Horn calls, drum signals and bells carry every cue, each with an on-screen banner (2026-11-04: the crew calls became sounds).
 - **On the phone only:** data stays on the iPhone.
 - **v1 audience:** the builder and about five TestFlight testers.
 
@@ -91,7 +91,7 @@ All 64 origin requirements carry forward (R11 is now a deferral). Grouped for tr
 - **R26–R34, R50–R52. Rowing mode.**
   - The scene and per-leg scenery.
   - The gauge, with a 22 pt zone chip and session time left.
-  - Effort-led zone states, effort guidance with the "Hold!" cue, and "Strap lost".
+  - Effort-led zone states, effort guidance with the hold signal, and "Strap lost".
   - A strip with taller push segments.
   - Visual twins, timers, pausing, both orientations, and keep-awake.
 - **R35–R37. Heart-rate coaching.**
@@ -155,7 +155,7 @@ M1 is a hard gate: if the slice isn't fun, the scene and sound change before M2 
   - A small Swift module returns `secondaryAudioShouldBeSilencedHint` and emits its change notification. react-native-audio-api has no equivalent.
   - The app re-checks it on every return to the foreground.
 - KTD9. **Signals duck the music by switching the session mode.**
-  - The session runs `mixWithOthers`. Each signal (horn, drum count, crew call, bells) switches to `duckOthers`, plays, and switches back.
+  - The session runs `mixWithOthers`. Each signal (horn, drum count, push-start strike, hold signal, bells) switches to `duckOthers`, plays, and switches back.
   - Releasing the duck may need `setActive(false, notifyOthersOnDeactivation)`, which can stop our own audio or lose the background grant while the screen is locked. The U4a spike tests 20 cues in a row with the screen locked and measures how long the music takes to return to full volume.
   - **Fallback, decided now:** no ducking. Signals are mixed loud over the music.
 - KTD10. **Sensors behind interfaces with fake devices, from M1.**
@@ -250,7 +250,7 @@ Each segment carries a type, duration, target zone, target stroke rate and scene
 - **Types:** warm-up, pickup, push, rest, easy, steady, cool-down, benchmark, or open.
 - **Scene states:** work, rest, horn, easy, swell or rough.
 - **Open segments:** Row freely is a single open segment with no end; it counts up.
-- **Events:** the machine emits `segmentStarted`, `cueDue` (horn, countIn, heave, hold, pushEnd, easeOff), `segmentEnded`, `sessionCompleted` and `sessionEndedEarly`. Audio, scene and gauge subscribe to these and never own time.
+- **Events:** the machine emits `segmentStarted`, `cueDue` (horn, countIn, pushStart, holdEffort, pushEnd, easeOff), `segmentEnded`, `sessionCompleted` and `sessionEndedEarly`. Audio, scene and gauge subscribe to these and never own time.
 - **Checkpoints:** the machine's state is serialized every 10 s (KTD4).
 
 ### Cue timeline around a push
@@ -266,8 +266,8 @@ sequenceDiagram
   AE->>OS: switch to duckOthers (fallback: stay mixWithOthers)
   AE->>AE: play war horn (ambience dips for the cue)
   AE->>OS: back to mixWithOthers
-  SM->>AE: segmentStarted(push, 26–28 spm) + cueDue(heave)
-  AE->>AE: crew "Heave!", drum tempo up, work sea bed
+  SM->>AE: segmentStarted(push, 26–28 spm) + cueDue(pushStart)
+  AE->>AE: double drum strike, drum tempo up, work sea bed
   SM->>UI: "Pull" banner
 ```
 
@@ -383,13 +383,13 @@ nor4x4-app/
   - the war horn and the push-end horn;
   - the three-bell ease-off and a drum hit (for the count-in);
   - one drum loop and one calm sea bed;
-  - the crew "Heave!" and "Hold!".
+  - the push-start strike and the hold signal.
 
 **Approach:**
 - Inventory every sound in two groups, each signal paired with its visual twin (R40, R51):
-  - **ambience:** sea beds for calm, swell and rough water; drum loops; crew murmur;
-  - **signals:** horn, push-end horn, bells, drum count, crew calls, landfall.
-- Record the loudness targets, loop lengths, file format, and the source and license of every file (CC0 or royalty-free libraries; crew calls recorded with friends).
+  - **ambience:** sea beds for calm, swell and rough water; drum loops; wordless crew murmur;
+  - **signals:** horn, push-end horn, bells, drum count, push-start strike, hold signal, landfall.
+- Record the loudness targets, loop lengths, file format, and the source and license of every file (CC0 or royalty-free libraries).
 - The slice must not run on stock stand-ins, since sound is half the bet it tests.
 
 **Test expectation:** none -- documentation and assets.
@@ -501,7 +501,7 @@ nor4x4-app/
 
 **Test scenarios:**
 - Covers AE9. Get seated ends at the 20 s hold and emits a count-in cue for each of the last 5 s; "Start now" ends it at once.
-- A horn cue fires 10 s before each push and never before the warm-up ends; a heave cue fires at each push start.
+- A horn cue fires 10 s before each push and never before the warm-up ends; a pushStart cue fires at each push start.
 - In effort mode, a hold cue fires 90 s into a 3′ push; in HR mode it doesn't.
 - Pausing for 60 s mid-push extends the session end by 60 s, keeps the remaining push time unchanged, and cancels pending cues.
 - The clock jumping forward 95 s emits each skipped segment boundary exactly once, in order, and drops stale cues.
@@ -938,7 +938,7 @@ nor4x4-app/
 
 **Approach:**
 - **Ambience** (sea bed by sea state, drum loop at the target rate, crew murmur) is a set of gain-controlled loops.
-- **Signals** (horn, push-end horn, drum count, crew calls, bells, landfall) are one-shots scheduled ahead on the audio clock.
+- **Signals** (horn, push-end horn, drum count, push-start strike, hold signal, bells, landfall) are one-shots scheduled ahead on the audio clock.
 - **Sound modes:**
   - **Full ship:** ambience and signals.
   - **Cues only:** signals only.
@@ -947,13 +947,13 @@ nor4x4-app/
 - **Interruptions:** a phone call pauses the session (U6), and the audio clock is re-mapped on return.
 
 **Test scenarios:**
-- Covers AE4. With music playing at the start, ambience gains are zero and the notice shows; the horn, drum count, "Heave!" and bells still play.
+- Covers AE4. With music playing at the start, ambience gains are zero and the notice shows; the horn, drum count, push-start strike and bells still play.
 - Music stopping mid-session returns to the previous mode, unless the rower picked one.
 - Silent mode plays nothing, and the session still advances after a simulated suspend.
 - A horn cue is scheduled at the audio-clock time of the push start minus 10 s; after a simulated interruption the mapping is rebuilt and the next cue lands within 50 ms of its session time.
 - A cue more than 2 s stale after resume is dropped.
 - The ease-off bells play once per push however long HR stays high.
-- Setting Crew to 0 in the mixer mutes the murmur and the crew calls in Full ship mode only.
+- Setting Crew to 0 in the mixer mutes the murmur in Full ship mode only.
 
 **Verification:** On device with Spotify playing and the screen locked, the signals are audible over the music (ducked or mixed), and the music stays at its volume once the session ends.
 

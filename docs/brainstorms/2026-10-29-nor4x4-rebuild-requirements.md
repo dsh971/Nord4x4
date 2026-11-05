@@ -36,7 +36,7 @@ The current SwiftUI app does not solve this. It is a stock-looking interval time
 
 - **Role play is the main thing.** Scene, sound, and route carry the motivation, and the training plan serves the voyage. When the two compete for effort, the voyage wins.
 - **Hands-free and sensor-free by default.** Every screen in rowing mode must work at 1 m with no touch and no sensors. Sensors improve the experience but are never required.
-- **No spoken voice.** Horn calls, drum signals and crew chants carry every cue, and the screen carries the details. Every cue has both a sound and a visual twin.
+- **No human voice.** Horn calls, drum signals and bells carry every cue, and an on-screen banner carries the details. Every cue has both a sound and a visual twin. (2026-11-04: the crew calls "Heave!" and "Hold!" became sounds; this supersedes decision S6, "Crew calls in English", of 2026-10-31.)
 - **Value before setup.** Onboarding asks only what the first session needs. The safety warning and sensor pairing come at the first "Set out".
 - **Safety before targets.**
   - When max HR is estimated, or heart-rate medication makes bpm unreliable, perceived effort leads and heart rate is only information.
@@ -169,7 +169,7 @@ The current SwiftUI app does not solve this. It is a stock-looking interval time
   - The zone chip is at least 22 pt.
 - R50. Zone state is shown as a word plus a shape, never color alone: "Ease off ▲", "In zone", "Build ▼", and "Recovering" during rests (no arrow).
   - "Build ▼" never appears in the first 90 s of a push, in pushes shorter than 3 minutes, or when max HR is estimated from age.
-- R30. Without a heart-rate strap, with heart-rate medication (R5), or when a strap drops ("Strap lost"), the gauge shows effort guidance instead of bpm. The guidance is perceived effort on a 1–10 scale plus a talk test. 90 s into each push, a crew "Hold!" call and a "Hold this effort" banner tell the rower to settle.
+- R30. Without a heart-rate strap, with heart-rate medication (R5), or when a strap drops ("Strap lost"), the gauge shows effort guidance instead of bpm. The guidance is perceived effort on a 1–10 scale plus a talk test. 90 s into each push, the hold signal (a short distinct sound, R40) and a "Hold this effort" banner tell the rower to settle.
 - R31. A progress strip at least 12 pt tall shows every segment, including warm-up pickups, with a marker for now, legible over the painting. Push segments are taller than steady ones, so the strip doesn't rely on color alone.
 - R51. Every audio cue has a visual twin (R40).
 - R52. All timers in rowing mode show time remaining, except Row freely, which has no end and shows time rowed.
@@ -193,17 +193,17 @@ The current SwiftUI app does not solve this. It is a stock-looking interval time
 **Sound**
 
 - R38. Rowing mode layers sound in two groups:
-  - **Ambience:** a sea bed that matches the scene, a drum loop at the target stroke rate, and crew murmur during work.
+  - **Ambience:** a sea bed that matches the scene, a drum loop at the target stroke rate, and a wordless crew murmur during work (effort grunts and exhales on the stroke; no intelligible words).
   - **Signals:** the cues in R40.
 - R39. Signals include a war horn before each push, a low horn note at the end of a push, and a landfall sound at the finish.
-- R40. Signals replace any spoken voice. Each has an on-screen twin:
+- R40. Signals replace any human voice. Each has an on-screen twin: a banner that shows for about 3 s, readable at 1 m, at the moment its sound plays, so Silent mode keeps every cue.
 
 | Moment | Sound | On screen |
 |---|---|---|
 | Get seated, last 5 s | Five drum beats | Big 5-4-3-2-1 |
 | Push in 10 s | War horn | Edge pulse + "Ready oars" |
-| Push starts | Crew "Heave!" + drum lifts to push tempo | "Pull" |
-| 90 s into a push (effort guidance, R30) | Crew "Hold!" | "Hold this effort" |
+| Push starts | Double drum strike + drum lifts to push tempo | "Pull" |
+| 90 s into a push (effort guidance, R30) | Hold signal: a short distinct sound (wooden clapper or single gong stroke, picked by listening test) | "Hold this effort" |
 | Push ends | One low horn note + drum slows | "Rest" |
 | Above 95% max for 15 s | Three bell strikes | Charcoal border glow + "Ease off ▲" |
 | Session ends | Landfall sound | Session complete |
@@ -264,7 +264,7 @@ The current SwiftUI app does not solve this. It is a stock-looking interval time
     1. The warning screen on the first row, then the strap prompt if never asked.
     2. Get seated with the stroke demo and the stop line.
     3. Warm-up with pickups.
-    4. For each push: the horn and edge pulse 10 s before, "Heave!" at the start, the work scene, the end-of-push horn, and the rest scene.
+    4. For each push: the horn and edge pulse 10 s before, the double drum strike and "Pull" at the start, the work scene, the end-of-push horn, and the rest scene.
     5. Cool-down.
     6. Session complete with the rating, then back to the route.
   - **Covered by:** R5, R6, R23–R44, R50–R53, R61
@@ -296,10 +296,10 @@ The current SwiftUI app does not solve this. It is a stock-looking interval time
 - AE3. **Covers R14, R15.** Given a remembered length of 30 min in week 2 or later, the weekly long row shows "Long row · 45 min" and can be shortened on the card.
 - AE4. **Covers R41.** Given music playing at session start:
   - the sea, drum loop and crew murmur are silent, with a notice;
-  - the horn, drum count, "Heave!" and bells still play and duck the music.
+  - the horn, drum count, push-start strike and bells still play and duck the music.
 - AE5. **Covers R21.** Given a missed Wednesday easy row, Saturday shows that easy row ("Waiting from Wed"), Saturday's own session moves to the next rowing day, nothing is doubled up, and the ship has not moved.
 - AE6. **Covers R9, R21.** Given a rower who rowed a hard session Monday and whose next waiting session on Tuesday is also hard, Tuesday shows the next easy row instead and the hard session follows it.
-- AE7. **Covers R30.** Given no heart-rate strap, during a push the gauge shows an effort cue such as "7–8 of 10 · single words only" in place of bpm, and at 90 s the crew calls "Hold!".
+- AE7. **Covers R30.** Given no heart-rate strap, during a push the gauge shows an effort cue such as "7–8 of 10 · single words only" in place of bpm, and at 90 s the hold signal sounds with a "Hold this effort" banner.
 - AE8. **Covers R5.** Given a rower setting out for the first time, the warning screen appears; "I understand" stays disabled until the medication question is answered, and "no" leaves HR coaching on.
 - AE9. **Covers R23.** Given the default hold time, the session starts 20 s after Get seated begins, with five drum beats and big numbers counting the last five seconds; "Start now" starts it at once.
 - AE10. **Covers R32.** Given a long press anywhere mid-push, the session pauses and the pause sheet opens; a short tap does nothing.

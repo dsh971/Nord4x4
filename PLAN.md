@@ -1,15 +1,50 @@
 # PLAN — M1 · Rowable slice (U1–U7)
 
-**Status (2026-11-04):** Phase A done (packet ready; you still need to find and send it to a coach). Phase B done, with the review fixes applied. Phase C done: all five device checks pass, and ducking uses the switch-options release (`docs/spikes/native-modules.md`). Phase D done: the session engine and fake sensors, with tests. Next: Phase E.
+**Status (2026-11-04):** Phase A done (packet ready; you still need to find and send it to a coach). Phase B done, with the review fixes applied. Phase C done: all five device checks pass, and ducking uses the switch-options release (`docs/spikes/native-modules.md`). Phase D done: the session engine and fake sensors, with tests. Phase E done: tokens, fonts and the slice's components, reviewed and checked on the phone. Cues without voices done. Next: Phase F.
 
 Goal: reach the M1 gate in `docs/plans/2026-10-29-001-feat-nor4x4-expo-rebuild-plan.md`. One hardcoded session (week 3 Beginner, 3×3′, 30 min) with the scene, drum, horn and crew is rowed on a real erg by you 3–5 times and by two other rowers once each. The go/change verdict goes in `docs/spikes/rowable-slice.md`.
+
+## Done · cues without voices (Phases A–B, completed 2026-11-04)
+
+**Decision (from you, 2026-11-04):** no human voice at all. The crew calls "Heave!" and "Hold!" become sounds, and every cue gets a clear on-screen notice. This replaces S6 ("Crew calls in English") from 2026-10-31.
+
+| Moment | Sound | On screen (banner, plus the existing visual) |
+|---|---|---|
+| Get seated, last 5 s | Five drum beats | Big 5-4-3-2-1 |
+| Push in 10 s | War horn | "Ready oars" + edge pulse |
+| Push starts | **Double drum strike**, then the drum lifts to push tempo (was "Heave!") | "Pull" |
+| 90 s into a push, effort mode | **A short distinct signal**, chosen in the Phase F listening test (candidates: wooden clapper, single gong stroke) (was "Hold!") | "Hold this effort" |
+| Push ends | One low horn note + drum slows | "Rest" |
+| Above 95% max for 15 s | Three bell strikes | "Ease off ▲" + charcoal border glow |
+| Session ends | Landfall sound | Session complete |
+
+On-screen notices: each banner shows for about 3 s, large enough to read at 1 m from the erg, and appears at the moment its sound plays (built in U7 as SignalBanner). Nothing here depends on sound being on, so Silent mode keeps every cue.
+
+### Phase A — Docs
+- `docs/brainstorms/2026-10-29-nor4x4-rebuild-requirements.md`: R30, R40 table, AE7, the "no spoken voice" line and R41's list of signals; S6 marked superseded.
+- `docs/plans/2026-10-29-001-feat-nor4x4-expo-rebuild-plan.md`: KTD9's signal list, the push cue timeline, U3, U7 and U19 cue lists.
+- `docs/review/coach-review.md`: the "Hold!" wording.
+- `PLAN.md`: Phase F drops "record the crew calls" and adds the two new sounds to the shortlist.
+
+### Phase B — Code
+- `src/domain/session/sessionMachine.ts` and its test: rename the cue kinds `heave` → `pushStart` and `hold` → `holdEffort`, so the names describe the moment, not a voice. No behaviour change.
+
+### Crew murmur (decided 2026-11-04)
+- R38's "crew murmur during work" stays as **wordless ambience**: low effort grunts and exhales on the stroke over a quiet murmur, with no intelligible words. It mutes with the rest of the ambience when the rower's music plays (R41) and carries no cue. Phase F's listening test offers 2–3 versions mixed under the drum and sea; each pick's licence is checked before it ships.
+- Phase A also updates R38 to say "wordless".
+
+### Verification
+```
+grep -rn -i -E 'heave|hold!' docs/brainstorms docs/plans docs/review src   # only the superseded S6 note remains
+npx tsc --noEmit && npm run lint && npx jest
+```
 
 ## What I can do here, and what needs you
 
 | Unit | I can do | Needs you |
 |---|---|---|
 | U1 coach review | Write the review packet | Find the coach, send it, bring back the answers |
-| U3 sound | Write the sound spec, shortlist CC0 or royalty-free files with licences | Pick the files, record the crew calls with friends |
+| U3 sound | Write the sound spec, shortlist CC0 or royalty-free files with licences | Pick the files by listening test |
 | U4a scaffold and spike | Expo project, strict TS, Jest, lint, test mode, the spike screen and the Swift module | Xcode selected, Apple signing, run the 5 checks on your iPhone with Spotify |
 | U2 design spec | Nothing in M1: it doesn't block the slice (U5 needs only the slice's tokens) | Held until M2 |
 | U4b strap and Health | Spike code | An H10 strap and the phone. **Not needed for the M1 gate**; I'd hold it until before M3 |
@@ -73,7 +108,7 @@ Goal: reach the M1 gate in `docs/plans/2026-10-29-001-feat-nor4x4-expo-rebuild-p
 ## Phase F — U3 sound spec and slice assets
 
 - `docs/design/sound-spec.md`: every ambience and signal with its visual twin, loudness targets, loop lengths, format, source and licence.
-- A shortlist of CC0 or royalty-free candidates for the slice set (horns, bells, drum hit and loop, calm sea), for you to pick. Crew "Heave!" and "Hold!" are yours to record.
+- A shortlist of CC0 or royalty-free candidates for the slice set (horns, bells, drum hit and loop, push-start strike, hold signal, calm sea, wordless crew murmur), for you to pick by listening test. No voices to record.
 - Brief from the 2026-11-04 listening test: the horn is horn-5 "war horn" (deep, with a growl and a valley echo), and the drum is drum-1 "taiko", one hit per stroke at the catch. The stand-ins are synthesized in `src/dev/spike/tones.ts`. Bells are still to choose.
 - Verify: every cue the U6 engine emits has a named asset and licence in the spec.
 
@@ -197,7 +232,7 @@ Each decision below has a **proposed default**. Approve all, or name the ones to
   - This fixes a push starting in silence when music is on (raised by 4 of 5 reviewers).
 - **S4. Silent mode really is silent, and the app may suspend.** Timestamps recover the timing when it comes back, and `bluetooth-central` keeps the heart-rate stream. This avoids App Review rejection under guideline 2.5.4.
 - **S5. The charcoal glow is provisional.** Board 3.2b shows it, but the M1 slice tests it against the painting. If it reads as dimming, switch to teal.
-- **S6. Crew calls in English ("Heave!", "Hold!").** The mixer's "Caller" slider becomes "Signals".
+- **S6. Crew calls in English ("Heave!", "Hold!").** *(Superseded 2026-11-04: the calls became sounds; see "cues without voices".)* The mixer's "Caller" slider becomes "Signals".
 
 #### Safety (training reviewer, P1s)
 

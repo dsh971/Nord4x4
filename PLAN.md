@@ -80,6 +80,7 @@ Goal: reach the M1 gate in `docs/plans/2026-10-29-001-feat-nor4x4-expo-rebuild-p
 ## Phase G — U7 rowable slice
 
 - `app/session/slice.tsx`, the first-pass InkScene and AudioEngine on their final interfaces, CornerGauge, ProgressStrip, SignalBanner, EaseOffGlow, GetSeated with the stop line, and long-press pause.
+- Gauge digits sit in fixed-width cells: Noto Serif SC has no tabular figures, so a bare countdown would shift sideways each second (Phase E review, 2026-11-04).
 - Tests: U7's three gauge scenarios.
 - You row it; `docs/spikes/rowable-slice.md` records each row and the go/change verdict. **M1 gate.**
 

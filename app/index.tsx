@@ -3,16 +3,21 @@ import { StyleSheet, Text, View } from 'react-native';
 
 import { isTestMode } from '../src/dev/testMode';
 
-/** Launch screen until the home route (U14) exists; shows test mode, and the spike link in dev builds. */
+/** Launch screen until the home route (U14) exists; shows test mode, and the spike and gallery links in dev builds. */
 export default function Index() {
   return (
     <View style={styles.screen}>
       <Text style={styles.title}>Nor4x4</Text>
       {__DEV__ && isTestMode ? <Text style={styles.note}>Test mode</Text> : null}
       {__DEV__ ? (
-        <Link href="/dev/spike" style={styles.link}>
-          Native spike
-        </Link>
+        <>
+          <Link href="/dev/spike" style={styles.link}>
+            Native spike
+          </Link>
+          <Link href="/dev/gallery" style={styles.link}>
+            Components gallery
+          </Link>
+        </>
       ) : null}
     </View>
   );

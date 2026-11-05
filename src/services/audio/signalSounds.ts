@@ -1,5 +1,5 @@
 import type { Cue } from '../../domain/session/sessionMachine';
-import type { SoundName } from './soundNames';
+import type { SoundName } from './assets';
 
 /** Every signal the rowing screen plays: the session machine's cues, plus the heart-rate ease-off (R36). */
 export type SignalKind = Cue['kind'] | 'easeOff';

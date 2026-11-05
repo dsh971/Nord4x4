@@ -5,7 +5,7 @@ import {
   AudioManager,
 } from 'react-native-audio-api';
 
-import { createSeaLoop, createStrokeDrumLoop, createWarHorn } from './tones';
+import { SOUND_FILES } from '../../services/audio/assets';
 
 /** How a cue gives the volume back to the user's music after ducking it (KTD9). */
 export type DuckRelease = 'switchOptions' | 'deactivate';
@@ -48,20 +48,17 @@ function describeError(error: unknown): string {
   return error instanceof Error ? error.message : String(error);
 }
 
+type SpikeSounds = {
+  readonly drum: AudioBuffer;
+  readonly sea: AudioBuffer;
+  readonly horn: AudioBuffer;
+};
+
 /** Drives the spike's sounds: two loops and a horn mixed over the user's music, plus the ducking trial. */
 export class SpikeAudio {
   private readonly context = new AudioContext();
-  private readonly drum: AudioBuffer;
-  private readonly sea: AudioBuffer;
-  private readonly horn: AudioBuffer;
+  private soundsLoading: Promise<SpikeSounds> | null = null;
   private loops: AudioBufferSourceNode[] = [];
-
-  constructor() {
-    const rate = this.context.sampleRate;
-    this.drum = this.toBuffer(createStrokeDrumLoop(rate, STROKES_PER_MINUTE));
-    this.sea = this.toBuffer(createSeaLoop(rate, 4));
-    this.horn = this.toBuffer(createWarHorn(rate));
-  }
 
   get areLoopsPlaying(): boolean {
     return this.loops.length > 0;
@@ -72,10 +69,11 @@ export class SpikeAudio {
     AudioManager.setSystemOptions(sessionOptions(false));
     await AudioManager.setAudioSessionActivity(true);
     await this.context.resume();
+    const { drum, sea } = await this.sounds();
     if (this.areLoopsPlaying) {
       return;
     }
-    this.loops = [this.play(this.drum, 0.8, true), this.play(this.sea, 0.5, true)];
+    this.loops = [this.play(drum, 0.8, true), this.play(sea, 0.5, true)];
   }
 
   stopLoops(): void {
@@ -87,7 +85,7 @@ export class SpikeAudio {
   async playHorn(): Promise<void> {
     await AudioManager.setAudioSessionActivity(true);
     await this.context.resume();
-    this.play(this.horn, 1, false);
+    this.play((await this.sounds()).horn, 1, false);
   }
 
   /** Ducks the user's music for each of `count` horn cues, releasing it the given way after each one. */
@@ -122,9 +120,10 @@ export class SpikeAudio {
     let releaseMs = 0;
     let error: string | null = null;
     try {
+      const { horn } = await this.sounds();
       AudioManager.setSystemOptions(sessionOptions(true));
-      this.play(this.horn, 1, false);
-      await wait(this.horn.duration * 1000);
+      this.play(horn, 1, false);
+      await wait(horn.duration * 1000);
       const releaseStart = performance.now();
       AudioManager.setSystemOptions(sessionOptions(false));
       if (release === 'deactivate') {
@@ -151,10 +150,20 @@ export class SpikeAudio {
     };
   }
 
-  private toBuffer(samples: Float32Array<ArrayBuffer>): AudioBuffer {
-    const buffer = this.context.createBuffer(1, samples.length, this.context.sampleRate);
-    buffer.copyToChannel(samples, 0);
-    return buffer;
+  /** Decodes the real slice sounds once; the drum loop is one taiko hit per stroke at a push rate. */
+  private sounds(): Promise<SpikeSounds> {
+    this.soundsLoading ??= (async () => {
+      const [hit, sea, horn] = await Promise.all([
+        this.context.decodeAudioData(SOUND_FILES['drum-hit']),
+        this.context.decodeAudioData(SOUND_FILES['sea-calm']),
+        this.context.decodeAudioData(SOUND_FILES['war-horn']),
+      ]);
+      const strokeLength = Math.round((60 / STROKES_PER_MINUTE) * hit.sampleRate);
+      const drum = this.context.createBuffer(1, strokeLength, hit.sampleRate);
+      drum.copyToChannel(hit.getChannelData(0).slice(0, strokeLength), 0);
+      return { drum, sea, horn };
+    })();
+    return this.soundsLoading;
   }
 
   private play(buffer: AudioBuffer, volume: number, isLooping: boolean): AudioBufferSourceNode {

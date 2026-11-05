@@ -111,7 +111,7 @@ npx tsc --noEmit && npm run lint && npx jest
 - A shortlist of CC0 or royalty-free candidates for the slice set (horns, bells, drum hit and loop, push-start strike, hold signal, calm sea, wordless crew murmur), for you to pick by listening test. No voices to record.
 - Brief from the 2026-11-04 listening test: the horn is horn-5 "war horn" (deep, with a growl and a valley echo), and the drum is drum-1 "taiko", one hit per stroke at the catch. The stand-ins are synthesized in `src/dev/spike/tones.ts`. Bells are still to choose.
 - Picks so far (listening tests, 2026-11-04):
-  - Horn: horn-5 "war horn" (synthesized, `war_horn` in `build_sounds.py`; the stand-in in `src/dev/spike/tones.ts` goes in Phase G).
+  - Horn: horn-5 "war horn" (synthesized, `war_horn` in `build_sounds.py`; the stand-in in `src/dev/spike/tones.ts` was deleted in G2).
   - Drum: drum-1 "taiko", one hit per stroke at the catch (synthesized).
   - Hold signal: wood-3 "oar shafts clack", two hollow wood knocks, solo with no drum (synthesized, `hold_signal` in `docs/design/tools/build_sounds.py`).
   - Ease-off bells: H1, "chromatic handbells 12 tones g1" by radwoc (https://freesound.org/people/radwoc/sounds/370007/, CC0, 48 kHz/24-bit studio WAV), its single-tone strike played three times 0.6 s apart. Synthesized bells were rejected; the original WAV needs a free Freesound account to download. The original is downloaded and cut (2026-11-05).

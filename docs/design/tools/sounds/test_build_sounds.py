@@ -1,8 +1,10 @@
 """Tests for build_sounds. Run: python3 -m unittest discover -s docs/design/tools/sounds"""
 import math
+import tempfile
 import unittest
+from pathlib import Path
 
-from build_sounds import RATE, first_strike, seamless_loop
+from build_sounds import RATE, check_size_budget, first_strike, seamless_loop
 
 
 def tone(seconds: float, hz: float = 220.0) -> list[float]:
@@ -37,6 +39,21 @@ class FirstStrikeTest(unittest.TestCase):
         self.assertEqual(strike[: lead_in], [0.01] * lead_in)
         self.assertEqual(strike[lead_in], 0.8)
         self.assertLess(abs(strike[-1]), 1e-3)  # faded out, so it ends without a click
+
+
+
+class SizeBudgetTest(unittest.TestCase):
+    def test_passes_at_exactly_the_budget(self) -> None:
+        with tempfile.TemporaryDirectory() as folder:
+            (Path(folder) / "a.wav").write_bytes(b"x" * 600)
+            (Path(folder) / "b.m4a").write_bytes(b"x" * 400)
+            self.assertEqual(check_size_budget(Path(folder), budget_bytes=1000), 1000)
+
+    def test_fails_one_byte_over_the_budget(self) -> None:
+        with tempfile.TemporaryDirectory() as folder:
+            (Path(folder) / "a.wav").write_bytes(b"x" * 1001)
+            with self.assertRaisesRegex(ValueError, "over the"):
+                check_size_budget(Path(folder), budget_bytes=1000)
 
 
 if __name__ == "__main__":

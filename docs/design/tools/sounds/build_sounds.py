@@ -18,6 +18,8 @@ from pathlib import Path
 
 RATE = 48_000
 PEAK = 0.89  # about -1 dBFS, so the decoder never clips
+# Xcode copies audio into the app as it is, so this script is the only place sound size is controlled.
+SIZE_BUDGET_BYTES = 8_000_000
 
 # --- Synthesis -------------------------------------------------------------------------------------------------
 
@@ -233,15 +235,28 @@ def loudness(path: Path) -> float:
     return float(matches[-1])
 
 
-def write_loop(path: Path, samples: list[float], channels: int, target_lufs: float, scratch: Path) -> None:
-    """Gain the loop to `target_lufs` and encode it as 160 kbps AAC in .m4a with Apple's encoder."""
+def write_loop(
+    path: Path, samples: list[float], channels: int, target_lufs: float, bitrate: int, scratch: Path
+) -> None:
+    """Gain the loop to `target_lufs` and encode it as AAC at `bitrate` bits/s in .m4a with Apple's encoder."""
     wav = scratch / f"{path.stem}.wav"
     write_wav(wav, samples, channels)
     gain = 10 ** ((target_lufs - loudness(wav)) / 20)
     if max(abs(s) for s in samples) * gain > PEAK:
         raise ValueError(f"{path.name} would clip at {target_lufs} LUFS")
     write_wav(wav, [s * gain for s in samples], channels)
-    subprocess.run(["afconvert", "-f", "m4af", "-d", "aac", "-b", "160000", str(wav), str(path)], check=True)
+    subprocess.run(["afconvert", "-f", "m4af", "-d", "aac", "-b", str(bitrate), str(wav), str(path)], check=True)
+
+
+def check_size_budget(out_dir: Path, budget_bytes: int = SIZE_BUDGET_BYTES) -> int:
+    """Return the total size of `out_dir`'s files; raise if it is over `budget_bytes`."""
+    total = sum(path.stat().st_size for path in out_dir.iterdir() if path.is_file())
+    if total > budget_bytes:
+        raise ValueError(
+            f"{out_dir} holds {total / 1e6:.1f} MB of sound, over the {budget_bytes / 1e6:.1f} MB budget: "
+            "lower a loop's bitrate or length, or raise the budget on purpose"
+        )
+    return total
 
 
 def build(bell: Path, sea: Path, crew: Path, out_dir: Path) -> None:
@@ -260,10 +275,14 @@ def build(bell: Path, sea: Path, crew: Path, out_dir: Path) -> None:
     with tempfile.TemporaryDirectory() as scratch:
         # The sea's splashes peak far above its average, so -25 LUFS is as loud as it goes without clipping.
         # The crew sits 8 dB under it (listening test, 2026-11-05); the app sets the playback level.
-        write_loop(out_dir / "sea-calm.m4a", seamless_loop(decode(sea, 2), 2, 20, 60, 2), 2, -25, Path(scratch))
-        write_loop(out_dir / "crew-murmur.m4a", seamless_loop(decode(crew, 1), 1, 0, 15, 1.5), 1, -33, Path(scratch))
+        sea_loop = seamless_loop(decode(sea, 2), 2, 20, 60, 2)
+        crew_loop = seamless_loop(decode(crew, 1), 1, 0, 15, 1.5)
+        write_loop(out_dir / "sea-calm.m4a", sea_loop, 2, -25, 128_000, Path(scratch))
+        # A mono murmur under the sea needs less than the stereo sea.
+        write_loop(out_dir / "crew-murmur.m4a", crew_loop, 1, -33, 96_000, Path(scratch))
     for path in sorted(out_dir.iterdir()):
         print(path.name)
+    print(f"{check_size_budget(out_dir) / 1e6:.1f} MB of {SIZE_BUDGET_BYTES / 1e6:.1f} MB budget")
 
 
 def main() -> None:

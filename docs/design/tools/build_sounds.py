@@ -3,10 +3,12 @@
 The horns, drum, push-start strike and hold signal are synthesized here. The bell, sea and crew are cut from
 CC0 recordings that you download from Freesound first (links in the spec). Needs ffmpeg and macOS afconvert.
 
-Run: python3 -I docs/design/tools/sounds/build_sounds.py --bell <370007 wav> --sea <637945 flac> --crew <480808 wav>
+Run: python3 -I docs/design/tools/build_sounds.py --bell <370007 wav> --sea <637945 flac> --crew <480808 wav>
 """
 import argparse
+import hashlib
 import math
+import os
 import random
 import re
 import struct
@@ -20,6 +22,17 @@ RATE = 48_000
 PEAK = 0.89  # about -1 dBFS, so the decoder never clips
 # Xcode copies audio into the app as it is, so this script is the only place sound size is controlled.
 SIZE_BUDGET_BYTES = 8_000_000
+ASSETS_DIR = Path(__file__).resolve().parents[3] / "assets" / "audio"
+EXPECTED_FILES = frozenset({
+    "war-horn.wav", "push-end-horn.wav", "push-start-strike.wav", "hold-signal.wav", "drum-hit.wav",
+    "ease-off-bell.wav", "sea-calm.m4a", "crew-murmur.m4a",
+})
+# The Freesound originals the cuts were chosen on; a preview or re-upload would silently cut different sounds.
+ORIGINAL_SHA256 = {
+    "bell": "4a5124919245feaf3fef307a6c5db0ceb647d1f2c9f4fa9356509ed8a9577fcb",
+    "sea": "a0eaa38da6b86de506058d379cd049e58633b2de8f6de6ceef6eb37b61c87278",
+    "crew": "ac087628b186bac95908546335e909b3bb090a68965ca5e118dc1e1ba23762a6",
+}
 
 # --- Synthesis -------------------------------------------------------------------------------------------------
 
@@ -129,7 +142,15 @@ def drum_hit(seed: int) -> list[float]:
         slap = 0.6 * slap_tone * math.exp(-t / 0.012)
         # Soft saturation adds harmonics, so the low body still reads as low on small speakers.
         hit.append(math.tanh(2.0 * (body + slap)) / math.tanh(2.0))
-    return hit
+    return fade_edges(hit)
+
+
+def fade_edges(samples: list[float], onset: float = 0.001, tail: float = 0.03) -> list[float]:
+    """Ramp in over `onset` s and out over `tail` s, so a sound cut short doesn't click at either end."""
+    onset_count, tail_count = int(onset * RATE), int(tail * RATE)
+    return [
+        s * min(1.0, i / onset_count, (len(samples) - 1 - i) / tail_count) for i, s in enumerate(samples)
+    ]
 
 
 def struck(partials: list[tuple[float, float, float]], seconds: float, attack_noise: float, seed: int) -> list[float]:
@@ -164,25 +185,43 @@ def push_end_horn() -> list[float]:
 def push_start_strike() -> list[float]:
     """strike-1 "double taiko": a clipped grace hit 0.17 s before a full one."""
     taiko = drum_hit(seed=99)
-    return taiko[: int(0.17 * RATE)] + taiko + silence(0.5)
+    return fade_edges(taiko[: int(0.17 * RATE)], tail=0.005) + taiko
 
 
 def hold_signal() -> list[float]:
-    """wood-3 "oar shafts clack": two hollow wood knocks 0.09 s apart."""
+    """wood-3 "oar shafts clack": two hollow wood knocks, starting 0.24 s apart."""
     def knock(seed: int) -> list[float]:
-        return struck(OAR_SHAFTS, 0.15, attack_noise=0.6, seed=seed)
+        return fade_edges(struck(OAR_SHAFTS, 0.15, attack_noise=0.6, seed=seed))
 
-    return knock(1) + silence(0.09) + knock(2) + silence(0.6)
+    return knock(1) + silence(0.09) + knock(2)
 
 
 # --- Recordings ------------------------------------------------------------------------------------------------
 
 
+def run(command: list[str]) -> subprocess.CompletedProcess[bytes]:
+    """Run a tool; on failure, raise with its own error output rather than just the exit status."""
+    result = subprocess.run(command, capture_output=True)
+    if result.returncode != 0:
+        detail = result.stderr.decode(errors="replace").strip()
+        raise RuntimeError(f"{command[0]} failed ({result.returncode}): {detail}")
+    return result
+
+
+def check_original(name: str, path: Path) -> None:
+    """Raise unless `path` is the exact Freesound original the cuts were chosen on."""
+    digest = hashlib.sha256(path.read_bytes()).hexdigest()
+    if digest != ORIGINAL_SHA256[name]:
+        raise ValueError(
+            f"--{name} {path} is not the original the sounds were cut from (sha256 {digest}); "
+            "download the original file from Freesound, not the preview"
+        )
+
+
 def decode(path: Path, channels: int) -> list[float]:
     """Decode any audio file to 48 kHz float samples, interleaved when `channels` is 2."""
-    raw = subprocess.run(
-        ["ffmpeg", "-loglevel", "error", "-i", str(path), "-ac", str(channels), "-ar", str(RATE), "-f", "f32le", "-"],
-        check=True, capture_output=True,
+    raw = run(
+        ["ffmpeg", "-loglevel", "error", "-i", str(path), "-ac", str(channels), "-ar", str(RATE), "-f", "f32le", "-"]
     ).stdout
     samples = array("f")
     samples.frombytes(raw)
@@ -200,7 +239,7 @@ def first_strike(samples: list[float], seconds: float) -> list[float]:
 
 
 def seamless_loop(samples: list[float], channels: int, start: float, length: float, fade: float) -> list[float]:
-    """`length` s from `start`, with the `fade` s that follow crossfaded (equal power) into its head, so it loops clean."""
+    """`length` s from `start`, with the `fade` s of audio after the cut crossfaded into its head, so it loops clean."""
     first, count, fade_count = int(start * RATE) * channels, int(length * RATE) * channels, int(fade * RATE) * channels
     if first + count + fade_count > len(samples):
         raise ValueError(f"Recording is too short for a {length} s loop from {start} s with a {fade} s crossfade")
@@ -215,7 +254,7 @@ def seamless_loop(samples: list[float], channels: int, start: float, length: flo
 
 
 def write_wav(path: Path, samples: list[float], channels: int = 1) -> None:
-    """Write 16-bit 48 kHz PCM; one-shots are normalized to PEAK, loops are written as given."""
+    """Write 16-bit 48 kHz PCM, clamped to ±1."""
     with wave.open(str(path), "wb") as out:
         out.setnchannels(channels)
         out.setsampwidth(2)
@@ -224,11 +263,12 @@ def write_wav(path: Path, samples: list[float], channels: int = 1) -> None:
 
 
 def loudness(path: Path) -> float:
-    """Integrated loudness of a file in LUFS (EBU R128), measured by ffmpeg."""
-    report = subprocess.run(
-        ["ffmpeg", "-hide_banner", "-i", str(path), "-af", "ebur128", "-f", "null", "-"],
-        check=True, capture_output=True, text=True,
-    ).stderr
+    """Integrated loudness of a file in LUFS (EBU R128) as heard: a mono file counts as playing on both speakers."""
+    # iOS plays a mono file on both channels, which sounds 3 dB louder than R128's plain mono measure.
+    # R128 measures in 0.4 s blocks; trailing silence lets a shorter one-shot fill one, and the gate drops it.
+    report = run(
+        ["ffmpeg", "-hide_banner", "-i", str(path), "-af", "apad=pad_dur=1,ebur128=dualmono=true", "-f", "null", "-"]
+    ).stderr.decode(errors="replace")
     matches = re.findall(r"I:\s+(-?[\d.]+) LUFS", report)
     if not matches:
         raise RuntimeError(f"ffmpeg reported no loudness for {path}")
@@ -245,7 +285,7 @@ def write_loop(
     if max(abs(s) for s in samples) * gain > PEAK:
         raise ValueError(f"{path.name} would clip at {target_lufs} LUFS")
     write_wav(wav, [s * gain for s in samples], channels)
-    subprocess.run(["afconvert", "-f", "m4af", "-d", "aac", "-b", str(bitrate), str(wav), str(path)], check=True)
+    run(["afconvert", "-f", "m4af", "-d", "aac", "-b", str(bitrate), str(wav), str(path)])
 
 
 def check_size_budget(out_dir: Path, budget_bytes: int = SIZE_BUDGET_BYTES) -> int:
@@ -260,29 +300,38 @@ def check_size_budget(out_dir: Path, budget_bytes: int = SIZE_BUDGET_BYTES) -> i
 
 
 def build(bell: Path, sea: Path, crew: Path, out_dir: Path) -> None:
-    """Write every slice asset to `out_dir`."""
+    """Build every slice asset in a staging folder, check it, then move the files into `out_dir` together."""
+    for name, path in (("bell", bell), ("sea", sea), ("crew", crew)):
+        check_original(name, path)
     out_dir.mkdir(parents=True, exist_ok=True)
-    one_shots = {
-        "war-horn": war_horn(),
-        "push-end-horn": push_end_horn(),
-        "push-start-strike": push_start_strike(),
-        "hold-signal": hold_signal(),
-        "drum-hit": drum_hit(seed=0),
-        "ease-off-bell": first_strike(decode(bell, 1), 1.8),
-    }
-    for name, samples in one_shots.items():
-        write_wav(out_dir / f"{name}.wav", normalize(samples))
-    with tempfile.TemporaryDirectory() as scratch:
-        # The sea's splashes peak far above its average, so -25 LUFS is as loud as it goes without clipping.
-        # The crew sits 8 dB under it (listening test, 2026-11-05); the app sets the playback level.
+    # Staging sits beside out_dir so the final moves are renames on one disk, and a failed build changes nothing.
+    with tempfile.TemporaryDirectory(dir=out_dir.parent) as staging, tempfile.TemporaryDirectory() as scratch:
+        staged = Path(staging)
+        one_shots = {
+            "war-horn": war_horn(),
+            "push-end-horn": push_end_horn(),
+            "push-start-strike": push_start_strike(),
+            "hold-signal": hold_signal(),
+            "drum-hit": drum_hit(seed=0),
+            "ease-off-bell": first_strike(decode(bell, 1), 1.8),
+        }
+        for name, samples in one_shots.items():
+            write_wav(staged / f"{name}.wav", normalize(samples))
+        # The sea's splashes peak far above its average, so -25 LUFS keeps it clear of the clip guard.
+        # The crew sits 8 dB under it as heard (listening test, 2026-11-05); the app sets the playback level.
         sea_loop = seamless_loop(decode(sea, 2), 2, 20, 60, 2)
         crew_loop = seamless_loop(decode(crew, 1), 1, 0, 15, 1.5)
-        write_loop(out_dir / "sea-calm.m4a", sea_loop, 2, -25, 128_000, Path(scratch))
+        write_loop(staged / "sea-calm.m4a", sea_loop, 2, -25, 128_000, Path(scratch))
         # A mono murmur under the sea needs less than the stereo sea.
-        write_loop(out_dir / "crew-murmur.m4a", crew_loop, 1, -33, 96_000, Path(scratch))
-    for path in sorted(out_dir.iterdir()):
-        print(path.name)
-    print(f"{check_size_budget(out_dir) / 1e6:.1f} MB of {SIZE_BUDGET_BYTES / 1e6:.1f} MB budget")
+        write_loop(staged / "crew-murmur.m4a", crew_loop, 1, -33, 96_000, Path(scratch))
+        built = {path.name for path in staged.iterdir()}
+        if built != EXPECTED_FILES:
+            raise RuntimeError(f"Built {sorted(built)}, expected {sorted(EXPECTED_FILES)}")
+        total = check_size_budget(staged)
+        for path in sorted(staged.iterdir()):
+            print(f"{path.name:24} {loudness(path):6.1f} LUFS")
+            os.replace(path, out_dir / path.name)
+    print(f"{total / 1e6:.1f} MB of {SIZE_BUDGET_BYTES / 1e6:.1f} MB budget")
 
 
 def main() -> None:
@@ -290,7 +339,7 @@ def main() -> None:
     parser.add_argument("--bell", type=Path, required=True, help="radwoc 370007, chromatic handbells, original WAV")
     parser.add_argument("--sea", type=Path, required=True, help="kyles 637945, lake waves at boats, original FLAC")
     parser.add_argument("--crew", type=Path, required=True, help="craigsmith 480808, men murmuring, original WAV")
-    parser.add_argument("--out", type=Path, default=Path("assets/audio"))
+    parser.add_argument("--out", type=Path, default=ASSETS_DIR)
     args = parser.parse_args()
     build(args.bell, args.sea, args.crew, args.out)
 

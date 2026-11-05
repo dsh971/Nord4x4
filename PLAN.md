@@ -1,6 +1,6 @@
 # PLAN — M1 · Rowable slice (U1–U7)
 
-**Status (2026-11-04):** Phase A done (packet ready; you still need to find and send it to a coach). Phase B done, with the review fixes applied. Phase C done: all five device checks pass, and ducking uses the switch-options release (`docs/spikes/native-modules.md`). Phase D done: the session engine and fake sensors, with tests. Phase E done: tokens, fonts and the slice's components, reviewed and checked on the phone. Cues without voices done. Phase F done (2026-11-05): `docs/design/sound-spec.md` and the eight slice sounds in `assets/audio/`, built by `docs/design/tools/sounds/build_sounds.py`. The drum is one hit scheduled per stroke, not a pre-made loop. Next: Phase G.
+**Status (2026-11-05):** Phase A done (packet ready; you still need to find and send it to a coach). Phase B done, with the review fixes applied. Phase C done: all five device checks pass, and ducking uses the switch-options release (`docs/spikes/native-modules.md`). Phase D done: the session engine and fake sensors, with tests. Phase E done: tokens, fonts and the slice's components, reviewed and checked on the phone. Cues without voices done. Phase F done (2026-11-05): `docs/design/sound-spec.md` and the eight slice sounds in `assets/audio/`, built by `docs/design/tools/build_sounds.py`, with the interrogate review fixes applied. The drum is one hit scheduled per stroke, not a pre-made loop. Next: Phase G.
 
 Goal: reach the M1 gate in `docs/plans/2026-10-29-001-feat-nor4x4-expo-rebuild-plan.md`. One hardcoded session (week 3 Beginner, 3×3′, 30 min) with the scene, drum, horn and crew is rowed on a real erg by you 3–5 times and by two other rowers once each. The go/change verdict goes in `docs/spikes/rowable-slice.md`.
 
@@ -111,16 +111,16 @@ npx tsc --noEmit && npm run lint && npx jest
 - A shortlist of CC0 or royalty-free candidates for the slice set (horns, bells, drum hit and loop, push-start strike, hold signal, calm sea, wordless crew murmur), for you to pick by listening test. No voices to record.
 - Brief from the 2026-11-04 listening test: the horn is horn-5 "war horn" (deep, with a growl and a valley echo), and the drum is drum-1 "taiko", one hit per stroke at the catch. The stand-ins are synthesized in `src/dev/spike/tones.ts`. Bells are still to choose.
 - Picks so far (listening tests, 2026-11-04):
-  - Horn: horn-5 "war horn" (synthesized, `src/dev/spike/tones.ts`).
+  - Horn: horn-5 "war horn" (synthesized, `war_horn` in `build_sounds.py`; the stand-in in `src/dev/spike/tones.ts` goes in Phase G).
   - Drum: drum-1 "taiko", one hit per stroke at the catch (synthesized).
-  - Hold signal: wood-3 "oar shafts clack", two hollow wood knocks, solo with no drum (synthesized, `render_wood.py`).
+  - Hold signal: wood-3 "oar shafts clack", two hollow wood knocks, solo with no drum (synthesized, `hold_signal` in `docs/design/tools/build_sounds.py`).
   - Ease-off bells: H1, "chromatic handbells 12 tones g1" by radwoc (https://freesound.org/people/radwoc/sounds/370007/, CC0, 48 kHz/24-bit studio WAV), its single-tone strike played three times 0.6 s apart. Synthesized bells were rejected; the original WAV needs a free Freesound account to download. The original is downloaded and cut (2026-11-05).
-  - Push-start strike: strike-1 "double taiko", two quick taiko hits, solo (synthesized, `render_signals.py`).
+  - Push-start strike: strike-1 "double taiko", two quick taiko hits, solo (synthesized, `push_start_strike` in `build_sounds.py`).
   - Drum during signals: the drum pauses while a signal plays and picks up on the next stroke (audition B).
-  - Push-end horn: end-2 "falling war horn", the war horn whose pitch sags five semitones over its last 1.5 s, so it can't be mistaken for the push warning (synthesized, `render_push_end.py`, 2026-11-05).
+  - Push-end horn: end-2 "falling war horn", the war horn whose pitch sags five semitones over its last 1.5 s, so it can't be mistaken for the push warning (synthesized, `push_end_horn` in `build_sounds.py`, 2026-11-05).
   - Rejected: a crowd send-off before the row (Jorvik parade, 2026-11-05). It would blunt the war horn, mask the count-in and wear thin with repetition.
   - Calm sea: S2, "lake waves lapping at boats" by kyles (https://freesound.org/people/kyles/sounds/637945/, CC0).
-  - Wordless crew: C2, "men murmuring" by craigsmith (https://freesound.org/people/craigsmith/sounds/480808/, CC0), 8 dB under the sea, with both loudness-matched first (audition `S2+C2-crew-minus-8dB`, 2026-11-05).
+  - Wordless crew: C2, "men murmuring" by craigsmith (https://freesound.org/people/craigsmith/sounds/480808/, CC0), 8 dB under the sea as heard, with both loudness-matched first (audition `S2+C2-crew-minus-8dB`, 2026-11-05).
 - Verify: every cue the U6 engine emits has a named asset and licence in the spec.
 
 ## Phase G — U7 rowable slice

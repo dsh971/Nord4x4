@@ -1,64 +1,21 @@
+import { hardSession } from '../sessionBuilders';
 import type { SessionEvent } from '../sessionMachine';
-import type {
-  CoachingMode,
-  HeartRateZone,
-  OpenSegment,
-  SessionPlan,
-  TimedSegment,
-} from '../sessionPlan';
+import type { CoachingMode, HeartRateZone, OpenSegment, SessionPlan } from '../sessionPlan';
 
 export const SECOND = 1000;
 export const MINUTE = 60 * SECOND;
 
-const PUSH_ZONE: HeartRateZone = { lowPercentOfMax: 85, highPercentOfMax: 95 };
-
-/** A warm-up stretch, pickup, push, rest or cool-down of the given length. */
-export function segment(type: TimedSegment['type'], durationMs: number): TimedSegment {
-  const isWork = type === 'push' || type === 'pickup';
-  return {
-    type,
-    durationMs,
-    targetZone: type === 'push' ? PUSH_ZONE : null,
-    strokesPerMinute: isWork ? 27 : 20,
-    scene: isWork ? 'work' : type === 'rest' ? 'rest' : 'easy',
-  };
-}
-
-/** A 10-minute warm-up with two 20 s pickups, as R10 describes. */
-export function warmUpWithPickups(): TimedSegment[] {
-  return [
-    segment('warmUp', 5 * MINUTE),
-    segment('pickup', 20 * SECOND),
-    segment('warmUp', 100 * SECOND),
-    segment('pickup', 20 * SECOND),
-    segment('warmUp', 160 * SECOND),
-  ];
-}
-
-/** A hard session: warm-up, `pushCount` pushes with rests between, then a 5-minute cool-down. */
-export function intervalPlan(options: {
-  pushCount: number;
-  pushMs: number;
-  restMs: number;
-  coachingMode?: CoachingMode;
-}): SessionPlan {
-  const work: TimedSegment[] = [];
-  for (let push = 0; push < options.pushCount; push += 1) {
-    if (push > 0) {
-      work.push(segment('rest', options.restMs));
-    }
-    work.push(segment('push', options.pushMs));
-  }
-  return {
-    segments: [...warmUpWithPickups(), ...work, segment('coolDown', 5 * MINUTE)],
-    getSeatedHoldMs: 20 * SECOND,
-    coachingMode: options.coachingMode ?? 'hr',
-  };
-}
+export const PUSH_ZONE: HeartRateZone = { lowPercentOfMax: 85, highPercentOfMax: 95 };
 
 /** Week 6: 4×4′ / 3′, 40 minutes. */
 export function fourByFourPlan(coachingMode: CoachingMode = 'hr'): SessionPlan {
-  return intervalPlan({ pushCount: 4, pushMs: 4 * MINUTE, restMs: 3 * MINUTE, coachingMode });
+  return hardSession({
+    pushCount: 4,
+    pushMs: 4 * MINUTE,
+    restMs: 3 * MINUTE,
+    pushZone: PUSH_ZONE,
+    coachingMode,
+  });
 }
 
 /** Row freely: one open segment. */

@@ -130,6 +130,108 @@ npx tsc --noEmit && npm run lint && npx jest
 - Tests: U7's three gauge scenarios.
 - You row it; `docs/spikes/rowable-slice.md` records each row and the go/change verdict. **M1 gate.**
 
+### Detailed plan (approved 2026-11-05)
+
+Decided 2026-11-05: the phone sits **landscape** on your holder, so the slice polishes landscape (board 3.2) first. The scene is **drawn in code** with Skia from the boards; real art can replace it after M1.
+
+Goal: one real session you can row on the phone. It is week 3 of the Beginner voyage: a 10′ warm-up with two 20 s pickups, then 3×3′ pushes with 3′ rests, then a 5′ cool-down, 30 min in all. It has a painted scene, the Phase F sounds, the gauge, signals with their banners, and long-press pause. There is no onboarding, database or scheduler. Each sub-step ends in a check, and each gets its own "OK to commit".
+
+**Data shapes first.**
+- **The session machine stays the single clock.** A slice controller calls `advance()` about 10 times a second, and its events drive audio, banners and scene. Nothing else keeps time (KTD5).
+- **Two signal tables over one `SignalKind`** (every cue kind, plus `easeOff`), split by owner so dependencies still point down. `SIGNAL_SOUNDS` in `src/services/audio/` holds each signal's sound and strike pattern, and `drumGapMs` turns that and the decoded file length into the drum gap. `SIGNAL_BANNERS` in `src/features/rowing/` holds the banner text. Both are `Record`s, so a missing cue is a compile error. The count-in numbers and the ease-off glow and chip follow state, not a banner.
+- **Ease-off is a small pure state machine** (`src/domain/heart/easeOff.ts`). Heart rate above 95% of max for 15 s of readings no more than 5 s apart turns it on. The bells ring once per push, and outside a push only as the glow comes on, so HR still high after a push doesn't ring again. The glow clears when HR drops back or the strap drops (R36).
+- **The drum is a pure scheduler** (`src/services/audio/drumSchedule.ts`). From the segment stroke rates and the signal drum gaps, it returns hit times on the session clock. The audio engine plays what it returns, scheduled ahead on the audio clock.
+
+**G1 · Domain and the slice plan.** The pure parts, test-first.
+- Files:
+  - `src/content/slicePlan.ts`: the week-3 plan above, in effort mode (program content is data, KTD16).
+  - `src/domain/session/sessionBuilders.ts`: the R10 warm-up and hard-session builders, shared with the test fixtures.
+  - `src/domain/heart/easeOff.ts`.
+  - `src/services/audio/signalSounds.ts` and `soundNames.ts`: each signal's sound, and `drumGapMs`.
+  - `src/features/rowing/banners.ts`: each signal's banner.
+  - `src/features/rowing/effortGuide.ts`: the text per segment type, e.g. "7–8 of 10 · Single words only" in a push. The easy text is draft copy for the coach review (R17).
+- Tests:
+  - ease-off: on at 15 s above 95% and not at 14 s or at exactly 95%; bells once per push, not again when a push ends with HR high, again in the next push; a gap in readings or a dropout starts the wait again; a bad max HR is refused;
+  - the drum gap runs to the end of the third bell (3.0 s);
+  - the plan is 30 min, with a 10′ warm-up holding two pickups and three 3′ pushes.
+  - The tables have no tests of their own: `Record` already forces every signal and segment type to have an entry.
+
+**G2 · Audio engine (first pass of U19).**
+- Files:
+  - `src/services/audio/`: `audioEngine.ts`, `drumSchedule.ts`, `assets.ts`.
+  - The engine:
+    - loads the eight files;
+    - loops the sea in the background, and the crew during work segments;
+    - schedules drum hits ahead, skipping strokes inside a signal's drum gap;
+    - plays signals, ducking the music with the KTD9 switch-options release;
+    - pauses and resumes with the session.
+  - The spike moves to the real files, and the stand-in synthesis in `src/dev/spike/tones.ts` is deleted with its test.
+- Tests (drum scheduler):
+  - 27 spm gives a hit every 2.222 s;
+  - a rate change takes effect on the next stroke;
+  - strokes inside a horn's 5.2 s gap are skipped, and the drum comes back on the first stroke after it;
+  - pausing shifts nothing.
+- On the phone:
+  - the loops repeat without a hitch (the Phase F seam check);
+  - signals land on the beat;
+  - per-signal gains are tuned by ear, starting with the bell and wood about 10 dB up.
+
+**G3 · Rowing overlays.**
+- Files: `src/features/rowing/`:
+  - `CornerGauge` (fixed-width digit cells, U7);
+  - `SignalBanner` (about 3 s, readable at 1 m);
+  - `EaseOffGlow` (charcoal border, breathing);
+  - `GetSeated` (big 5-4-3-2-1, the R61 stop line, Start now);
+  - `PauseOverlay` (long press anywhere pauses, Resume, and End session with a hold to confirm).
+  - It reuses Phase E's `ProgressStrip`, `ZoneChip` and `Text`.
+- Tests: `src/features/rowing/__tests__/gauge.test.tsx`, with U7's three scenarios:
+  - effort guide and time sizes during a push;
+  - fake HR above 95% for 15 s shows "Ease off ▲" and the glow, and plays the bells once;
+  - the strip shows both pickups with the marker inside the current segment.
+
+  Plus a banner test and a long-press test.
+
+**G4 · Ink scene (first pass of U18).**
+- Files: `src/services/scene/InkScene.tsx`, a Skia canvas drawn in code from boards 3.2–3.4:
+  - paper sky, mountain washes and water;
+  - the striped sail, the prow, the deck, the rowers;
+  - oars that follow the drum's beat phase on the UI thread.
+- Four states:
+  - **work:** oars dig;
+  - **rest:** oars trail;
+  - **horn:** oars raised, horn rings at the prow;
+  - **easy:** calm water, low sun.
+- Reduced motion freezes it.
+- Tests: the segment-to-state mapping, and the oar phase at 27 spm.
+- On the phone: 60 fps through a full push, against the spike's 120 fps baseline.
+
+**G5 · The slice route.**
+- `app/session/slice.tsx` (dev only, linked from the start screen) wires the machine, audio, scene and overlays together.
+- The screen stays awake (`expo-keep-awake`, added with `npx expo install`).
+- A dev switch replays a fake heart-rate trace, so the ease-off can be tried without a strap.
+- On the phone: row the full 30 min once yourself.
+
+**G6 · Rowing it (M1 gate).**
+- `docs/spikes/rowable-slice.md`: a row log covering:
+  - enjoyment 1–5;
+  - readability at 1 m;
+  - whether the charcoal glow reads clearly;
+  - what felt off;
+  - the go or change verdict.
+- You row it 3–5 times and two other rowers once each.
+
+**Verification for every sub-step:** `npx tsc --noEmit && npx jest && npm run lint && python3 -m unittest discover -s docs/design/tools`, plus the phone checks named above.
+
+**Before writing Expo or library code:** fetch the versioned docs for SDK 58, react-native-audio-api 1.0 (decoding bundled assets, scheduling) and Skia (AGENTS.md).
+
+**Out of scope here (later units):**
+- heart-rate mode with a real strap (U21);
+- the full pause sheet with sound modes (U17);
+- music detection (U19);
+- landfall (U20);
+- portrait polish (it must still work, but board 3.2p is matched in U17);
+- the stroke demo animation in Get seated, which is a still catch pose here (U17).
+
 ## Verification (whole milestone)
 
 ```

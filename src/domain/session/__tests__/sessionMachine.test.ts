@@ -1,13 +1,13 @@
 import { ManualClock } from '../clock';
+import { hardSession, timedSegment } from '../sessionBuilders';
 import { createSessionMachine, type SessionEvent, type SessionMachine } from '../sessionMachine';
 import {
   describeEvent,
   fourByFourPlan,
-  intervalPlan,
   MINUTE,
+  PUSH_ZONE,
   rowFreelyPlan,
   SECOND,
-  segment,
 } from './fixtures';
 
 /** Moves the clock in steps up to `totalMs`, advancing the machine after each step. */
@@ -95,7 +95,13 @@ describe('cues', () => {
 
   it('sounds the hold signal 90 s into each push in effort mode, and never in HR mode (R30)', () => {
     const plan = (coachingMode: 'hr' | 'effort') =>
-      intervalPlan({ pushCount: 3, pushMs: 3 * MINUTE, restMs: 3 * MINUTE, coachingMode });
+      hardSession({
+        pushCount: 3,
+        pushMs: 3 * MINUTE,
+        restMs: 3 * MINUTE,
+        pushZone: PUSH_ZONE,
+        coachingMode,
+      });
     const holdCues = (mode: 'hr' | 'effort') => {
       const { clock, machine } = rowingAt(plan(mode));
       return runFor(machine, clock, 30 * MINUTE)
@@ -235,9 +241,9 @@ describe('plan validation', () => {
     const clock = new ManualClock();
     const plan = fourByFourPlan();
     expect(() => createSessionMachine({ ...plan, segments: [] }, clock)).toThrow(/at least one/);
-    expect(() => createSessionMachine({ ...plan, segments: [segment('push', 0)] }, clock)).toThrow(
-      /length/,
-    );
+    expect(() =>
+      createSessionMachine({ ...plan, segments: [timedSegment('push', 0)] }, clock),
+    ).toThrow(/length/);
   });
 });
 

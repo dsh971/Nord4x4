@@ -49,8 +49,10 @@ export type SessionSnapshot = {
 
 /** A cue this late is dropped rather than played late (KTD5). */
 export const STALE_CUE_MS = 2_000;
-const COUNT_IN_BEATS = 5;
-const HORN_LEAD_MS = 10_000;
+/** How many drum beats count the rower in at the end of Get seated (R23). */
+export const COUNT_IN_BEATS = 5;
+/** How long before a push its war horn sounds (R40: "Push in 10 s"). */
+export const HORN_LEAD_MS = 10_000;
 const HOLD_EFFORT_AFTER_MS = 90_000;
 
 /** Starts a session at Get seated, timed by `clock`; throws if the plan can't be rowed. */

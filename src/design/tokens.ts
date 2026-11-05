@@ -30,6 +30,7 @@ export const colors = {
   buildSurface: '#FFE9D1', // persimmon-100
   easeOffSurface: '#1C1B1A', // the charcoal of the ease-off glow (R36)
   destructive: '#A62B2B',
+  destructiveHold: '#F2DEDE', // cinnabar-100: End session filling as it is held (board 3.5)
 } as const;
 
 /** A colour role. */
@@ -60,6 +61,7 @@ export const textOnSurface: readonly { text: TextColorRole; surface: ColorRole }
   { text: 'textSteady', surface: 'inZoneSurface' },
   { text: 'textDestructive', surface: 'paper' },
   { text: 'textDestructive', surface: 'card' },
+  { text: 'textDestructive', surface: 'destructiveHold' },
 ];
 
 /** Shuimo's spacing, on an 8 pt base. */

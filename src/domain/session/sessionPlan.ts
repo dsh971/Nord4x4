@@ -90,3 +90,15 @@ export function plannedLengthMs(plan: SessionPlan): number | null {
   const last = segmentTimings(plan).at(-1);
   return last?.endMs ?? null;
 }
+
+/** Which push a segment is, counting from 0, out of how many; null if it isn't a push (R29, R36). */
+export function pushPositionAt(
+  plan: SessionPlan,
+  segmentIndex: number,
+): { readonly index: number; readonly count: number } | null {
+  const pushes: number[] = plan.segments.flatMap((segment: Segment, index) =>
+    segment.type === 'push' ? [index] : [],
+  );
+  const index = pushes.indexOf(segmentIndex);
+  return index === -1 ? null : { index, count: pushes.length };
+}

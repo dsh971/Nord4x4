@@ -134,6 +134,12 @@ npx tsc --noEmit && npm run lint && npx jest
 
 Decided 2026-11-05: the phone sits **landscape** on your holder, so the slice polishes landscape (board 3.2) first. The scene is **drawn in code** with Skia from the boards; real art can replace it after M1.
 
+Decided in the G3 review (2026-11-05):
+- **The stop line uses R61's wording**, not the boards' shorter question: "Stop and rest if you feel chest pain or pressure, dizziness, unusual breathlessness, or palpitations." The boards are out of date on this line.
+- **Ease-off only where bpm leads.** In an effort-mode session bpm can't be trusted (KTD21), so a strap reading above 95% shows no glow or chip, and G5 must keep the bells silent too. The slice's fake heart-rate trace rows as a heart-rate plan.
+- **The safe area holds the overlays.** The rowing overlay and Get seated sit inside the safe area with a 24 pt margin, clear of the camera cut-out (on the side in landscape) and the home indicator; the edge glows still reach the screen's edge.
+- **The zone chip shows nothing rather than an untrue "In zone".** Above the target band, short of the 95% ease-off, and below it while "Build ▼" isn't allowed yet (R50), the bpm and target line speak for themselves.
+
 Goal: one real session you can row on the phone. It is week 3 of the Beginner voyage: a 10′ warm-up with two 20 s pickups, then 3×3′ pushes with 3′ rests, then a 5′ cool-down, 30 min in all. It has a painted scene, the Phase F sounds, the gauge, signals with their banners, and long-press pause. There is no onboarding, database or scheduler. Each sub-step ends in a check, and each gets its own "OK to commit".
 
 **Data shapes first.**

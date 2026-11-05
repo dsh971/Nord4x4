@@ -3,7 +3,7 @@ import { StyleSheet, Text, View } from 'react-native';
 
 import { isTestMode } from '../src/dev/testMode';
 
-/** Launch screen until the home route (U14) exists; shows test mode, and the dev links (spike, gallery, audio check) in dev builds. */
+/** Launch screen until the home route (U14) exists; shows test mode, and the dev links (spike, gallery, audio check, rowing overlays) in dev builds. */
 export default function Index() {
   return (
     <View style={styles.screen}>
@@ -19,6 +19,9 @@ export default function Index() {
           </Link>
           <Link href="/dev/audio" style={styles.link}>
             Audio check
+          </Link>
+          <Link href="/dev/rowing" style={styles.link}>
+            Rowing overlays
           </Link>
         </>
       ) : null}

@@ -25,6 +25,19 @@ const config: ExpoConfig = {
     'expo-router',
     // Background audio keeps a session's sound running with the screen locked (KTD7).
     ['react-native-audio-api', { iosBackgroundMode: true }],
+    // Embedded at build time; iOS names each font by its PostScript name (src/design/typography.ts).
+    [
+      'expo-font',
+      {
+        fonts: [
+          './assets/fonts/Inter18pt-Regular.ttf',
+          './assets/fonts/Inter18pt-Medium.ttf',
+          './assets/fonts/Inter18pt-SemiBold.ttf',
+          './assets/fonts/NotoSerifSC-Regular.ttf',
+          './assets/fonts/NotoSerifSC-SemiBold.ttf',
+        ],
+      },
+    ],
   ],
   experiments: {
     typedRoutes: true,

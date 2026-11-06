@@ -1,8 +1,8 @@
 import { Canvas, Fill, Shader, Skia, useClock } from '@shopify/react-native-skia';
-import { useState } from 'react';
 import { Pressable, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
-import { useDerivedValue, useFrameCallback, useSharedValue } from 'react-native-reanimated';
-import { scheduleOnRN } from 'react-native-worklets';
+import { useDerivedValue } from 'react-native-reanimated';
+
+import { describeFrameRate, useFrameRate, type FrameStats } from '../useFrameRate';
 
 // Layered ink washes drifting over paper: about as costly per pixel as the U18 scene's bleed and grain.
 const INK_WASH = Skia.RuntimeEffect.Make(`
@@ -33,16 +33,6 @@ if (INK_WASH === null) {
 }
 const inkWash = INK_WASH;
 
-export interface FrameStats {
-  framesPerSecond: number;
-  lowestFramesPerSecond: number;
-  /** Frames that took longer than a 60 fps frame, counted since the check opened. */
-  slowFrames: number;
-}
-
-// A frame this long or longer missed the 60 fps deadline (16.7 ms), with 1 ms of timer slack.
-const SLOW_FRAME_MS = 17.7;
-
 /** Spike check 5: draws one SkSL shader full-screen and reports the frame rate the UI thread achieves. */
 export function ShaderCheck({ onClose }: { onClose: (stats: FrameStats | null) => void }) {
   const { width, height } = useWindowDimensions();
@@ -51,33 +41,7 @@ export function ShaderCheck({ onClose }: { onClose: (stats: FrameStats | null) =
     resolution: [width, height],
     time: clock.value / 1000,
   }));
-  const [stats, setStats] = useState<FrameStats | null>(null);
-  const windowFrames = useSharedValue(0);
-  const windowMs = useSharedValue(0);
-  const slowFrames = useSharedValue(0);
-  const lowest = useSharedValue(Number.POSITIVE_INFINITY);
-
-  useFrameCallback(({ timeSincePreviousFrame }) => {
-    if (timeSincePreviousFrame === null) {
-      return;
-    }
-    windowFrames.value += 1;
-    windowMs.value += timeSincePreviousFrame;
-    if (timeSincePreviousFrame >= SLOW_FRAME_MS) {
-      slowFrames.value += 1;
-    }
-    if (windowMs.value >= 1000) {
-      const framesPerSecond = Math.round((windowFrames.value * 1000) / windowMs.value);
-      lowest.value = Math.min(lowest.value, framesPerSecond);
-      scheduleOnRN(setStats, {
-        framesPerSecond,
-        lowestFramesPerSecond: lowest.value,
-        slowFrames: slowFrames.value,
-      });
-      windowFrames.value = 0;
-      windowMs.value = 0;
-    }
-  });
+  const stats = useFrameRate();
 
   return (
     <View style={styles.screen}>
@@ -87,11 +51,7 @@ export function ShaderCheck({ onClose }: { onClose: (stats: FrameStats | null) =
         </Fill>
       </Canvas>
       <View style={styles.readout}>
-        <Text style={styles.readoutText}>
-          {stats === null
-            ? 'Measuring…'
-            : `${stats.framesPerSecond} fps · lowest ${stats.lowestFramesPerSecond} · slow frames ${stats.slowFrames}`}
-        </Text>
+        <Text style={styles.readoutText}>{describeFrameRate(stats)}</Text>
         <Pressable accessibilityRole="button" onPress={() => onClose(stats)} style={styles.close}>
           <Text style={styles.readoutText}>Done</Text>
         </Pressable>

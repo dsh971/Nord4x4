@@ -3,7 +3,8 @@ import { AppState, Modal, Pressable, ScrollView, StyleSheet, Text, View } from '
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import OtherAudio from '../../../modules/other-audio';
-import { ShaderCheck, type FrameStats } from './ShaderCheck';
+import type { FrameStats } from '../useFrameRate';
+import { ShaderCheck } from './ShaderCheck';
 import { SpikeAudio, type DuckedCue, type DuckRelease } from './spikeAudio';
 import { assessSuspension, type SuspensionVerdict } from './suspension';
 

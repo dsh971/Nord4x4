@@ -1,9 +1,9 @@
-import { useState, type ReactNode } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { SLICE_PLAN } from '../../content/slicePlan';
-import type { SessionPlan } from '../../domain/session/sessionPlan';
+import { segmentTimings, type SessionPlan } from '../../domain/session/sessionPlan';
 import { Text } from '../../design/components/Text';
 import { colors, radius, space } from '../../design/tokens';
 import { SIGNAL_BANNERS } from '../../features/rowing/banners';
@@ -17,6 +17,8 @@ import {
 import { GetSeated } from '../../features/rowing/GetSeated';
 import { PauseSheet } from '../../features/rowing/PauseSheet';
 import { RowingOverlay } from '../../features/rowing/RowingOverlay';
+import { InkScene } from '../../features/rowing/InkScene';
+import { describeFrameRate, useFrameRate } from '../useFrameRate';
 import {
   COOL_DOWN,
   heart,
@@ -44,12 +46,15 @@ function rowing(
     return <Text>No gauge at {sessionMs} ms</Text>;
   }
   return (
-    <RowingOverlay
-      gauge={gauge}
-      bars={progressBarsOf(plan)}
-      banner={options.banner ? SIGNAL_BANNERS[options.banner] : null}
-      onPause={() => undefined}
-    />
+    <>
+      <InkScene timings={segmentTimings(plan)} sessionMs={sessionMs} isRunning />
+      <RowingOverlay
+        gauge={gauge}
+        bars={progressBarsOf(plan)}
+        banner={options.banner ? SIGNAL_BANNERS[options.banner] : null}
+        onPause={() => undefined}
+      />
+    </>
   );
 }
 
@@ -69,18 +74,45 @@ function paused(): ReactNode {
   machine.pause('longPress');
   const gauge = describeGauge(SLICE_PLAN, machine.snapshot(), null);
   return gauge ? (
-    <PauseSheet
-      gauge={gauge}
-      reason="longPress"
-      onResume={() => undefined}
-      onEndSession={() => undefined}
-    />
+    <>
+      <InkScene
+        timings={segmentTimings(SLICE_PLAN)}
+        sessionMs={PUSH_2_AT_1_48_LEFT}
+        isRunning={false}
+      />
+      <PauseSheet
+        gauge={gauge}
+        reason="longPress"
+        onResume={() => undefined}
+        onEndSession={() => undefined}
+      />
+    </>
   ) : (
     <Text>No gauge while paused</Text>
   );
 }
 
+const LIVE_FROM_MS = REST_10_S_BEFORE_PUSH_2 - 20 * SECOND;
+const LIVE_LOOP_MS = 60 * SECOND;
+
+/**
+ * The slice rowing in real time from 30 s before push 2, through the war horn into the push, looping
+ * each minute: the one state where the scene changes state and rate as you watch.
+ */
+function LiveRow() {
+  const [sessionMs, setSessionMs] = useState(LIVE_FROM_MS);
+  useEffect(() => {
+    const startedAt = Date.now();
+    const timer = setInterval(() => {
+      setSessionMs(LIVE_FROM_MS + ((Date.now() - startedAt) % LIVE_LOOP_MS));
+    }, 100);
+    return () => clearInterval(timer);
+  }, []);
+  return rowing(sessionMs);
+}
+
 const STATES: { name: string; render: () => ReactNode }[] = [
+  { name: 'Live · rest, war horn, into push 2', render: () => <LiveRow /> },
   { name: 'Push 2 · effort (board 3.6)', render: () => rowing(PUSH_2_AT_1_48_LEFT) },
   {
     name: 'Push 2 · heart rate in zone (3.2)',
@@ -114,12 +146,14 @@ const STATES: { name: string; render: () => ReactNode }[] = [
 ];
 
 /**
- * G3's phone check: each rowing overlay state from the boards, over a plain wash until the scene
- * exists (G4), to judge readability at 1 m in both orientations. Tap the caption to step on.
+ * The G3 and G4 phone check: each rowing state from the boards over the painted scene, with the oars
+ * rowing from that moment, to judge readability at 1 m and the frame rate in both orientations. Tap
+ * the caption to step on.
  */
 export function RowingStatesScreen() {
   const [index, setIndex] = useState(0);
   const state = STATES[index % STATES.length];
+  const frameRate = useFrameRate();
   return (
     <View style={styles.screen}>
       {state?.render()}
@@ -131,6 +165,8 @@ export function RowingStatesScreen() {
         >
           <Text variant="caption">
             {(index % STATES.length) + 1}/{STATES.length} · {state?.name} · tap for next
+            {'\n'}
+            {describeFrameRate(frameRate)}
           </Text>
         </Pressable>
       </SafeAreaView>

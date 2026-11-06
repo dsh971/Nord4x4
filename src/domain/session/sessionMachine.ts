@@ -53,6 +53,23 @@ export const STALE_CUE_MS = 2_000;
 export const COUNT_IN_BEATS = 5;
 /** How long before a push its war horn sounds (R40: "Push in 10 s"). */
 export const HORN_LEAD_MS = 10_000;
+
+/** When a push's war horn sounds: HORN_LEAD_MS before the push, but never before the row starts. */
+export function hornCueAtMs(pushStartMs: number): number {
+  'worklet';
+  return Math.max(0, pushStartMs - HORN_LEAD_MS);
+}
+
+/** Whether a war horn is calling a push at `sessionMs`: from its cue until the push starts (R27, R40). */
+export function isHornCalling(pushStartsMs: readonly number[], sessionMs: number): boolean {
+  'worklet';
+  for (const startMs of pushStartsMs) {
+    if (sessionMs >= hornCueAtMs(startMs) && sessionMs < startMs) {
+      return true;
+    }
+  }
+  return false;
+}
 const HOLD_EFFORT_AFTER_MS = 90_000;
 
 /** Starts a session at Get seated, timed by `clock`; throws if the plan can't be rowed. */
@@ -294,7 +311,7 @@ function buildTimeline(
         cue: { kind, segmentIndex },
         atMs,
       });
-      events.push(cue('horn', Math.max(0, startMs - HORN_LEAD_MS)), cue('pushStart', startMs));
+      events.push(cue('horn', hornCueAtMs(startMs)), cue('pushStart', startMs));
       if (plan.coachingMode === 'effort' && segment.durationMs > HOLD_EFFORT_AFTER_MS) {
         events.push(cue('holdEffort', startMs + HOLD_EFFORT_AFTER_MS));
       }

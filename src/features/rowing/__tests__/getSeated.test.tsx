@@ -1,10 +1,20 @@
 import { fireEvent, render, screen } from '@testing-library/react-native';
 
 import { useIsPortrait } from '../../../design/useIsPortrait';
-import { STOP_LINE } from '../copy';
+import { CATCH_FIGURE_LABEL, STOP_LINE } from '../copy';
 import { GetSeated } from '../GetSeated';
 
 jest.mock('../../../design/useIsPortrait', () => ({ useIsPortrait: jest.fn(() => true) }));
+// Skia draws natively, so the tests stand in a labelled box for the figure.
+jest.mock('../CatchFigure', () => {
+  const { View } = jest.requireActual<typeof import('react-native')>('react-native');
+  const { CATCH_FIGURE_LABEL } = jest.requireActual<typeof import('../copy')>('../copy');
+  return {
+    CatchFigure: () => (
+      <View accessible accessibilityRole="image" accessibilityLabel={CATCH_FIGURE_LABEL} />
+    ),
+  };
+});
 const mockedIsPortrait = jest.mocked(useIsPortrait);
 
 async function renderGetSeated(remainingMs: number, isHardSession = true, onStartNow = jest.fn()) {
@@ -62,5 +72,10 @@ describe('Get seated (R23, R61)', () => {
     expect(stopLine).toBeGreaterThanOrEqual(0);
     expect(stopLine).toBeLessThan(texts.indexOf('Get seated · starting in'));
     mockedIsPortrait.mockReturnValue(true);
+  });
+
+  it('shows the rower at the catch above the stroke phases', async () => {
+    await renderGetSeated(14_000);
+    expect(screen.getByRole('image', { name: CATCH_FIGURE_LABEL })).toBeOnTheScreen();
   });
 });

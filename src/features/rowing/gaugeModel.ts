@@ -1,4 +1,4 @@
-import { HORN_LEAD_MS, type SessionSnapshot } from '../../domain/session/sessionMachine';
+import { isHornCalling, type SessionSnapshot } from '../../domain/session/sessionMachine';
 import {
   pushPositionAt,
   segmentTimings,
@@ -130,7 +130,9 @@ export function describeGauge(
     clock,
     widestClock: hasLongClock(timings) ? '00:00' : '0:00',
     clockTone:
-      nextPush !== null && clock.kind === 'left' && clock.ms <= HORN_LEAD_MS ? 'push' : 'ink',
+      clock.kind === 'left' && isHornCalling(pushStartsOf(timings), snapshot.sessionElapsedMs)
+        ? 'push'
+        : 'ink',
     body,
     footer:
       segment.type === 'rest' && nextPush !== null && next !== undefined && next.endMs !== null
@@ -146,6 +148,10 @@ export function describeGauge(
     sessionElapsedMs: snapshot.sessionElapsedMs,
     sessionLeftMs: snapshot.sessionRemainingMs,
   };
+}
+
+function pushStartsOf(timings: readonly SegmentTiming[]): number[] {
+  return timings.flatMap(({ segment, startMs }) => (segment.type === 'push' ? [startMs] : []));
 }
 
 // Row freely counts up without end, and a segment over 599 s starts at 10:00 once its seconds round up.

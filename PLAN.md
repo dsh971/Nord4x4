@@ -137,6 +137,8 @@ Decided 2026-11-05: the phone sits **landscape** on your holder, so the slice po
 Decided in the G3 review (2026-11-05):
 - **The stop line uses R61's wording**, not the boards' shorter question: "Stop and rest if you feel chest pain or pressure, dizziness, unusual breathlessness, or palpitations." The boards are out of date on this line.
 - **Ease-off only where bpm leads.** In an effort-mode session bpm can't be trusted (KTD21), so a strap reading above 95% shows no glow or chip, and G5 must keep the bells silent too. The slice's fake heart-rate trace rows as a heart-rate plan.
+- **No crew grunts in the slice (2026-11-05).** Grunts on every stroke (ShangusBurger 764048, CC0) were auditioned and left out: they repeat about 80 times a push, a faint mix likely vanishes under the erg's flywheel, and the murmur already says "crew". The slice keeps clip A: drum, sea and murmur. The G6 row log asks whether the crew felt present and whether push-only grunts would help.
+- **The drum leads into each catch in work (2026-11-05, clip 3 of the drum audition).** The drum becomes the hits of "rowrow" by theredshore (https://freesound.org/people/theredshore/sounds/83977/, CC0): its deep, long-ringing low hit on every catch, and in pushes and pickups two lighter taps of its higher hit at 70% and 85% of each stroke ("tap · tap · BOOM"), placed as shares of the stroke so they follow the rate. Easy rowing keeps one soft low hit. The catch stays on the stroke grid, so the oars don't change, and the taiko push-start strike stays distinct. Picked by ear; the page calls the clip a "row row" call, so the G5 phone check confirms no word is audible. Built in G5 from the original file.
 - **The safe area holds the overlays.** The rowing overlay and Get seated sit inside the safe area with a 24 pt margin, clear of the camera cut-out (on the side in landscape) and the home indicator; the edge glows still reach the screen's edge.
 - **The zone chip shows nothing rather than an untrue "In zone".** Above the target band, short of the 95% ease-off, and below it while "Build ▼" isn't allowed yet (R50), the bpm and target line speak for themselves.
 
@@ -219,6 +221,7 @@ Goal: one real session you can row on the phone. It is week 3 of the Beginner vo
 
 **G6 · Rowing it (M1 gate).**
 - `docs/spikes/rowable-slice.md`: a row log covering:
+  - whether the crew felt present, and whether push-only grunts on the drive would help;
   - enjoyment 1–5;
   - readability at 1 m;
   - whether the charcoal glow reads clearly;

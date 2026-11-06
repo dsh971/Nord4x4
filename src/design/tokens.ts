@@ -9,6 +9,7 @@ export const colors = {
   wash: '#F1F0EB', // silk-200: nested and pressed surfaces
   line: '#DAD9D5', // --line-2 (14% ink) flattened onto paper
   ink: '#1C1B1A', // ink-800, Charcoal Ink
+  machine: '#7C7873', // the rowing machine in drawings: rail, seat and flywheel
 
   textPrimary: '#1C1B1A',
   textSecondary: '#5C564E', // ink-500, Diluted Ink

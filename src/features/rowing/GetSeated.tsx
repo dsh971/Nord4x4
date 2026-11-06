@@ -6,6 +6,7 @@ import { useIsPortrait } from '../../design/useIsPortrait';
 import { Button } from '../../design/components/Button';
 import { Text } from '../../design/components/Text';
 import { colors, space } from '../../design/tokens';
+import { CatchFigure } from './CatchFigure';
 import { STOP_LINE } from './copy';
 import { GaugeDigits } from './GaugeDigits';
 import { countWord, formatClock } from './gaugeModel';
@@ -20,8 +21,8 @@ const PHASES = [
 
 /**
  * Get seated (R23, R61, board 3.1a): the countdown to the row, then big 5-4-3-2-1 in its last five
- * seconds, the stop line before a hard session, and Start now. The stroke shows as its four phases
- * with the catch marked; the drawn figure comes with the scene (G4) and its animation in U17.
+ * seconds, the stop line before a hard session, and Start now. The stroke shows as a still catch
+ * above its four phases; the figure animates through them in U17.
  */
 export function GetSeated({
   remainingMs,
@@ -48,6 +49,7 @@ export function GetSeated({
       </Text>
       {/* Landscape has height to spare beside the countdown, so the stop line sits here. */}
       {isPortrait ? null : stopLine}
+      <CatchFigure />
       <View style={styles.phases}>
         {PHASES.map((phase, index) => (
           <View key={phase.name} style={[styles.phase, index === 0 && styles.currentPhase]}>

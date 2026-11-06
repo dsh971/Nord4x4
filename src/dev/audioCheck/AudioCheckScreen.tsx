@@ -7,13 +7,15 @@ import { systemClock } from '../../domain/session/clock';
 import {
   createSessionMachine,
   restoreSessionMachine,
+  sessionClockMs,
   type SessionMachine,
 } from '../../domain/session/sessionMachine';
 import { segmentTimings } from '../../domain/session/sessionPlan';
 import { Button } from '../../design/components/Button';
 import { Text } from '../../design/components/Text';
 import { colors, space } from '../../design/tokens';
-import { AudioEngine, LOOKAHEAD_MS } from '../../services/audio/audioEngine';
+import { AudioEngine } from '../../services/audio/audioEngine';
+import { LOOKAHEAD_MS } from '../../services/audio/drumSchedule';
 
 const TICK_MS = 100;
 const MINUTE = 60_000;
@@ -32,12 +34,8 @@ function formatSessionTime(ms: number): string {
   return `${sign}${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, '0')}`;
 }
 
-/** Session time now, negative during Get seated, as the audio engine reads it. */
 function sessionTimeOf(machine: SessionMachine): number {
-  const snapshot = machine.snapshot();
-  return snapshot.phase === 'getSeated'
-    ? -snapshot.getSeatedRemainingMs
-    : snapshot.sessionElapsedMs;
+  return sessionClockMs(machine.snapshot());
 }
 
 /** A machine already `sessionMs` into the slice, so a check can jump straight to a push. */

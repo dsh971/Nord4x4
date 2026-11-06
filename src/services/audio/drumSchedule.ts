@@ -1,5 +1,8 @@
 import { isWorkSegment, type SegmentTiming } from '../../domain/session/sessionPlan';
 
+/** How far ahead of session time sounds are scheduled on the audio clock (KTD5). */
+export const LOOKAHEAD_MS = 600;
+
 /** A stretch of session time in which the drum stays quiet while a signal plays, `fromMs` to `toMs`. */
 export type DrumGap = { readonly fromMs: number; readonly toMs: number };
 

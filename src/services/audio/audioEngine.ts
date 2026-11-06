@@ -9,11 +9,9 @@ import {
 import type { SessionEvent } from '../../domain/session/sessionMachine';
 import { isWorkSegment, type SegmentTiming } from '../../domain/session/sessionPlan';
 import { PLAYBACK_GAIN, SOUND_FILES, SOUND_ONSET_MS, type SoundName } from './assets';
-import { drumHitsBetween, type DrumGap } from './drumSchedule';
+import { drumHitsBetween, LOOKAHEAD_MS, type DrumGap } from './drumSchedule';
 import { drumGapMs, SIGNAL_SOUNDS, type SignalKind } from './signalSounds';
 
-/** How far ahead of session time sounds are scheduled on the audio clock (KTD5). */
-export const LOOKAHEAD_MS = 600;
 // Crew murmur fades in and out over about this long at a work segment's edge.
 const CREW_FADE_SECONDS = 0.4;
 

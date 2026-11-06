@@ -3,7 +3,7 @@ import { StyleSheet, Text, View } from 'react-native';
 
 import { isTestMode } from '../src/dev/testMode';
 
-/** Launch screen until the home route (U14) exists; shows test mode, and the dev links (spike, gallery, audio check, rowing overlays) in dev builds. */
+/** Launch screen until the home route (U14) exists; shows test mode, and the dev links (the slice, spike, gallery, audio check, rowing overlays) in dev builds. */
 export default function Index() {
   return (
     <View style={styles.screen}>
@@ -11,6 +11,12 @@ export default function Index() {
       {__DEV__ && isTestMode ? <Text style={styles.note}>Test mode</Text> : null}
       {__DEV__ ? (
         <>
+          <Link href="/session/slice" style={styles.link}>
+            Row the slice
+          </Link>
+          <Link href="/session/slice?heart=fake" style={styles.link}>
+            Row the slice · fake heart rate
+          </Link>
           <Link href="/dev/spike" style={styles.link}>
             Native spike
           </Link>

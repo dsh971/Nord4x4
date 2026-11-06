@@ -47,6 +47,13 @@ export type SessionSnapshot = {
   readonly segmentRemainingMs: number | null;
 };
 
+/** Session time a snapshot stands at: negative during Get seated, as the audio and scene read it. */
+export function sessionClockMs(snapshot: SessionSnapshot): number {
+  return snapshot.phase === 'getSeated'
+    ? -snapshot.getSeatedRemainingMs
+    : snapshot.sessionElapsedMs;
+}
+
 /** A cue this late is dropped rather than played late (KTD5). */
 export const STALE_CUE_MS = 2_000;
 /** How many drum beats count the rower in at the end of Get seated (R23). */

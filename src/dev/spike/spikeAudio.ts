@@ -150,11 +150,11 @@ export class SpikeAudio {
     };
   }
 
-  /** Decodes the real slice sounds once; the drum loop is one taiko hit per stroke at a push rate. */
+  /** Decodes the real slice sounds once; the drum loop is one catch hit per stroke at a push rate. */
   private sounds(): Promise<SpikeSounds> {
     this.soundsLoading ??= (async () => {
       const [hit, sea, horn] = await Promise.all([
-        this.context.decodeAudioData(SOUND_FILES['drum-hit']),
+        this.context.decodeAudioData(SOUND_FILES['drum-catch']),
         this.context.decodeAudioData(SOUND_FILES['sea-calm']),
         this.context.decodeAudioData(SOUND_FILES['war-horn']),
       ]);

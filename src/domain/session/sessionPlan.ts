@@ -44,6 +44,11 @@ export type SegmentTiming =
   | { readonly segment: TimedSegment; readonly startMs: number; readonly endMs: number }
   | { readonly segment: OpenSegment; readonly startMs: number; readonly endMs: null };
 
+/** Whether a kind of segment is work: pushes, and the pickups inside a warm-up. */
+export function isWorkSegment(type: SegmentType): boolean {
+  return type === 'push' || type === 'pickup';
+}
+
 /** The default Get seated hold time (R23). */
 export const DEFAULT_GET_SEATED_HOLD_MS = 20_000;
 

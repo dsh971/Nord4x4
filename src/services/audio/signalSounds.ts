@@ -12,7 +12,7 @@ export type SignalSound = {
 
 /** Each signal's sound, as in docs/design/sound-spec.md. Their visual twins live in the rowing feature. */
 export const SIGNAL_SOUNDS: Record<SignalKind, SignalSound> = {
-  countIn: { sound: 'drum-hit' },
+  countIn: { sound: 'drum-catch' },
   horn: { sound: 'war-horn' },
   pushStart: { sound: 'push-start-strike' },
   holdEffort: { sound: 'hold-signal' },

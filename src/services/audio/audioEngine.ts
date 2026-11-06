@@ -7,8 +7,8 @@ import {
 } from 'react-native-audio-api';
 
 import type { SessionEvent } from '../../domain/session/sessionMachine';
-import type { SegmentTiming } from '../../domain/session/sessionPlan';
-import { PLAYBACK_GAIN, SOUND_FILES, type SoundName } from './assets';
+import { isWorkSegment, type SegmentTiming } from '../../domain/session/sessionPlan';
+import { PLAYBACK_GAIN, SOUND_FILES, SOUND_ONSET_MS, type SoundName } from './assets';
 import { drumHitsBetween, type DrumGap } from './drumSchedule';
 import { drumGapMs, SIGNAL_SOUNDS, type SignalKind } from './signalSounds';
 
@@ -40,7 +40,7 @@ function sessionOptions(isDucking: boolean): SessionOptions {
 }
 
 function isWork(timing: SegmentTiming): boolean {
-  return timing.segment.type === 'push' || timing.segment.type === 'pickup';
+  return isWorkSegment(timing.segment.type);
 }
 
 /**
@@ -58,6 +58,8 @@ export class AudioEngine {
   private readonly scheduledCues = new Set<string>();
   private readonly gaps: DrumGap[] = [];
   private drumHits: { readonly atMs: number; readonly source: AudioBufferSourceNode }[] = [];
+  // One per sound and level, made on first use: a soft catch and two tap levels in all.
+  private readonly levelGains = new Map<string, GainNode>();
   private duckUntilMs = -Infinity;
   private duckTimer: ReturnType<typeof setTimeout> | null = null;
 
@@ -76,7 +78,8 @@ export class AudioEngine {
       'push-end-horn': gainFor('push-end-horn'),
       'push-start-strike': gainFor('push-start-strike'),
       'hold-signal': gainFor('hold-signal'),
-      'drum-hit': gainFor('drum-hit'),
+      'drum-catch': gainFor('drum-catch'),
+      'drum-tap': gainFor('drum-tap'),
       'ease-off-bell': gainFor('ease-off-bell'),
       'sea-calm': gainFor('sea-calm'),
       'crew-murmur': gainFor('crew-murmur'),
@@ -141,14 +144,14 @@ export class AudioEngine {
     if (throughMs <= this.scheduledThroughMs) {
       return;
     }
-    for (const atMs of drumHitsBetween(
+    for (const hit of drumHitsBetween(
       view.timings,
       this.gaps,
       this.scheduledThroughMs,
       throughMs,
     )) {
-      const source = this.playAt('drum-hit', this.gains['drum-hit'], atMs);
-      this.drumHits.push({ atMs, source });
+      const source = this.playAt(hit.sound, this.levelled(hit.sound, hit.level), hit.atMs);
+      this.drumHits.push({ atMs: hit.atMs, source });
     }
     for (const timing of view.timings) {
       if (timing.startMs >= this.scheduledThroughMs && timing.startMs < throughMs) {
@@ -238,11 +241,28 @@ export class AudioEngine {
     return this.anchor.audioTime + (sessionMs - this.anchor.sessionMs) / 1000;
   }
 
+  /** The sound's own gain, or a cached quieter step in front of it for a soft catch or a lead-in tap. */
+  private levelled(name: SoundName, level: number): GainNode {
+    if (level === 1) {
+      return this.gains[name];
+    }
+    const key = `${name}@${level}`;
+    const cached = this.levelGains.get(key);
+    if (cached !== undefined) {
+      return cached;
+    }
+    const gain = this.context.createGain();
+    gain.gain.value = level;
+    gain.connect(this.gains[name]);
+    this.levelGains.set(key, gain);
+    return gain;
+  }
+
   private playAt(name: SoundName, output: GainNode, sessionMs: number): AudioBufferSourceNode {
     const source = this.context.createBufferSource();
     source.buffer = this.buffers[name];
     source.connect(output);
-    source.start(this.audioTimeAt(sessionMs));
+    source.start(this.audioTimeAt(sessionMs - (SOUND_ONSET_MS[name] ?? 0)));
     return source;
   }
 

@@ -1,5 +1,6 @@
 import {
   DEFAULT_GET_SEATED_HOLD_MS,
+  isWorkSegment,
   type CoachingMode,
   type HeartRateZone,
   type SessionPlan,
@@ -19,7 +20,7 @@ export function timedSegment(
   durationMs: number,
   pushZone: HeartRateZone | null = null,
 ): TimedSegment {
-  const isWork = type === 'push' || type === 'pickup';
+  const isWork = isWorkSegment(type);
   return {
     type,
     durationMs,

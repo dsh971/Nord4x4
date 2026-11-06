@@ -13,6 +13,7 @@ from build_sounds import (
     SIZE_BUDGET_BYTES,
     check_original,
     check_size_budget,
+    cut_hit,
     fade_edges,
     first_strike,
     seamless_loop,
@@ -55,6 +56,26 @@ class FirstStrikeTest(unittest.TestCase):
         self.assertLess(abs(strike[-1]), 1e-3)  # faded out, so it ends without a click
 
 
+class CutHitTest(unittest.TestCase):
+    def test_finds_the_hit_near_a_time_and_cuts_it_without_a_click(self) -> None:
+        quiet, hit = [0.01] * RATE, tone(0.6)
+        recording = quiet + hit + quiet + [0.5 * s for s in tone(0.6, 330)] + quiet
+        cut = cut_hit(recording, 2.6)  # the second hit starts at 2.6 s
+        self.assertEqual(len(cut), int(0.55 * RATE))
+        self.assertAlmostEqual(cut[0], 0.0)
+        self.assertLess(abs(cut[-1]), 1e-3)
+        onset = int(0.01 * RATE)
+        self.assertGreater(max(abs(s) for s in cut[onset : onset + 200]), 0.3)
+
+    def test_refuses_a_silent_stretch_with_a_clear_error(self) -> None:
+        with self.assertRaisesRegex(ValueError, "silent or empty"):
+            cut_hit([0.0] * (2 * RATE), 1.0)
+
+    def test_refuses_a_time_past_the_end(self) -> None:
+        with self.assertRaisesRegex(ValueError, "ends before"):
+            cut_hit(tone(1.0), 5.0)
+
+
 class FadeEdgesTest(unittest.TestCase):
     def test_a_sound_cut_off_mid_note_starts_and_ends_silent(self) -> None:
         faded = fade_edges([1.0] * RATE)
@@ -88,9 +109,9 @@ class SizeBudgetTest(unittest.TestCase):
 class CommittedAssetsTest(unittest.TestCase):
     """The files the app ships, checked on every test run, not only when someone rebuilds them."""
 
-    def test_every_asset_in_the_spec_is_present(self) -> None:
-        present = {path.name for path in ASSETS_DIR.iterdir()}
-        self.assertLessEqual(EXPECTED_FILES, present)
+    def test_the_folder_holds_exactly_the_sounds_the_build_makes(self) -> None:
+        present = {path.name for path in ASSETS_DIR.iterdir() if path.suffix in (".wav", ".m4a")}
+        self.assertEqual(present, EXPECTED_FILES)
 
     def test_the_folder_fits_the_size_budget(self) -> None:
         self.assertLessEqual(check_size_budget(ASSETS_DIR), SIZE_BUDGET_BYTES)

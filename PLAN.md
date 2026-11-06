@@ -1,6 +1,6 @@
 # PLAN — M1 · Rowable slice (U1–U7)
 
-**Status (2026-11-05):** Phase A done (packet ready; you still need to find and send it to a coach). Phase B done, with the review fixes applied. Phase C done: all five device checks pass, and ducking uses the switch-options release (`docs/spikes/native-modules.md`). Phase D done: the session engine and fake sensors, with tests. Phase E done: tokens, fonts and the slice's components, reviewed and checked on the phone. Cues without voices done. Phase F done (2026-11-05): `docs/design/sound-spec.md` and the eight slice sounds in `assets/audio/`, built by `docs/design/tools/build_sounds.py`, with the interrogate review fixes applied. The drum is one hit scheduled per stroke, not a pre-made loop. Next: Phase G.
+**Status (2026-11-05):** Phase A done (packet ready; you still need to find and send it to a coach). Phase B done, with the review fixes applied. Phase C done: all five device checks pass, and ducking uses the switch-options release (`docs/spikes/native-modules.md`). Phase D done: the session engine and fake sensors, with tests. Phase E done: tokens, fonts and the slice's components, reviewed and checked on the phone. Cues without voices done. Phase F done (2026-11-05): `docs/design/sound-spec.md` and the slice sounds in `assets/audio/`, built by `docs/design/tools/build_sounds.py`. Phase G under way: G1 to G4 done (slice plan and ease-off, audio engine, overlays, painted scene); G5a, the drum's lead-in, in review; next G5b, the session screen.
 
 Goal: reach the M1 gate in `docs/plans/2026-10-29-001-feat-nor4x4-expo-rebuild-plan.md`. One hardcoded session (week 3 Beginner, 3×3′, 30 min) with the scene, drum, horn and crew is rowed on a real erg by you 3–5 times and by two other rowers once each. The go/change verdict goes in `docs/spikes/rowable-slice.md`.
 
@@ -148,7 +148,7 @@ Goal: one real session you can row on the phone. It is week 3 of the Beginner vo
 - **The session machine stays the single clock.** A slice controller calls `advance()` about 10 times a second, and its events drive audio, banners and scene. Nothing else keeps time (KTD5).
 - **Two signal tables over one `SignalKind`** (every cue kind, plus `easeOff`), split by owner so dependencies still point down. `SIGNAL_SOUNDS` in `src/services/audio/` holds each signal's sound and strike pattern, and `drumGapMs` turns that and the decoded file length into the drum gap. `SIGNAL_BANNERS` in `src/features/rowing/` holds the banner text. Both are `Record`s, so a missing cue is a compile error. The count-in numbers and the ease-off glow and chip follow state, not a banner.
 - **Ease-off is a small pure state machine** (`src/domain/heart/easeOff.ts`). Heart rate above 95% of max for 15 s of readings no more than 5 s apart turns it on. The bells ring once per push, and outside a push only as the glow comes on, so HR still high after a push doesn't ring again. The glow clears when HR drops back or the strap drops (R36).
-- **The drum is a pure scheduler** (`src/services/audio/drumSchedule.ts`). From the segment stroke rates and the signal drum gaps, it returns hit times on the session clock. The audio engine plays what it returns, scheduled ahead on the audio clock.
+- **The drum is a pure scheduler** (`src/services/audio/drumSchedule.ts`). From the segment stroke rates and the signal drum gaps, it returns each hit's time, sound and level on the session clock. The audio engine plays what it returns, scheduled ahead on the audio clock.
 
 **G1 · Domain and the slice plan.** The pure parts, test-first.
 - Files:
@@ -168,7 +168,7 @@ Goal: one real session you can row on the phone. It is week 3 of the Beginner vo
 - Files:
   - `src/services/audio/`: `audioEngine.ts`, `drumSchedule.ts`, `assets.ts`.
   - The engine:
-    - loads the eight files;
+    - loads the slice's sound files;
     - loops the sea in the background, and the crew during work segments;
     - schedules drum hits ahead, skipping strokes inside a signal's drum gap;
     - plays signals, ducking the music with the KTD9 switch-options release;
@@ -213,7 +213,7 @@ Goal: one real session you can row on the phone. It is week 3 of the Beginner vo
 - Tests: the segment-to-state mapping, and the oar phase at 27 spm.
 - On the phone: 60 fps through a full push, against the spike's 120 fps baseline.
 
-**G5 · The slice route.**
+**G5 · The slice route**, in two parts: G5a builds the drum's lead-in (the decision above) from the original recording, and G5b is the session screen below.
 - `app/session/slice.tsx` (dev only, linked from the start screen) wires the machine, audio, scene and overlays together.
 - The screen stays awake (`expo-keep-awake`, added with `npx expo install`).
 - A dev switch replays a fake heart-rate trace, so the ease-off can be tried without a strap.

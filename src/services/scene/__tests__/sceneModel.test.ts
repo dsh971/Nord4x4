@@ -46,10 +46,12 @@ describe('sceneStateAt (R27)', () => {
 });
 
 describe('strokePhaseAt', () => {
-  it('is at the catch on every stroke the drum strikes, across every segment boundary', () => {
-    const hits = drumHitsBetween(TIMINGS, [], 0, ROW_ENDS);
-    expect(hits.length).toBeGreaterThan(200);
-    for (const atMs of hits) {
+  it('is at the catch on every catch the drum strikes, across every segment boundary', () => {
+    const catches = drumHitsBetween(TIMINGS, [], 0, ROW_ENDS).flatMap((hit) =>
+      hit.sound === 'drum-catch' ? [hit.atMs] : [],
+    );
+    expect(catches.length).toBeGreaterThan(200);
+    for (const atMs of catches) {
       const phase = strokePhaseAt(TIMELINE, atMs);
       expect(Math.min(phase, 1 - phase)).toBeLessThan(1e-6);
     }

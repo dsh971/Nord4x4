@@ -1,5 +1,6 @@
 import { isHornCalling, type SessionSnapshot } from '../../domain/session/sessionMachine';
 import {
+  isWorkSegment,
   pushPositionAt,
   segmentTimings,
   type SegmentTiming,
@@ -126,7 +127,7 @@ export function describeGauge(
   return {
     segmentType: segment.type,
     eyebrow: push ? `Push ${push.index + 1} of ${push.count}` : EYEBROWS[segment.type],
-    eyebrowTone: segment.type === 'push' || segment.type === 'pickup' ? 'push' : 'steady',
+    eyebrowTone: isWorkSegment(segment.type) ? 'push' : 'steady',
     clock,
     widestClock: hasLongClock(timings) ? '00:00' : '0:00',
     clockTone:

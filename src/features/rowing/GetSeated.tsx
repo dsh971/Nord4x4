@@ -6,12 +6,21 @@ import { useIsPortrait } from '../../design/useIsPortrait';
 import { Button } from '../../design/components/Button';
 import { Text } from '../../design/components/Text';
 import { colors, space } from '../../design/tokens';
+import { typography } from '../../design/typography';
 import { CatchFigure } from './CatchFigure';
 import { STOP_LINE } from './copy';
 import { GaugeDigits } from './GaugeDigits';
 import { countWord, formatClock } from './gaugeModel';
 
 const COUNT_IN_MS = COUNT_IN_BEATS * 1000;
+const COUNT_IN_FONT_SIZE = 96;
+// Rounded up to an even number, so the ratio never drops below the clock's and the margins that
+// hand back the extra height are whole points.
+const COUNT_IN_LINE_HEIGHT =
+  2 *
+  Math.ceil(
+    (COUNT_IN_FONT_SIZE * typography.gaugeTime.lineHeight) / typography.gaugeTime.fontSize / 2,
+  );
 const PHASES = [
   { name: 'Catch', cue: 'Shins vertical, arms long' },
   { name: 'Drive', cue: 'Push with the legs' },
@@ -74,7 +83,9 @@ export function GetSeated({
         Get seated · starting in
       </Text>
       {isCountingIn ? (
-        <Text variant="gaugeTime" style={styles.countIn} testID="count-in">
+        // Unscaled like the clock's digits: 96 pt is far above R29's minimum, and a scaled numeral
+        // would outgrow the clock's slot and push everything below it down at the count-in.
+        <Text variant="gaugeTime" style={styles.countIn} allowFontScaling={false} testID="count-in">
           {Math.max(1, Math.ceil(remainingMs / 1000))}
         </Text>
       ) : (
@@ -123,8 +134,14 @@ const styles = StyleSheet.create({
   start: { flex: 1.3 },
   startPortrait: { flex: 1 },
   startContent: { gap: space.xs },
-  // The count-in numeral takes the clock's place without making the column taller.
-  countIn: { fontSize: 96, lineHeight: 92 },
+  // Noto Serif SC's natural line is about 1.44 em, and iOS trims a shorter line from the top. At
+  // 96/92 the trim cut into the digits; the clock's 88/84 leaves them whole on the phone, so the
+  // numeral keeps that ratio, and negative margins hand back the extra so it fills the clock's slot.
+  countIn: {
+    fontSize: COUNT_IN_FONT_SIZE,
+    lineHeight: COUNT_IN_LINE_HEIGHT,
+    marginVertical: (typography.gaugeTime.lineHeight - COUNT_IN_LINE_HEIGHT) / 2,
+  },
   stopLine: { fontSize: 17, lineHeight: 24 },
   button: { alignSelf: 'flex-start', marginTop: space.xs },
 });

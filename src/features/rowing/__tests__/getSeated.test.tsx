@@ -1,5 +1,7 @@
 import { fireEvent, render, screen } from '@testing-library/react-native';
+import { StyleSheet } from 'react-native';
 
+import { typography } from '../../../design/typography';
 import { useIsPortrait } from '../../../design/useIsPortrait';
 import { CATCH_FIGURE_LABEL, STOP_LINE } from '../copy';
 import { GetSeated } from '../GetSeated';
@@ -39,6 +41,20 @@ describe('Get seated (R23, R61)', () => {
     expect(screen.getByTestId('count-in')).toHaveTextContent('3');
     await renderGetSeated(0);
     expect(screen.getByTestId('count-in')).toHaveTextContent('1');
+  });
+
+  it("sets the count-in numeral at the clock's line ratio, unscaled, in the clock's 88 pt slot", async () => {
+    await renderGetSeated(2_400);
+    const numeral = screen.getByTestId('count-in');
+    const style = StyleSheet.flatten(numeral.props.style);
+    const clock = typography.gaugeTime;
+    expect(numeral.props.allowFontScaling).toBe(false);
+    expect(style.lineHeight / style.fontSize).toBeGreaterThanOrEqual(
+      clock.lineHeight / clock.fontSize,
+    );
+    const marginTop = style.marginTop ?? style.marginVertical ?? 0;
+    const marginBottom = style.marginBottom ?? style.marginVertical ?? 0;
+    expect(style.lineHeight + marginTop + marginBottom).toBe(clock.lineHeight);
   });
 
   it('shows the stop line before a hard session only', async () => {

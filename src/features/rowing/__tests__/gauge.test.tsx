@@ -7,6 +7,7 @@ import type { Banner } from '../banners';
 import { describeGauge, progressBarsOf, type HeartInput } from '../gaugeModel';
 import { RowingOverlay } from '../RowingOverlay';
 import { colors } from '../../../design/tokens';
+import { typography } from '../../../design/typography';
 import { useIsPortrait } from '../../../design/useIsPortrait';
 import { gaugeDigitsWidth } from '../GaugeDigits';
 import {
@@ -61,6 +62,14 @@ describe('rowing gauge (U7)', () => {
       expect(StyleSheet.flatten(digit.props.style).fontSize).toBeGreaterThanOrEqual(75);
     }
     expect(screen.getByTestId('session-left')).toHaveTextContent('Session · 12:48 left');
+    const rate = screen.getByTestId('gauge-rate');
+    expect(rate).toHaveAccessibleName('Stroke rate 26 to 28 per minute');
+    expect(within(rate).getByText('26–28', { includeHiddenElements: true })).toBeOnTheScreen();
+    expect(screen.queryByText(/row with/)).toBeNull();
+    expect(screen.queryByText('Next')).toBeNull();
+    for (const text of within(rate).getAllByText(/./, { includeHiddenElements: true })) {
+      expect(text.props.maxFontSizeMultiplier).toBeLessThanOrEqual(1.3);
+    }
   });
 
   it('shows "Ease off ▲" and the charcoal glow while HR is held above 95%', async () => {
@@ -100,8 +109,14 @@ describe('rowing gauge, boards 3.3 and R61', () => {
   it('shows the next push in a rest, with the clock in persimmon as the horn calls it', async () => {
     await renderOverlay(REST_10_S_BEFORE_PUSH_2);
 
-    expect(screen.getByText('Next')).toBeOnTheScreen();
+    const next = screen.getByText('Next');
+    expect(StyleSheet.flatten(next.props.style).fontFamily).toBe(typography.headline.fontFamily);
     expect(screen.getByText('push 2 · 3:00')).toBeOnTheScreen();
+    // A small rate line, so the next push fits the landscape panel's height.
+    const rate = screen.getByTestId('gauge-rate');
+    expect(rate).toHaveAccessibleName('Stroke rate 18 to 22 per minute');
+    expect(rate).toHaveTextContent('Rate 18–22 spm');
+    expect(StyleSheet.flatten(rate.props.style).fontSize).toBe(typography.caption.fontSize);
     const digit = within(screen.getByTestId('gauge-time')).getAllByText(/\d/, {
       includeHiddenElements: true,
     })[0];

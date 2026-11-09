@@ -9,12 +9,15 @@ import { formatClock, formatGaugeClock, type GaugeModel } from './gaugeModel';
 // The landscape panel's width (U17); a clock of 10:00 or more widens it rather than shrink below R29.
 const GAUGE_WIDTH = 224;
 const PANEL_INSET = 2 * space.sm + 2;
+// "Rate 26–28 spm" fills about 146 of the panel's 198 pt; larger text would push it out of the panel.
+const RATE_MAX_FONT_SCALE = 1.3;
 
 // Copy, not the model's words: the label may change without renaming the union.
 const CLOCK_LABELS: Record<GaugeModel['clock']['kind'], string> = { left: 'left', rowed: 'rowed' };
 
 /**
- * The gauge (R29): segment, time left, effort or heart rate, and the drum or the next push. In
+ * The gauge (R29): segment, time left, effort or heart rate, and the stroke rate to aim for. In a
+ * rest the rate shrinks to a small line so the next push still fits the landscape panel's height. In
  * landscape it is a corner panel sized for the session's widest clock (board 3.2), and the rowing
  * overlay shows the cool-down line beside it; in portrait it stretches across as a band holding that
  * line too. The band keeps the panel's stacking until U17 lays it out as board 3.2p.
@@ -22,6 +25,8 @@ const CLOCK_LABELS: Record<GaugeModel['clock']['kind'], string> = { left: 'left'
 export function CornerGauge({ gauge, isBand = false }: { gauge: GaugeModel; isBand?: boolean }) {
   const isPush = gauge.eyebrowTone === 'push';
   const clock = formatGaugeClock(gauge.clock);
+  const { rate } = gauge.footer;
+  const rateLabel = `Stroke rate ${rate.low} to ${rate.high} per minute`;
   const panelWidth = Math.max(
     GAUGE_WIDTH,
     gaugeDigitsWidth(gauge.widestClock, 'gaugeTime') + PANEL_INSET,
@@ -93,22 +98,40 @@ export function CornerGauge({ gauge, isBand = false }: { gauge: GaugeModel; isBa
           {gauge.note}
         </Text>
       ) : null}
-      {gauge.footer.kind === 'drum' ? (
-        <View style={styles.reading}>
-          <Text variant="headline" style={styles.footerNumber}>
-            {gauge.footer.strokesPerMinute}
+      {gauge.footer.nextPush ? (
+        <>
+          <Text
+            variant="caption"
+            color="textSecondary"
+            accessibilityLabel={rateLabel}
+            maxFontSizeMultiplier={RATE_MAX_FONT_SCALE}
+            testID="gauge-rate"
+          >
+            Rate {rate.low}–{rate.high} spm
           </Text>
-          <Text variant="body" color="textSecondary" style={styles.shrink}>
-            {gauge.footer.isRowWithIt ? 'drum spm · row with it' : 'drum spm'}
-          </Text>
-        </View>
+          <View style={styles.reading}>
+            <Text variant="headline" color="textPush" style={styles.footerNumber}>
+              Next
+            </Text>
+            <Text variant="body" color="textSecondary">
+              push {gauge.footer.nextPush.pushNumber} · {formatClock(gauge.footer.nextPush.pushMs)}
+            </Text>
+          </View>
+        </>
       ) : (
-        <View style={styles.reading}>
-          <Text variant="headline" color="textPush" style={styles.footerNumber}>
-            Next
+        <View style={styles.reading} accessible accessibilityLabel={rateLabel} testID="gauge-rate">
+          <Text variant="body" color="textSecondary" maxFontSizeMultiplier={RATE_MAX_FONT_SCALE}>
+            Rate
           </Text>
-          <Text variant="body" color="textSecondary">
-            push {gauge.footer.pushNumber} · {formatClock(gauge.footer.pushMs)}
+          <Text
+            variant="headline"
+            style={styles.footerNumber}
+            maxFontSizeMultiplier={RATE_MAX_FONT_SCALE}
+          >
+            {rate.low}–{rate.high}
+          </Text>
+          <Text variant="body" color="textSecondary" maxFontSizeMultiplier={RATE_MAX_FONT_SCALE}>
+            spm
           </Text>
         </View>
       )}
@@ -133,5 +156,4 @@ const styles = StyleSheet.create({
   effortNumber: { fontSize: 48, lineHeight: 52 },
   speech: { fontSize: 17, lineHeight: 22 },
   footerNumber: { fontSize: 28, lineHeight: 32 },
-  shrink: { flexShrink: 1 },
 });

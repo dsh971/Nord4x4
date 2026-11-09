@@ -241,6 +241,18 @@ Goal: one real session you can row on the phone. It is week 3 of the Beginner vo
 - portrait polish (it must still work, but board 3.2p is matched in U17);
 - the stroke demo animation in Get seated, which is a still catch pose here (U17).
 
+### G6a · Show the target stroke rate as a range (approved 2026-11-06)
+
+Asked for after G5: the gauge showed only the drum's single rate ("27 drum spm · row with it"), which reads as the drum's setting rather than the rower's target, and vanished in rests.
+
+- **Decided with you:** the gauge always shows a range, "Rate 26–28 spm", in every segment including warm-up, rests and cool-down. "Row with the drum" goes (the drum is heard, and Silent mode has no drum). "spm" stays so it can't be read as heart rate next to bpm.
+- **Data:** every segment carries a target range beside the drum's exact rate: pushes and pickups 26–28 (the boards), warm-up, rests, easy and cool-down 18–22. 18–22 is draft copy for the coach review (R17). Each pair lives in one constant per kind of rowing (`PUSH_RATE`, `EASY_RATE`), and the plan check refuses a hand-built range that doesn't hold the drum's rate.
+- **Files:**
+  - `src/domain/session/sessionPlan.ts` (the range on each segment; validation), `sessionBuilders.ts` (the ranges);
+  - `src/features/rowing/gaugeModel.ts` (the footer always carries the range; a rest adds the next push), `CornerGauge.tsx` (draws "Rate 26–28 spm"; in rests a small "Rate 18–22 spm" line with "Next push 2 · 3:00" beneath it in board 3.3's serif, because the landscape panel has no height for two large rows; text scaling capped at 1.3× so the row stays in the panel);
+  - the test fixtures and dev fixtures that build segments by hand.
+- **Tests:** the range is refused when it doesn't hold the drum's rate; the gauge shows the push range in a push, the easy range in the warm-up and cool-down, and both the range and the next push in a rest. Then `npx tsc --noEmit`, `npm run lint`, and on the phone in landscape: the push rate on one line, and a heart-rate rest whose panel ends above the progress strip.
+
 ## Verification (whole milestone)
 
 ```

@@ -1,6 +1,7 @@
 // The slice at the moments the boards draw, shared by the rowing tests and the dev states screen.
 import { SLICE_PLAN } from '../../content/slicePlan';
 import { ManualClock } from '../../domain/session/clock';
+import { EASY_RATE } from '../../domain/session/sessionBuilders';
 import { createSessionMachine, type SessionMachine } from '../../domain/session/sessionMachine';
 import type { SessionPlan } from '../../domain/session/sessionPlan';
 import type { HeartInput } from '../../features/rowing/gaugeModel';
@@ -33,7 +34,14 @@ export const HR_SLICE: SessionPlan = { ...SLICE_PLAN, coachingMode: 'hr' };
 
 /** Row freely: one open segment that counts up (R52). */
 export const ROW_FREELY: SessionPlan = {
-  segments: [{ type: 'open', targetZone: null, strokesPerMinute: 20, scene: 'easy' }],
+  segments: [
+    {
+      type: 'open',
+      targetZone: null,
+      ...EASY_RATE,
+      scene: 'easy',
+    },
+  ],
   getSeatedHoldMs: 0,
   coachingMode: 'effort',
 };

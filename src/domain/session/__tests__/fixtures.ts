@@ -1,4 +1,4 @@
-import { hardSession } from '../sessionBuilders';
+import { EASY_RATE, hardSession } from '../sessionBuilders';
 import type { SessionEvent } from '../sessionMachine';
 import type { CoachingMode, HeartRateZone, OpenSegment, SessionPlan } from '../sessionPlan';
 
@@ -20,7 +20,12 @@ export function fourByFourPlan(coachingMode: CoachingMode = 'hr'): SessionPlan {
 
 /** Row freely: one open segment. */
 export function rowFreelyPlan(): SessionPlan {
-  const open: OpenSegment = { type: 'open', targetZone: null, strokesPerMinute: 20, scene: 'easy' };
+  const open: OpenSegment = {
+    type: 'open',
+    targetZone: null,
+    ...EASY_RATE,
+    scene: 'easy',
+  };
   return { segments: [open], getSeatedHoldMs: 20 * SECOND, coachingMode: 'hr' };
 }
 

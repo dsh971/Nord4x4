@@ -37,7 +37,7 @@ describe('describeGauge', () => {
       widestClock: '0:00',
       clockTone: 'ink',
       body: { kind: 'effort', guide: EFFORT_GUIDES.push },
-      footer: { kind: 'drum', strokesPerMinute: 27, isRowWithIt: true },
+      footer: { rate: { low: 26, high: 28 }, nextPush: null },
       note: null,
       isGlowing: false,
       sessionElapsedMs: PUSH_2_AT_1_48_LEFT,
@@ -51,7 +51,10 @@ describe('describeGauge', () => {
     expect(gauge?.eyebrowTone).toBe('steady');
     expect(gauge?.clockTone).toBe('push');
     expect(gaugeAt(REST_10_S_BEFORE_PUSH_2 - SECOND)?.clockTone).toBe('ink');
-    expect(gauge?.footer).toEqual({ kind: 'next', pushNumber: 2, pushMs: 3 * MINUTE });
+    expect(gauge?.footer).toEqual({
+      rate: { low: 18, high: 22 },
+      nextPush: { pushNumber: 2, pushMs: 3 * MINUTE },
+    });
     expect(gauge?.sessionLeftMs).toBe(14 * MINUTE + 10 * SECOND);
   });
 
@@ -63,17 +66,16 @@ describe('describeGauge', () => {
       zone: 'inZone',
       target: { lowBpm: 156, highBpm: 166 },
     });
-    expect(gauge?.footer).toEqual({ kind: 'drum', strokesPerMinute: 27, isRowWithIt: false });
+    expect(gauge?.footer).toEqual({ rate: { low: 26, high: 28 }, nextPush: null });
   });
 
-  it('falls back to the effort guide, row-with-it line included, when a heart-rate plan has no reading', () => {
+  it('falls back to the effort guide when a heart-rate plan has no reading', () => {
     const gauge = describeGauge(
       HR_SLICE,
       machineAt(PUSH_2_AT_1_48_LEFT, HR_SLICE).snapshot(),
       null,
     );
     expect(gauge?.body.kind).toBe('effort');
-    expect(gauge?.footer).toEqual({ kind: 'drum', strokesPerMinute: 27, isRowWithIt: true });
   });
 
   it('picks the zone chip by R36 and R50, and shows none rather than an untrue "In zone"', () => {
@@ -104,6 +106,12 @@ describe('describeGauge', () => {
     expect(gauge?.eyebrow).toBe('Row freely');
     expect(gauge?.sessionLeftMs).toBeNull();
     expect(gauge?.widestClock).toBe('00:00');
+  });
+
+  it('always shows the stroke rate to aim for: 18–22 in the warm-up and cool-down, 26–28 in work (G6a)', () => {
+    expect(gaugeAt(2 * MINUTE)?.footer.rate).toEqual({ low: 18, high: 22 });
+    expect(gaugeAt(5 * MINUTE + 10 * SECOND)?.footer.rate).toEqual({ low: 26, high: 28 });
+    expect(gaugeAt(27 * MINUTE)?.footer).toEqual({ rate: { low: 18, high: 22 }, nextPush: null });
   });
 
   it('says to keep paddling in the cool-down (R61)', () => {

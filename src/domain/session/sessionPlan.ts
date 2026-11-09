@@ -14,10 +14,15 @@ export type HeartRateZone = {
   readonly highPercentOfMax: number;
 };
 
+/** A stroke rate to aim for, in strokes per minute. */
+export type StrokeRateRange = { readonly low: number; readonly high: number };
+
 type SegmentBase = {
   readonly targetZone: HeartRateZone | null;
-  /** The drum's rate; v1 measures no strokes, so this is also the rate the gauge shows (KTD12). */
+  /** The drum's rate: one catch per stroke (KTD12; v1 measures no strokes). */
   readonly strokesPerMinute: number;
+  /** The stroke rate the rower aims for, around the drum's rate; the gauge shows it (R29). */
+  readonly strokeRateRange: StrokeRateRange;
   readonly scene: SceneState;
 };
 
@@ -52,7 +57,10 @@ export function isWorkSegment(type: SegmentType): boolean {
 /** The default Get seated hold time (R23). */
 export const DEFAULT_GET_SEATED_HOLD_MS = 20_000;
 
-/** Throws if the plan can't be rowed: no segments, a non-positive length or rate, or a negative hold. */
+/**
+ * Throws if the plan can't be rowed: no segments, a non-positive length or rate, a rate range that
+ * doesn't hold its drum rate, or a negative hold.
+ */
 export function validateSessionPlan(plan: SessionPlan): void {
   if (plan.segments.length === 0) {
     throw new Error('A session plan needs at least one segment');
@@ -64,6 +72,12 @@ export function validateSessionPlan(plan: SessionPlan): void {
     if (!Number.isFinite(segment.strokesPerMinute) || segment.strokesPerMinute <= 0) {
       throw new Error(
         `Segment ${index} stroke rate must be a positive number; got ${segment.strokesPerMinute}`,
+      );
+    }
+    const { low, high } = segment.strokeRateRange;
+    if (!(low <= segment.strokesPerMinute && segment.strokesPerMinute <= high)) {
+      throw new Error(
+        `Segment ${index} stroke rate range ${low}–${high} must hold its drum rate ${segment.strokesPerMinute}`,
       );
     }
     if (

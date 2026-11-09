@@ -6,6 +6,7 @@ import {
   type SegmentTiming,
   type SegmentType,
   type SessionPlan,
+  type StrokeRateRange,
 } from '../../domain/session/sessionPlan';
 import type { BarKind, BarSegment } from '../../design/components/SegmentBars';
 import type { ZoneState } from '../../design/components/ZoneChip';
@@ -40,9 +41,11 @@ export type GaugeModel = {
         readonly zone: ZoneState | null;
         readonly target: { readonly lowBpm: number; readonly highBpm: number } | null;
       };
-  readonly footer:
-    | { readonly kind: 'drum'; readonly strokesPerMinute: number; readonly isRowWithIt: boolean }
-    | { readonly kind: 'next'; readonly pushNumber: number; readonly pushMs: number };
+  /** The stroke rate to aim for, always shown (G6a), and in a rest the push coming next. */
+  readonly footer: {
+    readonly rate: StrokeRateRange;
+    readonly nextPush: { readonly pushNumber: number; readonly pushMs: number } | null;
+  };
   /** R61's cool-down line, or null outside the cool-down. */
   readonly note: string | null;
   readonly isGlowing: boolean;
@@ -135,14 +138,13 @@ export function describeGauge(
         ? 'push'
         : 'ink',
     body,
-    footer:
-      segment.type === 'rest' && nextPush !== null && next !== undefined && next.endMs !== null
-        ? { kind: 'next', pushNumber: nextPush.index + 1, pushMs: next.endMs - next.startMs }
-        : {
-            kind: 'drum',
-            strokesPerMinute: segment.strokesPerMinute,
-            isRowWithIt: body.kind === 'effort',
-          },
+    footer: {
+      rate: segment.strokeRateRange,
+      nextPush:
+        segment.type === 'rest' && nextPush !== null && next !== undefined && next.endMs !== null
+          ? { pushNumber: nextPush.index + 1, pushMs: next.endMs - next.startMs }
+          : null,
+    },
     note: segment.type === 'coolDown' ? COOL_DOWN_LINE : null,
     // Only where bpm leads: effort mode can't trust bpm (KTD21), so it shows no glow (decided 2026-11-05).
     isGlowing: body.kind === 'heart' && heart?.isGlowing === true,

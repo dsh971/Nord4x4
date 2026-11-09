@@ -259,6 +259,48 @@ Asked for after G5: the gauge showed only the drum's single rate ("27 drum spm �
 - **Fix:** the sail is drawn whole (`src/features/rowing/sceneGeometry.ts`): a square sail on a yard over the mast, about 10% wider than the old band at its foot and 25% at the yard, sides bowed out, foot sagging and stripes curving with the cloth, as a full sail looks from the deck (decided with you 2026-11-06). Portrait shows it all; landscape shows only its foot under the top edge. The foot stays clear of the dragon's head and the near hill's crest stays in view, as on board 3.2. Separately, the scene and the Get seated figure now measure their own view with `onLayout` (`src/design/fitTransform.ts`) and draw nothing until they have a real size. Before that, Metro logged Reanimated "undefined LayoutMetrics" warnings from Skia's `onSize` measuring.
 - **Tests:** `sceneGeometry.test.ts` (in portrait the mast tip and yard ends sit below each phone's status bar, SE to Pro Max; the foot clears the dragon's head; the hill's crest stays right of the sail; landscape shows only the foot); `catchFigure.test.tsx` (nothing before layout, the fitted transform after, nothing for an empty box). Phone check: the sail in portrait, and the Get seated figure whole.
 
+### G7 · Automated checks beside the rows (proposed 2026-11-09, revised after review; build after the M1 verdict)
+
+Asked for after the G6 phone checks: automate what can be automated, so physical QA is spent on what only a rower can judge. Built after the verdict, because a "change" verdict would redo the screenshots. Revised the same day after a four-model review of the first draft found that its walkthrough and screenshots would fail or flake from the first run.
+
+**Can't be automated (stays with the rows and phone checks):** fun, reading at 1 m mid-stroke, the glow's clarity, any word in the drum, sound levels over the flywheel, the Silent switch, real Reduce Motion, real frame rate, signing.
+
+**Built in three commits, each checked before the next.**
+
+- **G7a · A fast clock for the slice, chosen by the route.**
+  - **Speed:** `/session/slice?speed=10` rows at 10×, so the 30-minute slice takes 3 minutes. Each 100 ms screen tick then moves the session 1 s, leaving 1 s before the session machine treats a cue as stale (`STALE_CUE_MS`, 2 s). At 20× a tick moves the full 2 s, so any late tick would drop "Ready oars", "Pull" or "Rest" without a word. Speeds above 10 are refused with an error naming the limit.
+  - **Only in test mode:** the speed is honoured only under `if (__DEV__ && isTestMode)` in `app/session/slice.tsx`. In any other build a `speed` shows an error rather than rowing at the wrong speed. Plain test mode keeps real time, so the fakes still serve hands-on checks.
+  - **Where it's chosen:** the route builds the clock and turns sound off, as it already builds the fake heart feed. `RowingScreen` and `useRowingSession` take `clock` and `isSoundOn` as props and know nothing of test mode. With sound off the audio engine isn't loaded at all, because it keeps time by the audio clock, which can't run faster. Every cue still shows on screen.
+  - **The clock:** `src/domain/session/clock.ts` gains a clock that runs a set number of times faster than another clock.
+  - **Known and accepted:** at 10× the scene's oars step between ticks, because its frame clock re-anchors on each tick. Maestro can't see the scene, and the rows judge it at real speed.
+  - **Tests:** the slice rowed through `RowingSession` on the fast clock, with ticks arriving 100–150 ms apart, fires every banner cue (this fails at 20×). The route refuses a speed above 10. The fast clock never goes backwards. That release builds leave the fast clock out is checked by exporting a release bundle and searching it for the clock's name, since Jest always runs as a dev build.
+- **G7b · A Maestro walkthrough of the slice on the simulator** (`e2e/slice.yaml`).
+  - Opens `nor4x4://session/slice?speed=10`. First it checks the "Test mode" note on the start screen and fails at once if it's missing.
+  - Taps Start now, then waits only on screens that last: "Push 1 of 3", "Push 2 of 3", "Push 3 of 3", and the end card. Get seated, the count-in and the notices (150–300 ms at this speed) are left to the screenshots and the Jest tests. "Rest" isn't waited on, because it is both the gauge label and a notice.
+  - A second flow checks that a long press opens the pause sheet and a tap doesn't. That a hold ends the row stays in Jest, because Maestro can't set how long a press lasts.
+  - Taps match exact text or testIDs, so "Row the slice" can't hit "Row the slice · fake heart rate".
+- **G7c · Screenshots of fixed moments, compared with saved ones** (`e2e/screens.yaml`, `e2e/baselines/`).
+  - **Capture mode:** `/dev/rowing?state=<name>` opens one named moment with no caption and no frame-rate readout, and the Live state is left out. Each state gets a stable name, so adding a state doesn't shift the others. An unknown name shows an error listing the valid names.
+  - **Still pictures:** capture mode holds the scene and glow still through the app's own Reduce Motion path (`src/design/useReducedMotion.ts` gains an override that capture mode sets), because the simulator has no supported command for Reduce Motion. Real Reduce Motion stays a phone check.
+  - **Moments:** Get seated, the count-in, a push, the rest with the war horn, the heart-rate ease-off, the cool-down, and the pause sheet.
+  - **Set:** each moment in portrait and landscape at the default text size. Get seated, the pause sheet and a push also at the largest accessibility text size, since their text scales. About 20 pictures.
+  - **One pinned simulator:** iPhone 16e (the smallest installed) on iOS 27.2, created by the run script if missing. The run refuses to compare on a different device or iOS version, with a message saying why, rather than failing every picture.
+  - **Comparison:** a small tolerance, not an exact match, and still tight enough to fail the proof below. A changed picture fails the run and shows the difference; an intended change saves a new baseline.
+  - **Before building:** fetch Maestro 2.12's docs for screenshot comparison. If it has none, a small compare script with a pixel-diff dev dependency, added only with your approval.
+- **The run script** (`e2e/run.sh`, behind `npm run e2e` and `npm run e2e:screens`):
+  - sets `JAVA_HOME=/opt/homebrew/opt/openjdk@21` (Maestro 2.12.1 runs with it on this Mac) and fails clearly if it's missing;
+  - starts Metro with `EXPO_PUBLIC_TEST_MODE=1`, because the switch is read when Metro builds the JavaScript;
+  - boots the pinned simulator, pins its status bar (9:41, full battery), sets the text size for the large-text pictures with `xcrun simctl ui`, and resets both afterwards;
+  - opens the app by link, so it skips the dev-client launcher;
+  - turns off the dev warning pop-ups in test mode, so they can't land in a picture.
+- **Files:**
+  - G7a: `src/domain/session/clock.ts` and its test, `app/session/slice.tsx`, `src/features/rowing/RowingScreen.tsx`, `src/features/rowing/useRowingSession.ts`, and a test of the slice on the fast clock.
+  - G7b: `e2e/slice.yaml`, `e2e/pause.yaml`, `e2e/run.sh`, `package.json`.
+  - G7c: `src/dev/rowingStates/RowingStatesScreen.tsx`, `app/dev/rowing.tsx`, `src/design/useReducedMotion.ts`, `e2e/screens.yaml`, `e2e/baselines/`, `.gitignore` (the run's output pictures).
+- **Verification:** `npx tsc --noEmit && npx jest && npm run lint`, then `npm run e2e` and `npm run e2e:screens` against a simulator build (`npx expo run:ios`). Proof that each check bites, run once and the result written here:
+  - the walkthrough fails when the "Push 2 of 3" label is changed;
+  - the screenshot run fails when one overlay margin moves 4 pt, a change no Jest test catches.
+
 ## Verification (whole milestone)
 
 ```

@@ -18,7 +18,7 @@ import {
 } from 'react-native-reanimated';
 
 import type { SceneState, SegmentTiming } from '../../domain/session/sessionPlan';
-import { useFitTransform, type CanvasSize } from '../../design/useFitTransform';
+import { fitTransform, useLayoutSize } from '../../design/fitTransform';
 import { useIsPortrait } from '../../design/useIsPortrait';
 import { useReducedMotion } from '../../design/useReducedMotion';
 import {
@@ -29,11 +29,20 @@ import {
   toSceneTimeline,
   type ClockAnchor,
 } from '../../services/scene/sceneModel';
+import {
+  MAST,
+  NEAR_HILLS,
+  PORTRAIT_SCENE_SHARE,
+  PROW,
+  PROW_NECK,
+  PROW_NECK_WIDTH,
+  SAIL_PATH,
+  SAIL_STRIPE_PATHS,
+  SCENE_FRAME,
+  SKY_TOP,
+  YARD,
+} from './sceneGeometry';
 
-// The painting is laid out in board 3.2's frame, then scaled to the screen.
-const FRAME: CanvasSize = { width: 844, height: 390 };
-// In portrait the scene fills the top of the screen and the gauge band sits below (board 3.2p).
-const PORTRAIT_SCENE_SHARE = 0.6;
 const HORIZON_Y = 205;
 
 // The slice's palette. Each leg of the voyage brings its own in U18.
@@ -56,19 +65,15 @@ const PALETTE = {
   hornBell: '#C66B22',
 };
 
-const PROW = { x: 422, y: 200 };
 const BENCH_YS = [232, 262, 298, 346];
 // How far each deck edge runs out sideways per point down from the prow.
 const DECK_SPREAD = 2.3;
-const DECK_FOOT = FRAME.height + 20;
+const DECK_FOOT = SCENE_FRAME.height + 20;
 
 const FAR_HILLS = 'M0 175 C 90 150 170 140 260 152 C 350 164 420 150 520 160 L 520 205 L 0 205 Z';
-const NEAR_HILLS = 'M520 205 L 560 150 C 610 60 650 20 700 12 C 760 4 800 30 844 70 L 844 205 Z';
 const DECK = `M${PROW.x} ${PROW.y} L 900 ${DECK_FOOT} L -56 ${DECK_FOOT} Z`;
-const PROW_NECK = 'M422 205 C 418 150 420 110 446 92 C 462 82 474 86 480 80';
 // A lur blown at the prow (R27: "horn at the prow"), shown while the war horn calls a push.
 const HORN = 'M436 182 C 446 150 462 126 486 112 L 492 120 C 470 132 456 154 448 184 Z';
-const SAIL_STRIPES = [0, 1, 2, 3].map((index) => ({ x: 218 + index * 104, width: 52 }));
 
 function edgeX(y: number, side: -1 | 1): number {
   return PROW.x + side * DECK_SPREAD * (y - PROW.y);
@@ -160,126 +165,127 @@ const ScenePainting = memo(function ScenePainting({
   sceneState: SharedValue<SceneState>;
   phase: SharedValue<number>;
 }) {
-  const size = useSharedValue<CanvasSize>(FRAME);
-  const transform = useFitTransform(size, FRAME, fit);
+  const [size, onLayout] = useLayoutSize();
   const sunOpacity = useDerivedValue(() => (sceneState.get() === 'easy' ? 1 : 0));
   const hornOpacity = useDerivedValue(() => (sceneState.get() === 'horn' ? 1 : 0));
   return (
-    <Canvas style={StyleSheet.absoluteFill} onSize={size}>
-      <Group transform={transform}>
-        {/* The sky runs far above the frame, so a portrait screen fits the frame's width and fills up. */}
-        <Rect
-          x={-FRAME.width}
-          y={-3 * FRAME.height}
-          width={3 * FRAME.width}
-          height={3 * FRAME.height + HORIZON_Y}
-        >
-          <LinearGradient
-            start={vec(0, 0)}
-            end={vec(0, HORIZON_Y)}
-            colors={[PALETTE.skyTop, PALETTE.skyHorizon]}
-          />
-        </Rect>
-        <Circle cx={700} cy={150} r={34} color={PALETTE.sun} opacity={sunOpacity} />
-        <Path path={FAR_HILLS} color={PALETTE.farHills} />
-        <Path path={NEAR_HILLS} color={PALETTE.nearHills} />
-        <Rect
-          x={-FRAME.width}
-          y={HORIZON_Y - 5}
-          width={3 * FRAME.width}
-          height={FRAME.height}
-          color={PALETTE.water}
-        />
-        {[230, 268].map((y) => (
-          <Line
-            key={y}
-            p1={vec(30, y)}
-            p2={vec(170, y)}
-            color={PALETTE.waterLine}
-            strokeWidth={1.5}
-          />
-        ))}
-        <Path path={DECK} color={PALETTE.deck} />
-        {[-0.6, -0.25, 0.25, 0.6].map((share) => (
-          <Line
-            key={share}
-            p1={vec(PROW.x, PROW.y + 6)}
-            p2={vec(PROW.x + share * 520, DECK_FOOT)}
-            color={PALETTE.plank}
-            strokeWidth={1}
-          />
-        ))}
-        {BENCH_YS.map((y) => (
-          <Line
-            key={y}
-            p1={vec(edgeX(y, -1), y)}
-            p2={vec(edgeX(y, 1), y)}
-            color={PALETTE.plank}
-            strokeWidth={2 + (y - PROW.y) * 0.03}
-          />
-        ))}
-        {([-1, 1] as const).map((side) => (
-          <Line
-            key={side}
-            p1={vec(PROW.x, PROW.y)}
-            p2={vec(edgeX(DECK_FOOT, side), DECK_FOOT)}
-            color={PALETTE.ink}
-            strokeWidth={9}
-            strokeCap="round"
-          />
-        ))}
-        <Line p1={vec(PROW.x, 170)} p2={vec(PROW.x, 320)} color={PALETTE.mast} strokeWidth={4} />
-        <Path
-          path={PROW_NECK}
-          color={PALETTE.ink}
-          style="stroke"
-          strokeWidth={9}
-          strokeCap="round"
-        />
-        <Group opacity={hornOpacity}>
-          <Path path={HORN} color={PALETTE.ink} />
-          <Circle cx={489} cy={116} r={7} color={PALETTE.hornBell} />
-        </Group>
-        {ROWERS.map((rower) => (
-          <Oar
-            key={`${rower.y}${rower.side}`}
-            rower={rower}
-            phase={phase}
-            sceneState={sceneState}
-          />
-        ))}
-        {ROWERS.map((rower) => (
-          <Circle
-            key={`${rower.y}${rower.side}`}
-            cx={rower.x}
-            cy={rower.y - rower.size * 0.4}
-            r={rower.size}
-            color={PALETTE.rower}
-            opacity={0.88}
-          />
-        ))}
-        <Rect x={196} y={-10} width={440} height={86} color={PALETTE.sailCloth} />
-        {SAIL_STRIPES.map((stripe) => (
-          <Rect
-            key={stripe.x}
-            x={stripe.x}
-            y={-10}
-            width={stripe.width}
-            height={86}
-            color={PALETTE.sailStripe}
-          />
-        ))}
-        <Rect
-          x={196}
-          y={-10}
-          width={440}
-          height={86}
-          color={PALETTE.ink}
-          style="stroke"
-          strokeWidth={2}
-        />
-      </Group>
-    </Canvas>
+    <View style={StyleSheet.absoluteFill} onLayout={onLayout}>
+      {size === null ? null : (
+        <Canvas style={StyleSheet.absoluteFill}>
+          <Group transform={fitTransform(size, SCENE_FRAME, fit)}>
+            <Rect
+              x={-SCENE_FRAME.width}
+              y={SKY_TOP}
+              width={3 * SCENE_FRAME.width}
+              height={HORIZON_Y - SKY_TOP}
+            >
+              <LinearGradient
+                start={vec(0, 0)}
+                end={vec(0, HORIZON_Y)}
+                colors={[PALETTE.skyTop, PALETTE.skyHorizon]}
+              />
+            </Rect>
+            <Circle cx={700} cy={150} r={34} color={PALETTE.sun} opacity={sunOpacity} />
+            <Path path={FAR_HILLS} color={PALETTE.farHills} />
+            <Path path={NEAR_HILLS} color={PALETTE.nearHills} />
+            <Rect
+              x={-SCENE_FRAME.width}
+              y={HORIZON_Y - 5}
+              width={3 * SCENE_FRAME.width}
+              height={SCENE_FRAME.height}
+              color={PALETTE.water}
+            />
+            {[230, 268].map((y) => (
+              <Line
+                key={y}
+                p1={vec(30, y)}
+                p2={vec(170, y)}
+                color={PALETTE.waterLine}
+                strokeWidth={1.5}
+              />
+            ))}
+            <Path path={DECK} color={PALETTE.deck} />
+            {[-0.6, -0.25, 0.25, 0.6].map((share) => (
+              <Line
+                key={share}
+                p1={vec(PROW.x, PROW.y + 6)}
+                p2={vec(PROW.x + share * 520, DECK_FOOT)}
+                color={PALETTE.plank}
+                strokeWidth={1}
+              />
+            ))}
+            {BENCH_YS.map((y) => (
+              <Line
+                key={y}
+                p1={vec(edgeX(y, -1), y)}
+                p2={vec(edgeX(y, 1), y)}
+                color={PALETTE.plank}
+                strokeWidth={2 + (y - PROW.y) * 0.03}
+              />
+            ))}
+            {([-1, 1] as const).map((side) => (
+              <Line
+                key={side}
+                p1={vec(PROW.x, PROW.y)}
+                p2={vec(edgeX(DECK_FOOT, side), DECK_FOOT)}
+                color={PALETTE.ink}
+                strokeWidth={9}
+                strokeCap="round"
+              />
+            ))}
+            <Line
+              p1={vec(MAST.x, MAST.top)}
+              p2={vec(MAST.x, MAST.foot)}
+              color={PALETTE.mast}
+              strokeWidth={MAST.width}
+            />
+            <Path
+              path={PROW_NECK}
+              color={PALETTE.ink}
+              style="stroke"
+              strokeWidth={PROW_NECK_WIDTH}
+              strokeCap="round"
+            />
+            <Group opacity={hornOpacity}>
+              <Path path={HORN} color={PALETTE.ink} />
+              <Circle cx={489} cy={116} r={7} color={PALETTE.hornBell} />
+            </Group>
+            {ROWERS.map((rower) => (
+              <Oar
+                key={`${rower.y}${rower.side}`}
+                rower={rower}
+                phase={phase}
+                sceneState={sceneState}
+              />
+            ))}
+            {ROWERS.map((rower) => (
+              <Circle
+                key={`${rower.y}${rower.side}`}
+                cx={rower.x}
+                cy={rower.y - rower.size * 0.4}
+                r={rower.size}
+                color={PALETTE.rower}
+                opacity={0.88}
+              />
+            ))}
+            <Path path={SAIL_PATH} color={PALETTE.sailCloth} />
+            <Group clip={SAIL_PATH}>
+              {SAIL_STRIPE_PATHS.map((stripe) => (
+                <Path key={stripe} path={stripe} color={PALETTE.sailStripe} />
+              ))}
+            </Group>
+            <Path path={SAIL_PATH} color={PALETTE.ink} style="stroke" strokeWidth={2} />
+            <Line
+              p1={vec(YARD.left, YARD.y)}
+              p2={vec(YARD.right, YARD.y)}
+              color={PALETTE.mast}
+              strokeWidth={YARD.width}
+              strokeCap="round"
+            />
+          </Group>
+        </Canvas>
+      )}
+    </View>
   );
 });
 

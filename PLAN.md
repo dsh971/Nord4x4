@@ -253,6 +253,12 @@ Asked for after G5: the gauge showed only the drum's single rate ("27 drum spm Â
   - the test fixtures and dev fixtures that build segments by hand.
 - **Tests:** the range is refused when it doesn't hold the drum's rate; the gauge shows the push range in a push, the easy range in the warm-up and cool-down, and both the range and the next push in a rest. Then `npx tsc --noEmit`, `npm run lint`, and on the phone in landscape: the push rate on one line, and a heart-rate rest whose panel ends above the progress strip.
 
+### Fix Â· The sail cut off in portrait (reported 2026-11-06)
+
+- **Cause, found from the phone's screenshot:** the sail was drawn only as its foot, the band landscape shows under the top edge. Portrait fits the painting to the width and shows sky above the frame, so the sail ended in mid-air.
+- **Fix:** the sail is drawn whole (`src/features/rowing/sceneGeometry.ts`): a square sail on a yard over the mast, about 10% wider than the old band at its foot and 25% at the yard, sides bowed out, foot sagging and stripes curving with the cloth, as a full sail looks from the deck (decided with you 2026-11-06). Portrait shows it all; landscape shows only its foot under the top edge. The foot stays clear of the dragon's head and the near hill's crest stays in view, as on board 3.2. Separately, the scene and the Get seated figure now measure their own view with `onLayout` (`src/design/fitTransform.ts`) and draw nothing until they have a real size. Before that, Metro logged Reanimated "undefined LayoutMetrics" warnings from Skia's `onSize` measuring.
+- **Tests:** `sceneGeometry.test.ts` (in portrait the mast tip and yard ends sit below each phone's status bar, SE to Pro Max; the foot clears the dragon's head; the hill's crest stays right of the sail; landscape shows only the foot); `catchFigure.test.tsx` (nothing before layout, the fitted transform after, nothing for an empty box). Phone check: the sail in portrait, and the Get seated figure whole.
+
 ## Verification (whole milestone)
 
 ```

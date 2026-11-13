@@ -331,6 +331,7 @@ The current SwiftUI app does not solve this. It is a stock-looking interval time
 - Rotating 4×8 and 30/15 hard sessions.
 - An Apple Watch app, including live HR from the watch and haptic cues.
 - A scene that reacts to live effort, and rival or chase mechanics.
+- A Storm row on Just row: unpredictable surges inside a hidden storm arc, with its own storm scene, wind and thunder (`docs/plans/2026-11-10-001-feat-storm-survival-mode-plan.md`).
 - Android.
 - Concept2 PM5 support (A3): first-stroke start, auto-pause after 8 s without strokes, measured stroke rate and pace, and retests by pace at the same heart rate.
 

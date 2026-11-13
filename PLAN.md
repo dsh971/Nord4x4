@@ -289,6 +289,31 @@ Asked for after a phone row. The warm-up read as "warm-up, then a slower warm-up
   - The engine test moved to `src/features/rowing/__tests__/rowingSessionSound.test.ts`. It starts before the warning, stamps each music change with the time it fired, takes the files' lengths from the real .wav headers, and covers pause and resume.
   - `hornTiming.test.ts` checks the real horn file against `HORN_LEAD_MS` and `DUCK_HOLD_MS`, so a regenerated horn can't run into the push unnoticed.
 
+### G6c · Give pickups the push's screen cues (proposed 2026-11-12; build after G6b's phone check)
+
+After G6b, a pickup sounds like a push in miniature, but on screen it is still thinner than a push, and the warm-up's countdown doesn't say what it counts to. That is likely why the warm-up read as "warm-up, then a slower warm-up again".
+
+- **Decided with you (2026-11-12):**
+  - **Effort guidance in a pickup:** already in place. A pickup is its own segment, and the gauge shows the hard guide ("7–8 · Single words only"). No change unless the phone check shows otherwise.
+  - **The eyebrow names the pickup:** "Pickup 1 of 2", as a push shows "Push 2 of 3".
+  - **Clock and oars before a pickup:** the persimmon clock and the raised oars with the lur at the prow run from a pickup's 10 s warning until it starts, as before a push. This revises R27, where pickups had only the work state, and G6b's "real pushes only".
+  - **Next-work footer:** the footer names the next push or pickup wherever one follows. In the warm-up it shows "Next pickup 1 · 0:20" (or "Next push 1 · 4:00" in the warm-up's last stretch), the same way a rest shows "Next push 2 · 4:00". The main clock already counts down to it.
+  - **Get seated summary:** mentions the pickups, e.g. "Three 4′ pushes · 10′ warm-up with two pickups first".
+- **Docs:** R27 (the horn cue state precedes pickups too) and R29 (the footer names the next push or pickup) in `docs/brainstorms/2026-10-29-nor4x4-rebuild-requirements.md`; the scene-state test scenario in `docs/plans/2026-10-29-001-feat-nor4x4-expo-rebuild-plan.md`; the 3.3p row in `docs/design/README.md` if its caption names pushes only.
+- **Files:**
+  - `src/domain/session/sessionPlan.ts`: `pickupPositionAt`, beside `pushPositionAt`.
+  - `src/domain/session/sessionMachine.ts`: `isPushCalled` becomes `isWorkCalled`, over the starts of pushes and pickups.
+  - `src/features/rowing/gaugeModel.ts`: the pickup eyebrow, the clock tone before pickups, the footer's `nextPush` generalized to the next push or pickup from a rest or warm-up, and the pickups in `summarizePlan`.
+  - `src/features/rowing/CornerGauge.tsx`: renders "Next pickup n" as well as "Next push n".
+  - `src/services/scene/sceneModel.ts` (and `InkScene.tsx`'s lur comment): the horn state before pickups.
+  - `src/dev/rowingStates/RowingStatesScreen.tsx`: the warm-up states show the new footer and eyebrow.
+- **Tests:**
+  - In `gaugeModel.test.ts`: "Pickup 1 of 2" and "Pickup 2 of 2"; the clock persimmon from 4:50 to 5:00 and not at 4:49; the warm-up footer "Next pickup 1 · 0:20", then "Next push 1 · 4:00" in the last stretch; no footer during a push or pickup; the summary with "two pickups".
+  - In `sceneModel.test.ts`: the old "not before a pickup" test flips, so the horn state runs from 4:50 to 5:00.
+  - In `gauge.test.tsx`: the footer renders "Next pickup 1".
+  - Then `npx tsc --noEmit && npx jest && npm run lint`.
+- **Phone check:** step through the warm-up dev states, then row from Get seated past the first pickup. Judge whether raised oars before a 20 s pickup make it feel bigger than it is; that is the one call to make by eye.
+
 ### G7 · Automated checks beside the rows (proposed 2026-11-09, revised after review; build after the M1 verdict)
 
 Asked for after the G6 phone checks: automate what can be automated, so physical QA is spent on what only a rower can judge. Built after the verdict, because a "change" verdict would redo the screenshots. Revised the same day after a four-model review of the first draft found that its walkthrough and screenshots would fail or flake from the first run.

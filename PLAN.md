@@ -289,30 +289,58 @@ Asked for after a phone row. The warm-up read as "warm-up, then a slower warm-up
   - The engine test moved to `src/features/rowing/__tests__/rowingSessionSound.test.ts`. It starts before the warning, stamps each music change with the time it fired, takes the files' lengths from the real .wav headers, and covers pause and resume.
   - `hornTiming.test.ts` checks the real horn file against `HORN_LEAD_MS` and `DUCK_HOLD_MS`, so a regenerated horn can't run into the push unnoticed.
 
-### G6c · Give pickups the push's screen cues (proposed 2026-11-12; build after G6b's phone check)
+### G6c · Give pickups the push's screen cues (proposed 2026-11-12, revised after review; build after G6b's phone check)
 
 After G6b, a pickup sounds like a push in miniature, but on screen it is still thinner than a push, and the warm-up's countdown doesn't say what it counts to. That is likely why the warm-up read as "warm-up, then a slower warm-up again".
 
 - **Decided with you (2026-11-12):**
-  - **Effort guidance in a pickup:** already in place. A pickup is its own segment, and the gauge shows the hard guide ("7–8 · Single words only"). No change unless the phone check shows otherwise.
-  - **The eyebrow names the pickup:** "Pickup 1 of 2", as a push shows "Push 2 of 3".
+  - **The gauge body in a pickup:** in effort mode it already shows the hard guide ("7–8 · Single words only"). In heart-rate mode it showed bare bpm, because only pushes carried a heart-rate zone. Pickups now carry the push zone, so a heart-rate pickup shows its target and "In zone" like a push. "Build ▼" still never shows in a pickup (R50: pushes over 3 minutes only).
+  - **The eyebrow names the pickup:** "Pickup 1 of 2", as a push shows "Push 2 of 3". The pause sheet follows: "Paused · Pickup 1 of 2", then "left in this pickup", not "stretch". The progress strip's VoiceOver label says "pickup 1 of 2" too.
   - **Clock and oars before a pickup:** the persimmon clock and the raised oars with the lur at the prow run from a pickup's 10 s warning until it starts, as before a push. This revises R27, where pickups had only the work state, and G6b's "real pushes only".
-  - **Next-work footer:** the footer names the next push or pickup wherever one follows. In the warm-up it shows "Next pickup 1 · 0:20" (or "Next push 1 · 4:00" in the warm-up's last stretch), the same way a rest shows "Next push 2 · 4:00". The main clock already counts down to it.
-  - **Get seated summary:** mentions the pickups, e.g. "Three 4′ pushes · 10′ warm-up with two pickups first".
-- **Docs:** R27 (the horn cue state precedes pickups too) and R29 (the footer names the next push or pickup) in `docs/brainstorms/2026-10-29-nor4x4-rebuild-requirements.md`; the scene-state test scenario in `docs/plans/2026-10-29-001-feat-nor4x4-expo-rebuild-plan.md`; the 3.3p row in `docs/design/README.md` if its caption names pushes only.
+  - **Next-work footer:** wherever the segment after this one is a push or pickup and this one isn't work, the footer names it. In the slice's warm-up that is "Next pickup 1 · 0:20" until 5:00, "Next pickup 2 · 0:20" from 5:20, and "Next push 1 · 3:00" from 7:20; rests keep "Next push 2 · 3:00". The stroke rate then shrinks to its caption line for most of the warm-up, as it does in rests today. That is the cost of the footer; the phone check judges it.
+  - **Get seated summary:** "Three 3′ pushes · 10′ warm-up first, with two pickups". It counts pickups before the first push, says "one pickup" for one, and leaves the clause out when there are none.
+- **Shape (from the review):**
+  - One source for "work being called". The gauge's clock uses `calledWorkAt`, the banner's source since G6b, and its own push-only start list goes. The scene keeps a plain list of start times, because its oars run on the UI thread, built by one helper beside `calledWorkAt` that counts pushes and pickups. `isPushCalled` becomes `isWorkCalled`.
+  - One position helper, `workPositionAt`, gives a push's or pickup's number among its own kind, for the eyebrow, the footer and the progress strip. `pushPositionAt` stays push-only, because the ease-off bells' once-per-push rule relies on it.
+  - The footer carries what comes next: its kind (push or pickup), number and length. The gauge no longer writes "push" itself. The clock's colour value is renamed from `push` to `work`.
+- **Docs:**
+  - In `docs/brainstorms/2026-10-29-nor4x4-rebuild-requirements.md`:
+    - R27: the horn cue state precedes pickups too.
+    - R29: the footer names the next push or pickup.
+    - R51: correct the stale "4 s before it" to the 10 s warning.
+    - F2 step 3: the pickup's clock and oars.
+  - In `docs/plans/2026-10-29-001-feat-nor4x4-expo-rebuild-plan.md`: the scene-state scenario adds "or a pickup", and pickups carry the push zone.
+  - In `docs/design/README.md`: the 3.3 and 3.3p captions say "Push or pickup warning".
+  - The Get seated line in board 3.1a's canvas sources is noted as drifted; boards are redrawn in the next design pass.
+  - Doc comments that say "push" for the warning window: the clock colour, the footer, `sceneStateAt` and the lur in `InkScene.tsx`.
 - **Files:**
-  - `src/domain/session/sessionPlan.ts`: `pickupPositionAt`, beside `pushPositionAt`.
-  - `src/domain/session/sessionMachine.ts`: `isPushCalled` becomes `isWorkCalled`, over the starts of pushes and pickups.
-  - `src/features/rowing/gaugeModel.ts`: the pickup eyebrow, the clock tone before pickups, the footer's `nextPush` generalized to the next push or pickup from a rest or warm-up, and the pickups in `summarizePlan`.
-  - `src/features/rowing/CornerGauge.tsx`: renders "Next pickup n" as well as "Next push n".
-  - `src/services/scene/sceneModel.ts` (and `InkScene.tsx`'s lur comment): the horn state before pickups.
-  - `src/dev/rowingStates/RowingStatesScreen.tsx`: the warm-up states show the new footer and eyebrow.
+  - `src/domain/session/sessionBuilders.ts`: pickups carry the push zone.
+  - `src/domain/session/sessionPlan.ts`: `workPositionAt`.
+  - `src/domain/session/sessionMachine.ts`: `isWorkCalled` and the work-starts helper.
+  - `src/features/rowing/gaugeModel.ts`: eyebrow, clock colour, footer and summary.
+  - `src/features/rowing/CornerGauge.tsx`: the footer reads its kind. The "Next" row gets one VoiceOver label ("Next: pickup 1, 20 seconds") and the same text-size cap as the rate line.
+  - `src/features/rowing/PauseSheet.tsx`: "left in this pickup".
+  - `src/design/components/ProgressStrip.tsx`: numbers pickups in its VoiceOver label.
+  - `src/services/scene/sceneModel.ts`: the horn state before pickups.
+  - `src/dev/rowingStates/RowingStatesScreen.tsx`: a plain warm-up state (2:00), the warm-up's last stretch (9:51), a heart-rate pickup, and a live loop from 4:30 to 5:30 so the oars into pickup 1 can be watched without rowing five minutes.
 - **Tests:**
-  - In `gaugeModel.test.ts`: "Pickup 1 of 2" and "Pickup 2 of 2"; the clock persimmon from 4:50 to 5:00 and not at 4:49; the warm-up footer "Next pickup 1 · 0:20", then "Next push 1 · 4:00" in the last stretch; no footer during a push or pickup; the summary with "two pickups".
-  - In `sceneModel.test.ts`: the old "not before a pickup" test flips, so the horn state runs from 4:50 to 5:00.
-  - In `gauge.test.tsx`: the footer renders "Next pickup 1".
+  - `gaugeModel.test.ts`:
+    - "Pickup 1 of 2" and "Pickup 2 of 2".
+    - The clock persimmon at 4:50 and 4:59.999, ink at 4:49.999 and at 5:00, and still persimmon before push 1 (9:50).
+    - The footer: pickup 1 at 2:00, pickup 2 at 6:00, push 1 at 8:00, and none during a pickup or push.
+    - A heart-rate pickup shows its target and "In zone", and never "Build".
+    - The summary with two pickups, one, and none, using small built plans for the last two.
+  - `sceneModel.test.ts`: in its own plan, the pickup starts at 2:01.3, so the horn state runs from 1:51.3. The test asserts easy, horn, work and easy at the four edges of that pickup.
+  - `horn.test.ts`: `isWorkCalled` across a pickup's window.
+  - `sessionPlan.test.ts`: `workPositionAt` for pushes and pickups, and `pushPositionAt` still null for a pickup.
+  - A cross-check across the slice that the persimmon clock, the horn scene and the warning banner switch on and off together.
+  - `gauge.test.tsx`: the footer renders "Next pickup 1", has one VoiceOver label, and caps its text size.
+  - `pause.test.tsx`: a pause in a pickup says "left in this pickup".
+  - `ProgressStrip.test.tsx`: "pickup 1 of 2".
   - Then `npx tsc --noEmit && npx jest && npm run lint`.
-- **Phone check:** step through the warm-up dev states, then row from Get seated past the first pickup. Judge whether raised oars before a 20 s pickup make it feel bigger than it is; that is the one call to make by eye.
+- **Phone check:**
+  - The live loop into pickup 1. Judge whether raised oars before a 20 s pickup make it feel bigger than it is. The oars freeze for 10 s while you're rowing easy, then jump to the catch at 5:00. Compare with 9:50 before push 1.
+  - The warm-up gauge in landscape at the largest text size: the footer fits, and the smaller stroke rate still reads at 1 m.
 
 ### G7 · Automated checks beside the rows (proposed 2026-11-09, revised after review; build after the M1 verdict)
 

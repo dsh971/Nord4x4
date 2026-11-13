@@ -45,7 +45,7 @@ describe('describeGauge', () => {
     });
   });
 
-  it('shows the next push in a rest, the clock in persimmon while the horn calls it (board 3.3)', () => {
+  it('shows the next push in a rest, the clock in persimmon from its 10 s warning (board 3.3)', () => {
     const gauge = gaugeAt(REST_10_S_BEFORE_PUSH_2);
     expect(gauge?.eyebrow).toBe('Rest');
     expect(gauge?.eyebrowTone).toBe('steady');

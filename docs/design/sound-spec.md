@@ -11,14 +11,19 @@ One-shots, scheduled ahead on the audio clock. A cue more than 2 s late is dropp
 | Moment | Engine cue | File | Sound | Drum gap | On screen (R40) |
 |---|---|---|---|---|---|
 | Get seated, last 5 s | `countIn` (5 to 1) | `drum-catch.wav` | One deep drum hit per second | None; the drum hasn't started | Big 5-4-3-2-1 |
-| Push in 10 s | `horn` | `war-horn.wav` | War horn: 3.2 s at 73 Hz with a growl, plus a 2 s valley echo | 5.2 s | Edge pulse + "Ready oars" |
+| Push or pickup in 10 s | None: read off session time (`calledWorkAt`) | None | Silent; the horn follows | None | Edge pulse + "Ready oars" (push) or "Pickup coming" (pickup), until it starts |
+| Push or pickup in 6 s | `horn` | `war-horn.wav` | War horn: 3.2 s at 73 Hz with a growl, plus a 2 s valley echo | 5.2 s, so the drum is back 0.8 s before the start strike | The 10 s warning, still up |
 | Push starts | `pushStart` | `push-start-strike.wav` | Double taiko strike; the drum then lifts to push tempo | 0.67 s | "Pull" |
+| Pickup starts | `pickupStart` | `push-start-strike.wav` | As a push starts | 0.67 s | "Pickup" |
 | 90 s into a push (effort guidance, R30) | `holdEffort` | `hold-signal.wav` | Two hollow wood knocks, like oar shafts clacking | 0.39 s | "Hold this effort" |
 | Push ends | `pushEnd` | `push-end-horn.wav` | The war horn, sagging five semitones over its last 1.5 s; the drum slows | 4.4 s | "Rest" |
+| Pickup ends | `pickupEnd` | `push-end-horn.wav` | As a push ends | 4.4 s | "Back to easy" |
 | Above 95% of max HR for 15 s (R36) | Heart-rate coaching, not the session machine | `ease-off-bell.wav` | One handbell strike, played three times 0.6 s apart, once per push | 3.0 s | Charcoal border glow + "Ease off ▲" |
 | Session ends | `sessionCompleted` | Not chosen yet | Landfall sound (U20) | None; the row is over | Session complete |
 
-The push-end horn deliberately reuses the war horn. One instrument marks both edges of a push, and the falling pitch says "done" (R39: "a low horn note at the end of a push").
+The push-end horn deliberately reuses the war horn. One instrument marks both edges of a push, and the falling pitch says "done" (R39: "a low horn note at the end of a push"). Warm-up pickups are pushes in miniature and use the same three sounds; only their banners differ (G6b, 2026-11-10).
+
+The rower's music stays ducked for 1 s after a signal's file ends (`DUCK_HOLD_MS`). The start strike is scheduled only 0.6 s ahead, 0.8 s after the horn ends, so without the hold the music would come up between the two and dip again. The 0.8 s gap between the horn and the strike holds only for a horn on time: one played up to 2 s late (`STALE_CUE_MS`) runs into the push. The hold applies to every signal, so the music stays down across the count-in's five beats, 1 s apart, and comes up once after the last. Pausing gives the music back; resuming ducks it again for any signal still sounding or already scheduled.
 
 ## Ambience
 

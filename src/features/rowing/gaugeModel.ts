@@ -1,4 +1,4 @@
-import { isHornCalling, type SessionSnapshot } from '../../domain/session/sessionMachine';
+import { isPushCalled, type SessionSnapshot } from '../../domain/session/sessionMachine';
 import {
   isWorkSegment,
   pushPositionAt,
@@ -31,7 +31,7 @@ export type GaugeModel = {
   readonly clock: { readonly kind: 'left' | 'rowed'; readonly ms: number };
   /** The widest clock this session can show, so the gauge is sized once and never jumps mid-row. */
   readonly widestClock: '0:00' | '00:00';
-  /** Persimmon while the war horn calls the next push (board 3.3). */
+  /** Persimmon from the next push's 10 s warning until it starts (board 3.3). */
   readonly clockTone: 'ink' | 'push';
   readonly body:
     | { readonly kind: 'effort'; readonly guide: EffortGuide }
@@ -134,7 +134,7 @@ export function describeGauge(
     clock,
     widestClock: hasLongClock(timings) ? '00:00' : '0:00',
     clockTone:
-      clock.kind === 'left' && isHornCalling(pushStartsOf(timings), snapshot.sessionElapsedMs)
+      clock.kind === 'left' && isPushCalled(pushStartsOf(timings), snapshot.sessionElapsedMs)
         ? 'push'
         : 'ink',
     body,

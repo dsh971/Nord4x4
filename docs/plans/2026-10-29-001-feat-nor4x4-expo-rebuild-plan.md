@@ -250,7 +250,7 @@ Each segment carries a type, duration, target zone, target stroke rate and scene
 - **Types:** warm-up, pickup, push, rest, easy, steady, cool-down, benchmark, or open.
 - **Scene states:** work, rest, horn, easy, swell or rough.
 - **Open segments:** Row freely is a single open segment with no end; it counts up.
-- **Events:** the machine emits `segmentStarted`, `cueDue` (horn, countIn, pushStart, holdEffort, pushEnd, easeOff), `segmentEnded`, `sessionCompleted` and `sessionEndedEarly`. Audio, scene and gauge subscribe to these and never own time.
+- **Events:** the machine emits `segmentStarted`, `cueDue` (countIn, horn, pushStart, pickupStart, holdEffort, pushEnd, pickupEnd; easeOff comes from heart rate, not the machine), `segmentEnded`, `sessionCompleted` and `sessionEndedEarly`. Audio, scene and gauge subscribe to these and never own time.
 - **Checkpoints:** the machine's state is serialized every 10 s (KTD4).
 
 ### Cue timeline around a push
@@ -261,8 +261,8 @@ sequenceDiagram
   participant AE as Audio engine
   participant OS as iOS audio session
   participant UI as Rowing screen
-  SM->>AE: cueDue(horn, push in 10s)
-  SM->>UI: edge pulse + "Ready oars" banner (visual twin)
+  SM->>UI: push in 10 s: edge pulse + "Ready oars" banner, read off session time (G6b)
+  SM->>AE: cueDue(horn, push in 6s)
   AE->>OS: switch to duckOthers (fallback: stay mixWithOthers)
   AE->>AE: play war horn (ambience dips for the cue)
   AE->>OS: back to mixWithOthers
@@ -501,7 +501,7 @@ nor4x4-app/
 
 **Test scenarios:**
 - Covers AE9. Get seated ends at the 20 s hold and emits a count-in cue for each of the last 5 s; "Start now" ends it at once.
-- A horn cue fires 10 s before each push and never before the warm-up ends; a pushStart cue fires at each push start.
+- A horn cue fires 6 s before each push and each warm-up pickup (G6b, revised 2026-11-10); a pushStart or pickupStart cue fires at each start, and a pushEnd or pickupEnd at each end.
 - In effort mode, a hold cue fires 90 s into a 3′ push; in HR mode it doesn't.
 - Pausing for 60 s mid-push extends the session end by 60 s, keeps the remaining push time unchanged, and cancels pending cues.
 - The clock jumping forward 95 s emits each skipped segment boundary exactly once, in order, and drops stale cues.
@@ -950,7 +950,7 @@ nor4x4-app/
 - Covers AE4. With music playing at the start, ambience gains are zero and the notice shows; the horn, drum count, push-start strike and bells still play.
 - Music stopping mid-session returns to the previous mode, unless the rower picked one.
 - Silent mode plays nothing, and the session still advances after a simulated suspend.
-- A horn cue is scheduled at the audio-clock time of the push start minus 10 s; after a simulated interruption the mapping is rebuilt and the next cue lands within 50 ms of its session time.
+- A horn cue is scheduled at the audio-clock time of the push start minus 6 s; after a simulated interruption the mapping is rebuilt and the next cue lands within 50 ms of its session time.
 - A cue more than 2 s stale after resume is dropped.
 - The ease-off bells play once per push however long HR stays high.
 - Setting Crew to 0 in the mixer mutes the murmur in Full ship mode only.

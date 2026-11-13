@@ -72,7 +72,7 @@ const DECK_FOOT = SCENE_FRAME.height + 20;
 
 const FAR_HILLS = 'M0 175 C 90 150 170 140 260 152 C 350 164 420 150 520 160 L 520 205 L 0 205 Z';
 const DECK = `M${PROW.x} ${PROW.y} L 900 ${DECK_FOOT} L -56 ${DECK_FOOT} Z`;
-// A lur blown at the prow (R27: "horn at the prow"), shown while the war horn calls a push.
+// A lur blown at the prow (R27: "horn at the prow"), shown from a push's 10 s warning until it starts.
 const HORN = 'M436 182 C 446 150 462 126 486 112 L 492 120 C 470 132 456 154 448 184 Z';
 
 function edgeX(y: number, side: -1 | 1): number {

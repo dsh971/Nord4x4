@@ -33,7 +33,7 @@ describe('sceneStateAt (R27)', () => {
     expect(sceneStateAt(TIMELINE, PUSH_STARTS + 7 * MINUTE)).toBe('easy');
   });
 
-  it('raises the oars while the war horn calls a push, but not before a pickup', () => {
+  it("raises the oars from a push's 10 s warning, but not before a pickup", () => {
     expect(sceneStateAt(TIMELINE, PUSH_STARTS - 10 * SECOND)).toBe('horn');
     expect(sceneStateAt(TIMELINE, PUSH_STARTS - 10 * SECOND - 1)).toBe('easy');
     expect(sceneStateAt(TIMELINE, 2 * MINUTE - 5 * SECOND)).toBe('easy');

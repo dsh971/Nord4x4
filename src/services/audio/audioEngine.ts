@@ -10,7 +10,13 @@ import type { SessionEvent } from '../../domain/session/sessionMachine';
 import { isWorkSegment, type SegmentTiming } from '../../domain/session/sessionPlan';
 import { PLAYBACK_GAIN, SOUND_FILES, SOUND_ONSET_MS, type SoundName } from './assets';
 import { drumHitsBetween, LOOKAHEAD_MS, type DrumGap } from './drumSchedule';
-import { drumGapMs, SIGNAL_SOUNDS, type SignalKind } from './signalSounds';
+import {
+  drumGapMs,
+  duckReleaseAtMs,
+  SIGNAL_SOUNDS,
+  type SignalKind,
+  type SignalSound,
+} from './signalSounds';
 
 // Crew murmur fades in and out over about this long at a work segment's edge.
 const CREW_FADE_SECONDS = 0.4;
@@ -60,6 +66,8 @@ export class AudioEngine {
   private readonly levelGains = new Map<string, GainNode>();
   private duckUntilMs = -Infinity;
   private duckTimer: ReturnType<typeof setTimeout> | null = null;
+  // Ducks waiting for their signal, cancelled with the release so a pause or stop can't duck after it.
+  private readonly pendingDucks = new Set<ReturnType<typeof setTimeout>>();
 
   private constructor(
     private readonly context: AudioContext,
@@ -181,6 +189,12 @@ export class AudioEngine {
     await AudioManager.setAudioSessionActivity(true);
     await this.context.resume();
     this.anchor = { sessionMs, audioTime: this.context.currentTime };
+    // Pausing gave the music back; signals still sounding or already scheduled duck it again.
+    for (const gap of this.gaps) {
+      if (gap.toMs > sessionMs) {
+        this.duck(gap.fromMs, gap.toMs, sessionMs);
+      }
+    }
   }
 
   /** Stops every sound and gives the audio session back. */
@@ -193,7 +207,7 @@ export class AudioEngine {
   }
 
   private playSignal(kind: SignalKind, atMs: number, nowMs: number): void {
-    const signal = SIGNAL_SOUNDS[kind];
+    const signal: SignalSound = SIGNAL_SOUNDS[kind];
     const buffer = this.buffers[signal.sound];
     const strikes = signal.repeat?.times ?? 1;
     for (let strike = 0; strike < strikes; strike += 1) {
@@ -213,14 +227,21 @@ export class AudioEngine {
 
   private duck(fromMs: number, untilMs: number, nowMs: number): void {
     this.duckUntilMs = Math.max(this.duckUntilMs, untilMs);
-    setTimeout(
-      () => AudioManager.setSystemOptions(sessionOptions(true)),
+    const pendingDuck = setTimeout(
+      () => {
+        this.pendingDucks.delete(pendingDuck);
+        AudioManager.setSystemOptions(sessionOptions(true));
+      },
       Math.max(0, fromMs - nowMs),
     );
+    this.pendingDucks.add(pendingDuck);
     if (this.duckTimer !== null) {
       clearTimeout(this.duckTimer);
     }
-    this.duckTimer = setTimeout(() => this.releaseDuck(), this.duckUntilMs - nowMs);
+    this.duckTimer = setTimeout(
+      () => this.releaseDuck(),
+      duckReleaseAtMs(this.duckUntilMs) - nowMs,
+    );
   }
 
   private releaseDuck(): void {
@@ -228,6 +249,8 @@ export class AudioEngine {
       clearTimeout(this.duckTimer);
       this.duckTimer = null;
     }
+    this.pendingDucks.forEach((pendingDuck) => clearTimeout(pendingDuck));
+    this.pendingDucks.clear();
     this.duckUntilMs = -Infinity;
     AudioManager.setSystemOptions(sessionOptions(false));
   }

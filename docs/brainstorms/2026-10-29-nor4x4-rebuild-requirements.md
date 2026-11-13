@@ -171,7 +171,7 @@ The current SwiftUI app does not solve this. It is a stock-looking interval time
   - "Build ▼" never appears in the first 90 s of a push, in pushes shorter than 3 minutes, or when max HR is estimated from age.
 - R30. Without a heart-rate strap, with heart-rate medication (R5), or when a strap drops ("Strap lost"), the gauge shows effort guidance instead of bpm. The guidance is perceived effort on a 1–10 scale plus a talk test. 90 s into each push, the hold signal (a short distinct sound, R40) and a "Hold this effort" banner tell the rower to settle.
 - R31. A progress strip at least 12 pt tall shows every segment, including warm-up pickups, with a marker for now, legible over the painting. Push segments are taller than steady ones, so the strip doesn't rely on color alone.
-- R51. Every audio cue has a visual twin (R40).
+- R51. Every audio cue has a visual twin (R40). The war horn's twin is the warning banner that went up 4 s before it and stays until the push or pickup starts.
 - R52. All timers in rowing mode show time remaining, except Row freely, which has no end and shows time rowed.
 - R32. Pausing never needs a precise tap: a long press anywhere pauses. The pause sheet offers Resume, Restart this push (during a push), sound mode, and End session, which needs a hold to confirm.
 - R33. Landscape and portrait are both first-class layouts.
@@ -195,16 +195,19 @@ The current SwiftUI app does not solve this. It is a stock-looking interval time
 - R38. Rowing mode layers sound in two groups:
   - **Ambience:** a sea bed that matches the scene, a drum loop at the target stroke rate, and a wordless crew murmur during work (effort grunts and exhales on the stroke; no intelligible words).
   - **Signals:** the cues in R40.
-- R39. Signals include a war horn before each push, a low horn note at the end of a push, and a landfall sound at the finish.
-- R40. Signals replace any human voice. Each has an on-screen twin: a banner that shows for about 3 s, readable at 1 m, at the moment its sound plays, so Silent mode keeps every cue.
+- R39. Signals include a war horn before each push and each warm-up pickup, a low horn note at the end of each, and a landfall sound at the finish. The horn sounds 6 s before, after a silent 10 s warning, so the warning reads as a warning and the horn as "now" (revised 2026-11-10).
+- R40. Signals replace any human voice. Each has an on-screen twin: a banner that shows for about 3 s, readable at 1 m, at the moment its sound plays, so Silent mode keeps every cue. The 10 s warnings differ: a banner with no sound that stays up until the push or pickup starts, so it covers the horn at 6 s.
 
 | Moment | Sound | On screen |
 |---|---|---|
 | Get seated, last 5 s | Five drum beats | Big 5-4-3-2-1 |
-| Push in 10 s | War horn | Edge pulse + "Ready oars" |
+| Push or pickup in 10 s | None | Edge pulse + "Ready oars" (push) or "Pickup coming" (pickup), until it starts |
+| Push or pickup in 6 s | War horn | The 10 s warning, still up |
 | Push starts | Double drum strike + drum lifts to push tempo | "Pull" |
+| Pickup starts | Double drum strike + drum lifts to push tempo | "Pickup" |
 | 90 s into a push (effort guidance, R30) | Hold signal: a short distinct sound (wooden clapper or single gong stroke, picked by listening test) | "Hold this effort" |
 | Push ends | One low horn note + drum slows | "Rest" |
+| Pickup ends | One low horn note + drum slows | "Back to easy" |
 | Above 95% max for 15 s | Three bell strikes | Charcoal border glow + "Ease off ▲" |
 | Session ends | Landfall sound | Session complete |
 
@@ -263,8 +266,8 @@ The current SwiftUI app does not solve this. It is a stock-looking interval time
   - **Steps:**
     1. The warning screen on the first row, then the strap prompt if never asked.
     2. Get seated with the stroke demo and the stop line.
-    3. Warm-up with pickups.
-    4. For each push: the horn and edge pulse 10 s before, the double drum strike and "Pull" at the start, the work scene, the end-of-push horn, and the rest scene.
+    3. Warm-up with pickups: "Pickup coming" 10 s before each, the horn 6 s before, the double strike and "Pickup" at the start, and the low horn and "Back to easy" at the end.
+    4. For each push: "Ready oars" and the edge pulse 10 s before, the horn 6 s before, the double drum strike and "Pull" at the start, the work scene, the end-of-push horn, and the rest scene.
     5. Cool-down.
     6. Session complete with the rating, then back to the route.
   - **Covered by:** R5, R6, R23–R44, R50–R53, R61

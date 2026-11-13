@@ -6,7 +6,7 @@ import { SLICE_PLAN } from '../../content/slicePlan';
 import { segmentTimings, type SessionPlan } from '../../domain/session/sessionPlan';
 import { Text } from '../../design/components/Text';
 import { colors, radius, space } from '../../design/tokens';
-import { SIGNAL_BANNERS } from '../../features/rowing/banners';
+import { SIGNAL_BANNERS, WARNING_BANNERS, type Banner } from '../../features/rowing/banners';
 import {
   describeGauge,
   isHardSession,
@@ -36,7 +36,7 @@ function rowing(
   options: {
     plan?: SessionPlan;
     heart?: HeartInput;
-    banner?: keyof typeof SIGNAL_BANNERS;
+    banner?: Banner | null;
   } = {},
 ): ReactNode {
   // A heart reading only leads in a heart-rate plan (KTD21), as G5's fake trace will row it.
@@ -51,7 +51,7 @@ function rowing(
       <RowingOverlay
         gauge={gauge}
         bars={progressBarsOf(plan)}
-        banner={options.banner ? SIGNAL_BANNERS[options.banner] : null}
+        banner={options.banner ?? null}
         onPause={() => undefined}
       />
     </>
@@ -123,8 +123,8 @@ const STATES: { name: string; render: () => ReactNode }[] = [
     render: () => rowing(PUSH_2_AT_1_48_LEFT, { heart: heart(178, { isGlowing: true }) }),
   },
   {
-    name: 'Rest · war horn (3.3)',
-    render: () => rowing(REST_10_S_BEFORE_PUSH_2, { banner: 'horn' }),
+    name: 'Rest · Ready oars (3.3)',
+    render: () => rowing(REST_10_S_BEFORE_PUSH_2, { banner: WARNING_BANNERS.push }),
   },
   {
     name: 'Rest · heart rate recovering',
@@ -132,11 +132,23 @@ const STATES: { name: string; render: () => ReactNode }[] = [
   },
   {
     name: 'Push starts · Pull',
-    render: () => rowing(16 * MINUTE + SECOND, { banner: 'pushStart' }),
+    render: () => rowing(16 * MINUTE + SECOND, { banner: SIGNAL_BANNERS.pushStart }),
+  },
+  {
+    name: 'Warm-up · pickup coming',
+    render: () => rowing(4 * MINUTE + 51 * SECOND, { banner: WARNING_BANNERS.pickup }),
+  },
+  {
+    name: 'Pickup 1',
+    render: () => rowing(5 * MINUTE + SECOND, { banner: SIGNAL_BANNERS.pickupStart }),
+  },
+  {
+    name: 'Pickup ends · back to easy',
+    render: () => rowing(5 * MINUTE + 21 * SECOND, { banner: SIGNAL_BANNERS.pickupEnd }),
   },
   {
     name: 'Hold this effort',
-    render: () => rowing(17 * MINUTE + 30 * SECOND, { banner: 'holdEffort' }),
+    render: () => rowing(17 * MINUTE + 30 * SECOND, { banner: SIGNAL_BANNERS.holdEffort }),
   },
   { name: 'Cool-down · keep paddling (R61)', render: () => rowing(COOL_DOWN) },
   { name: 'Row freely · 12:00 rowed', render: () => rowing(12 * MINUTE, { plan: ROW_FREELY }) },

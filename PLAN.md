@@ -11,7 +11,8 @@ Goal: reach the M1 gate in `docs/plans/2026-10-29-001-feat-nor4x4-expo-rebuild-p
 | Moment | Sound | On screen (banner, plus the existing visual) |
 |---|---|---|
 | Get seated, last 5 s | Five drum beats | Big 5-4-3-2-1 |
-| Push in 10 s | War horn | "Ready oars" + edge pulse |
+| Push or pickup in 10 s | None (G6b) | "Ready oars" (push) or "Pickup coming" (pickup) + edge pulse, until it starts |
+| Push or pickup in 6 s | War horn (was 10 s before pushes only; G6b) | The 10 s warning, still up |
 | Push starts | **Double drum strike**, then the drum lifts to push tempo (was "Heave!") | "Pull" |
 | 90 s into a push, effort mode | **A short distinct signal**, chosen in the Phase F listening test (candidates: wooden clapper, single gong stroke) (was "Hold!") | "Hold this effort" |
 | Push ends | One low horn note + drum slows | "Rest" |
@@ -259,6 +260,35 @@ Asked for after G5: the gauge showed only the drum's single rate ("27 drum spm �
 - **Fix:** the sail is drawn whole (`src/features/rowing/sceneGeometry.ts`): a square sail on a yard over the mast, about 10% wider than the old band at its foot and 25% at the yard, sides bowed out, foot sagging and stripes curving with the cloth, as a full sail looks from the deck (decided with you 2026-11-06). Portrait shows it all; landscape shows only its foot under the top edge. The foot stays clear of the dragon's head and the near hill's crest stays in view, as on board 3.2. Separately, the scene and the Get seated figure now measure their own view with `onLayout` (`src/design/fitTransform.ts`) and draw nothing until they have a real size. Before that, Metro logged Reanimated "undefined LayoutMetrics" warnings from Skia's `onSize` measuring.
 - **Tests:** `sceneGeometry.test.ts` (in portrait the mast tip and yard ends sit below each phone's status bar, SE to Pro Max; the foot clears the dragon's head; the hill's crest stays right of the sail; landscape shows only the foot); `catchFigure.test.tsx` (nothing before layout, the fitted transform after, nothing for an empty box). Phone check: the sail in portrait, and the Get seated figure whole.
 
+### G6b · Warn before pushes and pickups, and announce the pickups (proposed 2026-11-10; build before the remaining rows)
+
+Asked for after a phone row. The warm-up read as "warm-up, then a slower warm-up again": its two 20 s pickups have no cue, because the session machine cues only real pushes. And the war horn, though it sounds 10 s before a push, felt tied to the push's start rather than to a warning.
+
+- **Decided with you:** the warning splits in two, for pushes and pickups alike.
+  - **10 s before:** the banner and edge pulse, silent. "Ready oars" before a push, "Pickup coming" before a pickup. It stays up until the push or pickup starts, so the horn has its visual twin (R51) and Silent mode keeps the whole warning.
+  - **6 s before:** the war horn, with no banner of its own. Asked for at 5 s; 6 s because the horn file runs 5.2 s and the drum stays quiet while it plays (listening test B), so at 5 s the horn's tail and the drum's silence would run past the push-start strike. At 6 s the horn ends 0.8 s before it.
+  - **Pickup starts:** the push-start double strike and a "Pickup" banner. The gauge clock already counts the 0:20 down.
+  - **Pickup ends:** the low push-end horn and a "Back to easy" banner, so it isn't mistaken for a rest.
+  - All reuse existing sounds; no new audio files. The scene's raised oars and the gauge's persimmon clock still run from 10 s before a push, and stay for real pushes only.
+  - The rower's music stays ducked 1 s past each signal, so it doesn't come up for 0.8 s between the horn and the start strike.
+  - This revises R39 (the horn now also precedes pickups), R40 (the 10 s warning becomes a silent banner held through the horn at 6 s) and R51 (the horn's twin is that banner).
+- **Docs:** R39, R40 and R51 in `docs/brainstorms/2026-10-29-nor4x4-rebuild-requirements.md`; the cue list, cue diagram and test scenarios in `docs/plans/2026-10-29-001-feat-nor4x4-expo-rebuild-plan.md`; the signal table and the ducking note in `docs/design/sound-spec.md`; the 3.3 rows in `docs/design/README.md`; the horn's docstring in `docs/design/tools/build_sounds.py`.
+- **Files:**
+  - `src/domain/session/sessionMachine.ts`: the `horn` cue 6 s before pushes and pickups, `pickupStart` and `pickupEnd`; `calledWorkAt` gives the push or pickup in its 10 s warning, which the screen reads off session time rather than a cue; `isHornCalling` renamed `isPushCalled`, sharing that window;
+  - `src/services/audio/signalSounds.ts`: their sounds, null for the two warnings, and the 1 s duck hold; `src/services/audio/audioEngine.ts` skips a signal with no sound and holds the duck;
+  - `src/features/rowing/banners.ts`: a fixed banner per kind, none for the horn; `src/features/rowing/rowingSession.ts` shows a warning's banner from session time, from 10 s before its push or pickup until it starts;
+  - `src/dev/rowingStates/RowingStatesScreen.tsx`: three pickup states, for the phone check;
+  - stale "the war horn calls a push" comments in the scene, gauge and edge glow.
+- **Tests:** in `sessionMachine.test.ts`, the slice emits for each pickup the horn at 4:54 and 6:54, the start at 5:00 and 7:00 and the end at 5:20 and 7:20; for Push 1, the horn at 9:54. In `rowingSession.test.ts`, the warning is still up 5 s before a push or pickup, after the horn, then "Pull" or "Pickup", then "Back to easy" after a pickup; it survives a stall and hides while paused. In `rowingSessionSound.test.ts`, the music stays up through the warning, ducks at the horn and comes up once after the start strike, a pause just before the horn gives it back, and a resume ducks it again. `hornTiming.test.ts` checks the real horn file against the 6 s lead. Then `npx tsc --noEmit && npx jest && npm run lint`, and on the phone: row from Get seated to 10:10 with music playing; hear each horn before its push or pickup begins, and the music dip once, not twice.
+- **Reviewed (2026-11-10, four models):** fixed the horn's missing visual twin, the music dipping twice, the missing test for the horn's banner, and the docs. Left for later: overlapping signals when work starts within about 10.4 s of the row start or of other work. Every plan today comes from `hardSession`, which can't produce that; it needs a spacing check once a second plan builder exists.
+- **Reviewed again (2026-11-10, four models):** the warning banner now follows session time, as the persimmon clock does, so a stall that drops a cue as stale can't take the warning with it (and a restored row will show it, once restore reaches the rowing screen). "Pickup in 10 s" became "Pickup coming", since it stays up for 10 s. A duck scheduled just before a pause or stop is now cancelled, so the music can't stay low; an older bug. The ducking is tested through the engine with a mocked `react-native-audio-api`. Left for later: the 1 s hold applies to every signal, which also keeps the music down across the count-in's five beats.
+- **Reviewed a third time (2026-11-10, four models):**
+  - The warnings are no longer cues: they played nothing and set the banner the session clock already gave. `calledWorkAt` is now the one source for the banner, and it shares its window with `isPushCalled` for the scene and the clock.
+  - Resuming re-ducks the music for any signal still sounding or scheduled, so a pause just before a horn doesn't leave it over full music. That also closes the older gap of resuming mid-horn.
+  - The warning and its edge pulse hide under the pause sheet.
+  - The engine test moved to `src/features/rowing/__tests__/rowingSessionSound.test.ts`. It starts before the warning, stamps each music change with the time it fired, takes the files' lengths from the real .wav headers, and covers pause and resume.
+  - `hornTiming.test.ts` checks the real horn file against `HORN_LEAD_MS` and `DUCK_HOLD_MS`, so a regenerated horn can't run into the push unnoticed.
+
 ### G7 · Automated checks beside the rows (proposed 2026-11-09, revised after review; build after the M1 verdict)
 
 Asked for after the G6 phone checks: automate what can be automated, so physical QA is spent on what only a rower can judge. Built after the verdict, because a "change" verdict would redo the screenshots. Revised the same day after a four-model review of the first draft found that its walkthrough and screenshots would fail or flake from the first run.
@@ -282,7 +312,7 @@ Asked for after the G6 phone checks: automate what can be automated, so physical
 - **G7c · Screenshots of fixed moments, compared with saved ones** (`e2e/screens.yaml`, `e2e/baselines/`).
   - **Capture mode:** `/dev/rowing?state=<name>` opens one named moment with no caption and no frame-rate readout, and the Live state is left out. Each state gets a stable name, so adding a state doesn't shift the others. An unknown name shows an error listing the valid names.
   - **Still pictures:** capture mode holds the scene and glow still through the app's own Reduce Motion path (`src/design/useReducedMotion.ts` gains an override that capture mode sets), because the simulator has no supported command for Reduce Motion. Real Reduce Motion stays a phone check.
-  - **Moments:** Get seated, the count-in, a push, the rest with the war horn, the heart-rate ease-off, the cool-down, and the pause sheet.
+  - **Moments:** Get seated, the count-in, a push, the rest with "Ready oars", the heart-rate ease-off, the cool-down, and the pause sheet.
   - **Set:** each moment in portrait and landscape at the default text size. Get seated, the pause sheet and a push also at the largest accessibility text size, since their text scales. About 20 pictures.
   - **One pinned simulator:** iPhone 16e (the smallest installed) on iOS 27.2, created by the run script if missing. The run refuses to compare on a different device or iOS version, with a message saying why, rather than failing every picture.
   - **Comparison:** a small tolerance, not an exact match, and still tight enough to fail the proof below. A changed picture fails the run and shows the difference; an intended change saves a new baseline.

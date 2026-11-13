@@ -174,7 +174,7 @@ OAR_SHAFTS = [(310, 1, 0.045), (760, 0.7, 0.03), (1450, 0.35, 0.015)]
 
 
 def war_horn() -> list[float]:
-    """horn-5 "war horn": 3.2 s at 73 Hz with a light growl and a valley tail. Warns 10 s before a push."""
+    """horn-5 "war horn": 3.2 s at 73 Hz with a light growl and a valley tail. Sounds 6 s before a push or pickup, after the silent 10 s warning."""
     return valley_reverb(growl(horn(seconds=3.2, attack=0.5, release=0.7, **WAR_HORN), 34, 0.25), 2.0, 0.55)
 
 

@@ -47,16 +47,43 @@ function startedSession(plan = SLICE_PLAN, withHeart = false) {
 }
 
 describe('RowingSession', () => {
-  it('shows each signal banner for 3 s from its cue: "Ready oars" with the edge pulse, then "Pull"', () => {
+  it('keeps "Ready oars" up from the warning through the horn until the push, then shows "Pull" for 3 s', () => {
     const { clock, session } = startedSession();
-    const hornAtMs = PUSH_2_STARTS - 10 * SECOND;
-    rowTo(session, clock, 0, hornAtMs);
-    const during = rowTo(session, clock, hornAtMs, hornAtMs + 2_900);
-    expect(during.at(-1)?.banner).toEqual({ text: 'Ready oars', hasEdgePulse: true });
-    const after = rowTo(session, clock, hornAtMs + 2_900, hornAtMs + 3_200);
-    expect(after.at(-1)?.banner).toBeNull();
-    const pushStart = rowTo(session, clock, hornAtMs + 3_200, PUSH_2_STARTS + 500);
+    const warningAtMs = PUSH_2_STARTS - 10 * SECOND;
+    rowTo(session, clock, 0, warningAtMs);
+    const afterHorn = rowTo(session, clock, warningAtMs, PUSH_2_STARTS - 5 * SECOND);
+    expect(afterHorn.at(-1)?.banner).toEqual({ text: 'Ready oars', hasEdgePulse: true });
+    const pushStart = rowTo(session, clock, PUSH_2_STARTS - 5 * SECOND, PUSH_2_STARTS + 2_900);
     expect(pushStart.at(-1)?.banner?.text).toBe('Pull');
+    const after = rowTo(session, clock, PUSH_2_STARTS + 2_900, PUSH_2_STARTS + 3_200);
+    expect(after.at(-1)?.banner).toBeNull();
+  });
+
+  it('announces a warm-up pickup: "Pickup coming" through its horn, then "Pickup", then "Back to easy"', () => {
+    const { clock, session } = startedSession();
+    const pickupStarts = 5 * MINUTE;
+    const afterHorn = rowTo(session, clock, 0, pickupStarts - 5 * SECOND);
+    expect(afterHorn.at(-1)?.banner).toEqual({ text: 'Pickup coming', hasEdgePulse: true });
+    const start = rowTo(session, clock, pickupStarts - 5 * SECOND, pickupStarts + 500);
+    expect(start.at(-1)?.banner?.text).toBe('Pickup');
+    const end = rowTo(session, clock, pickupStarts + 500, pickupStarts + 20_500);
+    expect(end.at(-1)?.banner?.text).toBe('Back to easy');
+  });
+
+  it('still shows "Ready oars" when a stall drops its warning cue as stale, before the horn sounds', () => {
+    const { clock, session } = startedSession();
+    rowTo(session, clock, 0, PUSH_2_STARTS - 11 * SECOND);
+    clock.advanceBy(4 * SECOND);
+    expect(session.tick().banner).toEqual({ text: 'Ready oars', hasEdgePulse: true });
+  });
+
+  it('hides the warning under the pause sheet and shows it again on resume', () => {
+    const { clock, session } = startedSession();
+    rowTo(session, clock, 0, PUSH_2_STARTS - 8 * SECOND);
+    session.pause('longPress');
+    expect(session.tick().banner).toBeNull();
+    session.resume();
+    expect(session.tick().banner).toEqual({ text: 'Ready oars', hasEdgePulse: true });
   });
 
   it('calls for "Hold this effort" 90 s into a push in effort mode, and not in heart-rate mode', () => {

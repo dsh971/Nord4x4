@@ -106,7 +106,7 @@ describe('rowing gauge (U7)', () => {
 });
 
 describe('rowing gauge, boards 3.3 and R61', () => {
-  it('shows the next push in a rest, with the clock in persimmon as the horn calls it', async () => {
+  it('shows the next push in a rest, with the clock in persimmon from its 10 s warning', async () => {
     await renderOverlay(REST_10_S_BEFORE_PUSH_2);
 
     const next = screen.getByText('Next');

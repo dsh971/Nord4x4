@@ -3,6 +3,7 @@ import { INITIAL_EASE_OFF, observeHeartRate, type EaseOffState } from '../../dom
 import type { MonotonicClock } from '../../domain/session/clock';
 import {
   createSessionMachine,
+  calledWorkAt,
   sessionClockMs,
   type PauseReason,
   type SessionEvent,
@@ -18,7 +19,7 @@ import {
 import type { SessionSummary } from '../../domain/session/summary';
 import type { SessionView } from '../../services/audio/audioEngine';
 import { LOOKAHEAD_MS } from '../../services/audio/drumSchedule';
-import { SIGNAL_BANNERS, type Banner } from './banners';
+import { SIGNAL_BANNERS, WARNING_BANNERS, type Banner } from './banners';
 import { describeGauge, type GaugeModel, type HeartInput } from './gaugeModel';
 
 /** The part of the audio engine a session drives each tick; the engine itself is started by the screen. */
@@ -50,6 +51,18 @@ export type RowingView = {
 const BANNER_MS = 3_000;
 /** A strap reports about once a second. */
 const HEART_SAMPLE_MS = 1_000;
+
+/**
+ * The warning for the push or pickup about to start, so the horn 6 s before has its visual twin
+ * (R51). It follows session time, as the persimmon clock does, so a stall that drops the horn's cue
+ * as stale can't take the warning with it.
+ */
+function warningBannerAt(timings: readonly SegmentTiming[], sessionMs: number): Banner | null {
+  const called = calledWorkAt(timings, sessionMs);
+  return called === undefined
+    ? null
+    : WARNING_BANNERS[called.segment.type === 'push' ? 'push' : 'pickup'];
+}
 
 /**
  * One row of a session plan, tick by tick (U7): the session machine keeps time (KTD5), and each tick
@@ -102,7 +115,7 @@ export class RowingSession {
       sessionMs,
       getSeatedRemainingMs: snapshot.getSeatedRemainingMs,
       gauge: describeGauge(this.plan, snapshot, this.heart),
-      banner: this.banner && sessionMs < this.banner.untilMs ? this.banner.banner : null,
+      banner: snapshot.phase === 'rowing' ? this.bannerAt(sessionMs) : null,
       summary: this.summary,
     };
   }
@@ -152,6 +165,14 @@ export class RowingSession {
           break;
       }
     }
+  }
+
+  // Only while rowing: under the pause sheet a frozen warning would keep pulsing at the edge.
+  private bannerAt(sessionMs: number): Banner | null {
+    if (this.banner !== null && sessionMs < this.banner.untilMs) {
+      return this.banner.banner;
+    }
+    return warningBannerAt(this.timings, sessionMs);
   }
 
   private observeHeart(sessionMs: number, segmentIndex: number | null): void {

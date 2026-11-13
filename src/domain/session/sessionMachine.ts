@@ -1,6 +1,7 @@
 import type { SessionCheckpoint } from './checkpoint';
 import type { MonotonicClock } from './clock';
 import {
+  isWorkSegment,
   plannedLengthMs,
   segmentTimings,
   validateSessionPlan,
@@ -15,13 +16,17 @@ export type SessionPhase = 'getSeated' | 'rowing' | 'paused' | 'complete' | 'par
 /** What paused the row: the rower's long press, or iOS taking the audio (a call, Siri). */
 export type PauseReason = 'longPress' | 'interruption';
 
-/** A signal the audio and screen play together (R40). Get seated count-ins carry their number. */
+/** A cue tied to a push or a pickup, carrying that segment's index. */
+export type WorkCueKind =
+  'horn' | 'pushStart' | 'pickupStart' | 'holdEffort' | 'pushEnd' | 'pickupEnd';
+
+/**
+ * A signal the audio and screen play together (R40). Get seated count-ins carry their number. The
+ * silent 10 s warnings aren't cues: the screen reads them off session time (calledWorkAt).
+ */
 export type Cue =
   | { readonly kind: 'countIn'; readonly count: number }
-  | {
-      readonly kind: 'horn' | 'pushStart' | 'holdEffort' | 'pushEnd';
-      readonly segmentIndex: number;
-    };
+  | { readonly kind: WorkCueKind; readonly segmentIndex: number };
 
 /**
  * Everything the machine announces. `atMs` is session time: 0 is the moment rowing starts,
@@ -58,24 +63,51 @@ export function sessionClockMs(snapshot: SessionSnapshot): number {
 export const STALE_CUE_MS = 2_000;
 /** How many drum beats count the rower in at the end of Get seated (R23). */
 export const COUNT_IN_BEATS = 5;
-/** How long before a push its war horn sounds (R40: "Push in 10 s"). */
-export const HORN_LEAD_MS = 10_000;
+/** How long before a push or pickup its warning banner shows (R40: "Push or pickup in 10 s"). */
+export const WARNING_LEAD_MS = 10_000;
+/**
+ * How long before a push or pickup the war horn sounds. The drum stays quiet for the horn's whole
+ * 5.2 s file, so at 6 s the drum is back before the push-start strike.
+ */
+export const HORN_LEAD_MS = 6_000;
 
-/** When a push's war horn sounds: HORN_LEAD_MS before the push, but never before the row starts. */
-export function hornCueAtMs(pushStartMs: number): number {
+/** When a push's or pickup's warning shows: WARNING_LEAD_MS before it, but never before the row starts. */
+export function warningStartsAtMs(workStartMs: number): number {
   'worklet';
-  return Math.max(0, pushStartMs - HORN_LEAD_MS);
+  return Math.max(0, workStartMs - WARNING_LEAD_MS);
 }
 
-/** Whether a war horn is calling a push at `sessionMs`: from its cue until the push starts (R27, R40). */
-export function isHornCalling(pushStartsMs: readonly number[], sessionMs: number): boolean {
+/** When a push's or pickup's war horn sounds: HORN_LEAD_MS before it, but never before the row starts. */
+export function hornCueAtMs(workStartMs: number): number {
+  'worklet';
+  return Math.max(0, workStartMs - HORN_LEAD_MS);
+}
+
+/** Whether work starting at `workStartMs` is being called at `sessionMs`: from its warning until it starts. */
+function isCalled(workStartMs: number, sessionMs: number): boolean {
+  'worklet';
+  return sessionMs >= warningStartsAtMs(workStartMs) && sessionMs < workStartMs;
+}
+
+/** Whether a push is being called at `sessionMs`: from its warning until the push starts (R27, R40). */
+export function isPushCalled(pushStartsMs: readonly number[], sessionMs: number): boolean {
   'worklet';
   for (const startMs of pushStartsMs) {
-    if (sessionMs >= hornCueAtMs(startMs) && sessionMs < startMs) {
+    if (isCalled(startMs, sessionMs)) {
       return true;
     }
   }
   return false;
+}
+
+/** The push or pickup being called at `sessionMs`, from its warning until it starts (R40), if any. */
+export function calledWorkAt(
+  timings: readonly SegmentTiming[],
+  sessionMs: number,
+): SegmentTiming | undefined {
+  return timings.find(
+    (timing) => isWorkSegment(timing.segment.type) && isCalled(timing.startMs, sessionMs),
+  );
 }
 const HOLD_EFFORT_AFTER_MS = 90_000;
 
@@ -308,22 +340,26 @@ function buildTimeline(
   }
   timings.forEach(({ segment, startMs, endMs }, segmentIndex) => {
     events.push({ type: 'segmentStarted', segmentIndex, atMs: startMs });
-    if (segment.type === 'push') {
-      // Pickups inside the warm-up are pushes in miniature, but only real pushes get the war horn.
-      const cue = (
-        kind: 'horn' | 'pushStart' | 'holdEffort' | 'pushEnd',
-        atMs: number,
-      ): SessionEvent => ({
+    if (segment.type === 'push' || segment.type === 'pickup') {
+      // Pickups inside the warm-up are pushes in miniature: horned, started and ended alike.
+      const isPush = segment.type === 'push';
+      const cue = (kind: WorkCueKind, atMs: number): SessionEvent => ({
         type: 'cueDue',
         cue: { kind, segmentIndex },
         atMs,
       });
-      events.push(cue('horn', hornCueAtMs(startMs)), cue('pushStart', startMs));
-      if (plan.coachingMode === 'effort' && segment.durationMs > HOLD_EFFORT_AFTER_MS) {
+      events.push(
+        cue('horn', hornCueAtMs(startMs)),
+        cue(isPush ? 'pushStart' : 'pickupStart', startMs),
+      );
+      if (isPush && plan.coachingMode === 'effort' && segment.durationMs > HOLD_EFFORT_AFTER_MS) {
         events.push(cue('holdEffort', startMs + HOLD_EFFORT_AFTER_MS));
       }
       if (endMs !== null) {
-        events.push({ type: 'segmentEnded', segmentIndex, atMs: endMs }, cue('pushEnd', endMs));
+        events.push(
+          { type: 'segmentEnded', segmentIndex, atMs: endMs },
+          cue(isPush ? 'pushEnd' : 'pickupEnd', endMs),
+        );
       }
     } else if (endMs !== null) {
       events.push({ type: 'segmentEnded', segmentIndex, atMs: endMs });
@@ -337,6 +373,6 @@ function buildTimeline(
     });
   }
   // Array sort is stable, so events at the same moment keep the order they were built in:
-  // the old segment ends before the new one starts, and a push starts before its push-start cue.
+  // the old segment ends before the new one starts, and a push or pickup starts before its start cue.
   return events.sort((a, b) => a.atMs - b.atMs);
 }

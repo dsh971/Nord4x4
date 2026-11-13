@@ -1,4 +1,4 @@
-import { isHornCalling } from '../../domain/session/sessionMachine';
+import { isPushCalled } from '../../domain/session/sessionMachine';
 import type { SceneState, SegmentTiming } from '../../domain/session/sessionPlan';
 
 /**
@@ -56,8 +56,8 @@ function segmentIndexAt(timeline: SceneTimeline, sessionMs: number): number {
 }
 
 /**
- * The scene state for a moment of the session (R27): each segment's own scene, except while the war
- * horn calls a push, when the oars are raised. Before and after the row the sea is calm.
+ * The scene state for a moment of the session (R27): each segment's own scene, except from a push's
+ * 10 s warning until it starts, when the oars are raised. Before and after the row the sea is calm.
  */
 export function sceneStateAt(timeline: SceneTimeline, sessionMs: number): SceneState {
   'worklet';
@@ -65,7 +65,7 @@ export function sceneStateAt(timeline: SceneTimeline, sessionMs: number): SceneS
   if (segment === undefined) {
     return 'easy';
   }
-  return isHornCalling(timeline.pushStartsMs, sessionMs) ? 'horn' : segment.scene;
+  return isPushCalled(timeline.pushStartsMs, sessionMs) ? 'horn' : segment.scene;
 }
 
 /**

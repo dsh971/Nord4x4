@@ -58,7 +58,7 @@ The casual boards (1.3c, 2.11, 2.11f, 3.9, 3.10, 3.11) show a second rower on th
 | 3.1a–d | Get seated: drum count-in and the stop line (one frame per stroke phase) | `screens/3.1a-catch-get-seated.png` … `3.1d-recovery-get-seated.png` | R23, R24, R25, R52, R61 |
 | 3.2 | Push | `screens/3.2-rowing-work.png` | R26, R27, R29, R31, R32, R50, R52 |
 | 3.2b | Push above 95%: three bells, border glow, Ease off chip | `screens/3.2b-rowing-ease-off.png` | R36, R40, R50 |
-| 3.3 | Horn cue, 10 s to the push | `screens/3.3-rowing-horn-cue.png` | R27, R39, R40, R51 |
+| 3.3 | Push warning, 10 s to the push (the horn follows at 6 s) | `screens/3.3-rowing-horn-cue.png` | R27, R39, R40, R51 |
 | 3.4 | Easy row | `screens/3.4-rowing-easy.png` | R13, R27, R28, R50 |
 | 3.5 | Pause sheet with the stop line and music notice | `screens/3.5-rowing-pause.png` | R32, R41, R42, R54, R61, AE4 |
 | 3.6 | No strap: effort guidance | `screens/3.6-rowing-no-strap.png` | R30, AE7 |
@@ -69,7 +69,7 @@ The casual boards (1.3c, 2.11, 2.11f, 3.9, 3.10, 3.11) show a second rower on th
 | 3.11 | Casual row by feel: effort gauge, no heart rate | `screens/3.11-rowing-casual-row-by-feel.png` | R30, R57 |
 | 3.1p | Get seated, portrait | `screens/3.1p-get-seated-portrait.png` | R23, R33 |
 | 3.2p | Push, portrait | `screens/3.2p-rowing-work-portrait.png` | R29, R31, R33 |
-| 3.3p | Horn cue, portrait | `screens/3.3p-rowing-horn-cue-portrait.png` | R33, R51 |
+| 3.3p | Push warning, portrait | `screens/3.3p-rowing-horn-cue-portrait.png` | R33, R51 |
 | 3.5p | Pause sheet, portrait | `screens/3.5p-rowing-pause-portrait.png` | R32, R33, R41 |
 
 Screenshots are rendered at 2×. A casual Easy row uses the 3.4 scene. `flow-start.html` charts both paths from opening the app to the first stroke.
@@ -80,7 +80,7 @@ Screenshots are rendered at 2×. A casual Easy row uses the 3.4 scene. `flow-sta
 - Easy-row scenery for each leg of the voyage (R28); 3.4 shows one leg.
 - The final illustration and animation assets. Every painting here is a placeholder.
 - The path-switch confirmation sheet (R59), the 28-day return (R60, AE18) and the offer to lower max HR (R37, AE19).
-- The "Pull", "Rest" and "Hold this effort" banners (R40); 3.3 shows the horn banner they follow.
+- The "Pull", "Rest" and "Hold this effort" banners (R40); 3.3 shows the "Ready oars" warning they follow, which stays up until the push starts.
 
 ## Visual rules in force
 

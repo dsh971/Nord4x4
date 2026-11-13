@@ -8,8 +8,8 @@ const BREATH_MS = 1_600;
 
 /**
  * A glow around the screen's edge that breathes: charcoal for the ease-off (R36, board 3.2b), or
- * persimmon for the war horn's edge pulse (R40, board 3.3). It holds still under Reduce Motion, and
- * until that setting is known.
+ * persimmon for the warning's edge pulse before a push or pickup (R40, board 3.3). It holds still
+ * under Reduce Motion, and until that setting is known.
  */
 export function EdgeGlow({ tone, testID }: { tone: 'easeOff' | 'horn'; testID?: string }) {
   const [breath] = useState(() => new Animated.Value(1));

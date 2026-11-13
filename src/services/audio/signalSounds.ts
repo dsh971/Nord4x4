@@ -10,15 +10,32 @@ export type SignalSound = {
   readonly repeat?: { readonly times: number; readonly spacingMs: number };
 };
 
+const PUSH_START: SignalSound = { sound: 'push-start-strike' };
+const PUSH_END: SignalSound = { sound: 'push-end-horn' };
+
 /** Each signal's sound, as in docs/design/sound-spec.md. Their visual twins live in the rowing feature. */
-export const SIGNAL_SOUNDS: Record<SignalKind, SignalSound> = {
+export const SIGNAL_SOUNDS = {
   countIn: { sound: 'drum-catch' },
   horn: { sound: 'war-horn' },
-  pushStart: { sound: 'push-start-strike' },
+  pushStart: PUSH_START,
+  pickupStart: PUSH_START,
   holdEffort: { sound: 'hold-signal' },
-  pushEnd: { sound: 'push-end-horn' },
+  pushEnd: PUSH_END,
+  pickupEnd: PUSH_END,
   easeOff: { sound: 'ease-off-bell', repeat: { times: 3, spacingMs: 600 } },
-};
+} as const satisfies Record<SignalKind, SignalSound>;
+
+/**
+ * How long the rower's music stays ducked after a signal's file ends. A start strike is scheduled
+ * only LOOKAHEAD_MS ahead, 0.8 s after the horn ends; without the hold the music would come up
+ * between them and dip again.
+ */
+export const DUCK_HOLD_MS = 1_000;
+
+/** When the rower's music comes back up after signals whose drum gaps end at `gapEndsMs`. */
+export function duckReleaseAtMs(gapEndsMs: number): number {
+  return gapEndsMs + DUCK_HOLD_MS;
+}
 
 /**
  * How long the drum stays quiet for a signal: until its last strike's file ends, echo included, as in

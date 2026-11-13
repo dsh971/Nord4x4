@@ -71,23 +71,29 @@ describe('Get seated', () => {
 });
 
 describe('cues', () => {
-  it('sounds the horn 10 s before each push, never for a warm-up pickup, and the push-start strike as each push starts', () => {
+  it('sounds the horn 6 s before each pickup and push, and marks each start and end', () => {
     const { clock, machine } = rowingAt();
     const cues = runFor(machine, clock, 40 * MINUTE)
       .filter((event) => event.type === 'cueDue')
       .map(describeEvent);
 
     expect(cues).toEqual([
-      '9:50 horn 5',
+      '4:54 horn 1',
+      '5:00 pickupStart 1',
+      '5:20 pickupEnd 1',
+      '6:54 horn 3',
+      '7:00 pickupStart 3',
+      '7:20 pickupEnd 3',
+      '9:54 horn 5',
       '10:00 pushStart 5',
       '14:00 pushEnd 5',
-      '16:50 horn 7',
+      '16:54 horn 7',
       '17:00 pushStart 7',
       '21:00 pushEnd 7',
-      '23:50 horn 9',
+      '23:54 horn 9',
       '24:00 pushStart 9',
       '28:00 pushEnd 9',
-      '30:50 horn 11',
+      '30:54 horn 11',
       '31:00 pushStart 11',
       '35:00 pushEnd 11',
     ]);
@@ -120,7 +126,7 @@ describe('cues', () => {
   it('lists the cues due soon, so audio can schedule them ahead (KTD5)', () => {
     const { machine } = rowingAt(fourByFourPlan(), 9 * MINUTE + 45 * SECOND);
     expect(machine.upcomingCues(20 * SECOND).map(describeEvent)).toEqual([
-      '9:50 horn 5',
+      '9:54 horn 5',
       '10:00 pushStart 5',
     ]);
   });
@@ -259,36 +265,42 @@ describe('a full 4×4 session', () => {
       '-0:02 countIn 2',
       '-0:01 countIn 1',
       '0:00 segmentStarted 0',
+      '4:54 horn 1',
       '5:00 segmentEnded 0',
       '5:00 segmentStarted 1',
+      '5:00 pickupStart 1',
       '5:20 segmentEnded 1',
+      '5:20 pickupEnd 1',
       '5:20 segmentStarted 2',
+      '6:54 horn 3',
       '7:00 segmentEnded 2',
       '7:00 segmentStarted 3',
+      '7:00 pickupStart 3',
       '7:20 segmentEnded 3',
+      '7:20 pickupEnd 3',
       '7:20 segmentStarted 4',
-      '9:50 horn 5',
+      '9:54 horn 5',
       '10:00 segmentEnded 4',
       '10:00 segmentStarted 5',
       '10:00 pushStart 5',
       '14:00 segmentEnded 5',
       '14:00 pushEnd 5',
       '14:00 segmentStarted 6',
-      '16:50 horn 7',
+      '16:54 horn 7',
       '17:00 segmentEnded 6',
       '17:00 segmentStarted 7',
       '17:00 pushStart 7',
       '21:00 segmentEnded 7',
       '21:00 pushEnd 7',
       '21:00 segmentStarted 8',
-      '23:50 horn 9',
+      '23:54 horn 9',
       '24:00 segmentEnded 8',
       '24:00 segmentStarted 9',
       '24:00 pushStart 9',
       '28:00 segmentEnded 9',
       '28:00 pushEnd 9',
       '28:00 segmentStarted 10',
-      '30:50 horn 11',
+      '30:54 horn 11',
       '31:00 segmentEnded 10',
       '31:00 segmentStarted 11',
       '31:00 pushStart 11',

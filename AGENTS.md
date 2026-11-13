@@ -31,7 +31,7 @@ Run lint and typecheck before declaring any task done.
 
 ## Building
 
-M1 and M2 use local development builds on a physical iPhone: `npx expo run:ios --device`. EAS (`npx eas-cli@latest build`) is used only for TestFlight in M3. Run test mode (fake clock and sensors) with `npm run start:test`.
+M1 and M2 use local development builds on a physical iPhone: `npx expo run:ios --device`. A free Apple ID's signing profile lasts 7 days, and once it expires `expo run:ios` can't fetch a new one; `npm run ios:device` builds with provisioning updates allowed, then installs to the phone (pick it when asked). After a new profile, the phone may need Settings → General → VPN & Device Management → Trust. EAS (`npx eas-cli@latest build`) is used only for TestFlight in M3. Run test mode (fake clock and sensors) with `npm run start:test`.
 
 ## Rules
 

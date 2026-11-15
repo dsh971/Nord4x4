@@ -31,7 +31,7 @@ On-screen notices: each banner shows for about 3 s, large enough to read at 1 m 
 - `src/domain/session/sessionMachine.ts` and its test: rename the cue kinds `heave` → `pushStart` and `hold` → `holdEffort`, so the names describe the moment, not a voice. No behaviour change.
 
 ### Crew murmur (decided 2026-11-04)
-- R38's "crew murmur during work" stays as **wordless ambience**: low effort grunts and exhales on the stroke over a quiet murmur, with no intelligible words. It mutes with the rest of the ambience when the rower's music plays (R41) and carries no cue. Phase F's listening test offers 2–3 versions mixed under the drum and sea; each pick's licence is checked before it ships.
+- R38's "crew murmur during work" stays as **wordless ambience**: low effort grunts and exhales on the stroke over a quiet murmur, with no intelligible words. It drops about 6 dB with the rest of the ambience when the rower's music plays (R41) and carries no cue. Phase F's listening test offers 2–3 versions mixed under the drum and sea; each pick's licence is checked before it ships.
 - Phase A also updates R38 to say "wordless".
 
 ### Verification
@@ -289,6 +289,48 @@ Asked for after a phone row. The warm-up read as "warm-up, then a slower warm-up
   - The engine test moved to `src/features/rowing/__tests__/rowingSessionSound.test.ts`. It starts before the warning, stamps each music change with the time it fired, takes the files' lengths from the real .wav headers, and covers pause and resume.
   - `hornTiming.test.ts` checks the real horn file against `HORN_LEAD_MS` and `DUCK_HOLD_MS`, so a regenerated horn can't run into the push unnoticed.
 
+### G6b′ · Go silent when the rower leaves the app, and warn by notification (proposed 2026-11-13, revised 2026-11-15 after review; build after G6b's phone check, before G6c)
+
+Asked for during the G6b phone check: with the app in the background, the sea kept playing over the rower's music. You then decided the app should make no sound at all while it isn't open, with notifications warning of pushes and pickups (the middle ground, chosen over fully silent and over signals that keep playing).
+
+- **Decided with you:**
+  - When the app goes to the background (switching apps or locking the phone), all its sound stops: ambience and signals. The session keeps time; iOS suspends the app about 15 s later, and session time recovers on return (spike check 4).
+  - On leaving, the app schedules one iOS notification per push and pickup still to come, 10 s before each starts, with the war horn as its sound: "Ready oars" / "Push 2 starts in 10 s", "Pickup coming" / "Pickup starts in 10 s". Pickups aren't numbered until G6c. One due less than 1 s away is skipped.
+  - On return, the pending notifications are cancelled and delivered ones cleared, and the sound starts at the current moment. Nothing missed while away plays late.
+  - Only `background` counts as leaving. `inactive` (Control Centre or a notification pulled down) changes nothing.
+  - Leaving while paused schedules nothing; the sound comes back when the rower resumes.
+  - Notification permission is asked the first time a row opens Get seated. If it's refused, the background is silent and the app doesn't ask again.
+  - The ease-off bells can't be scheduled (they follow live heart rate), so they don't sound while away. If the strap wakes the app in the background, nothing plays either.
+  - This revises R43 and AE20, and limits S3 to while the app is open. R41's music lowering stays with U19: music detection exists (`modules/other-audio`), but its re-read on returning to the app is unconfirmed and the level is set by ear.
+- **Shape:**
+  - Leaving stops the engine with its existing `stop()`, and returning loads and starts a fresh one with the existing `load()` and `start(sessionMs, timings)`. `start` already sets the drum schedule and the crew level from the current moment, so no drum hits or signals from the absence are replayed. Re-decoding takes a moment, so the sound comes back a fraction of a second after the screen.
+  - The session's sound becomes clearable: `setSound(null)` while away.
+  - A pure function lists the warnings to schedule from the plan's timings and the session time, and a thin adapter hands them to `expo-notifications`. Notifications are local only: the plugin's `enableRemoteNotifications: false` leaves out the push entitlement, which a free Apple ID can't sign.
+- **Docs (done with this proposal):** R41, R43 and AE20 in `docs/brainstorms/2026-10-29-nor4x4-rebuild-requirements.md`; the sound section, U19's test scenarios and its verification in `docs/plans/2026-10-29-001-feat-nor4x4-expo-rebuild-plan.md`; the Ambience line in `docs/design/sound-spec.md`; S3 in this file; the 3.5 row in `docs/design/README.md`.
+- **Files:**
+  - `package.json`: `expo-notifications` via `npx expo install`. It's a native module, so the phone needs a new build (`npm run ios:device`).
+  - `app.config.ts`: the `expo-notifications` plugin with `sounds: ['./assets/audio/war-horn.wav']` and `enableRemoteNotifications: false`; the background-audio comment updated, since sound no longer runs with the screen locked.
+  - `src/features/rowing/workWarnings.ts` (new): `workWarningsFrom(timings, sessionMs)` returns each upcoming push and pickup warning with its seconds from now, title and body.
+  - `src/services/notifications/warningNotifications.ts` (new): schedule the warnings, cancel and clear them, ask permission once; a handler that never presents them while the app is open.
+  - `src/features/rowing/rowingSession.ts`: `setSound` accepts `null`.
+  - `src/features/rowing/useRowingSession.ts`: the `AppState` listener, removed on unmount. On `background`, stop the engine, clear the session's sound and schedule the warnings (unless paused or finished). On `active`, cancel them and start a fresh engine (or wait for resume if paused). The mount path's load-and-start becomes the same function.
+  - `app/_layout.tsx`: cancel any scheduled warnings at launch, so a row the system or the rower closed doesn't keep sounding horns.
+- **Tests:**
+  - `workWarnings.test.ts`: at 4:40 in the slice, the first warning is pickup 1 in 10 s and every later push and pickup follows, in order, with Push 2's body naming it; at 4:49.5 the 5:00 pickup is skipped; in the cool-down the list is empty.
+  - In `rowingSessionSound.test.ts`, through the real engine with the mocked audio API: a fresh engine started at 10:00, after one stopped at 4:40, schedules no drum hits or signals before 10:00 and plays the 10:00 strike only if it's under 2 s stale.
+  - A hook test with `AppState`, `expo-notifications` and the engine mocked: `background` stops the sound and schedules the warnings; `inactive` does neither; `active` cancels them and starts the sound; leaving while paused schedules nothing.
+  - `rowingSession.test.ts`: after `setSound(null)`, ticks play nothing.
+  - Each would fail without the change. Then `npx tsc --noEmit && npx jest && npm run lint`.
+- **Phone check:**
+  - Start a row with music playing and switch to the music app at about 4:40. The app goes silent at once; at 4:50 the "Pickup coming" notification arrives with the horn; come back at about 5:05: the sound picks up there, the clock is right, and no notification is left.
+  - Stay away through a whole rest (from 13:00): the "Ready oars" notification arrives at 15:50, and the clock is right on return.
+  - Lock the phone mid-row: silent, with the notifications on the lock screen.
+  - Pull down Control Centre: the sound keeps playing.
+- **Risks:**
+  - Notifications follow the ringer switch and Focus, so a rower with either on gets a silent banner. Time-sensitive delivery needs an entitlement a free Apple ID may not have, so it's left for M3.
+  - A row killed by iOS in the background keeps its scheduled notifications until the next launch.
+  - App Review: background audio stays declared but is now never used in the background. Whether to drop the background mode is decided at TestFlight in M3, with Silent mode (R43, KTD19).
+
 ### G6c · Give pickups the push's screen cues (proposed 2026-11-12, revised after review; build after G6b's phone check)
 
 After G6b, a pickup sounds like a push in miniature, but on screen it is still thinner than a push, and the warm-up's countdown doesn't say what it counts to. That is likely why the warm-up read as "warm-up, then a slower warm-up again".
@@ -490,9 +532,9 @@ Each decision below has a **proposed default**. Approve all, or name the ones to
   | Above 95% max HR held for 15 s | Three bell strikes | Charcoal border glow + "Ease off ▲" chip |
   | Session ends | Landfall sound | Session complete |
 
-- **S3. Signals never mute.**
+- **S3. Signals never mute while the app is open.** (Since 2026-11-15, nothing plays while it isn't; R43.)
   - The horn, drum count, tempo accents, "Heave!", "Hold!" and bells are all cues.
-  - In Cues only, and when the rower's music plays, only the sea bed, the drum loop and the crew ambience mute.
+  - In Cues only, only the sea bed, the drum loop and the crew ambience mute. When the rower's music plays, they drop about 6 dB instead (R41, revised 2026-11-13).
   - Every cue ducks the music.
   - This fixes a push starting in silence when music is on (raised by 4 of 5 reviewers).
 - **S4. Silent mode really is silent, and the app may suspend.** Timestamps recover the timing when it comes back, and `bluetooth-central` keeps the heart-rate stream. This avoids App Review rejection under guideline 2.5.4.
@@ -816,7 +858,7 @@ Edit in `docs/design/canvas-source/`:
 - **Gate:** export 3.2 at 3×, you view it on your phone on the holder at 1 m. Continue only on your OK.
 - `ShuimoHorn` (3.3): full-screen pulse + large banner as the horn's visual twin (R51); caller line as on-screen text.
 - `ShuimoEasy` (3.4): steady zone with word + shape, time remaining, leg scenery label (R28).
-- `ShuimoPause` (3.5): Resume, Restart this push, sound mode, End session with hold-to-confirm (R32); music notice (R41).
+- `ShuimoPause` (3.5): Resume, Restart this push, sound mode, End session with hold-to-confirm (R32). No music notice: R41 now lowers ambience rather than muting it.
 - `ShuimoCountdown` → `ShuimoGetSeated` (3.1a–d, hold timer) and `ShuimoGetSeatedPM5` (3.1e, waits for first stroke); caller's final 5 (R23).
 - New `ShuimoNoStrap` (3.6): effort guidance "7–8 of 10 · single words only" (R30, AE7); new `ShuimoStrapLost` (3.7).
 - New `ShuimoRowFreely` (3.8): open-ended easy row showing time rowed, "doesn't move the ship" note (R20). R52 now states this exception.

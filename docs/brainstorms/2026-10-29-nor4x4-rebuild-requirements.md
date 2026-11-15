@@ -211,16 +211,22 @@ The current SwiftUI app does not solve this. It is a stock-looking interval time
 | Above 95% max for 15 s | Three bell strikes | Charcoal border glow + "Ease off ▲" |
 | Session ends | Landfall sound | Session complete |
 
-- R41. When the rower's own music is playing, ambience mutes automatically and a one-line notice says so.
-  - Signals never mute: they still play and briefly duck the music.
-  - Sound returns to the previous mode when the music stops, and auto-switching never overrides a mode the rower chose.
+- R41. When the rower's own music is playing, ambience plays slightly quieter, about 6 dB down, so it sits under the music without disappearing. (Revised 2026-11-13: it used to mute with a notice.)
+  - The sea, drum and crew murmur all drop by the same amount; the drum keeps the stroke rhythm audible.
+  - Signals are never lowered: they play at full level and briefly duck the music. (While the app isn't open, R43 applies instead.)
+  - When the music stops, ambience fades back to full. No notice is shown, since nothing goes silent.
+  - The lowering applies only in Full ship. A mode the rower chose (Cues only or Silent) is never changed by music starting or stopping.
 - R42. Sound modes live in the pause sheet:
   - **Full ship:** ambience and signals.
   - **Cues only:** signals only.
   - **Silent:** nothing plays.
 
   A per-layer mixer (Sea, Drum, Crew, Signals) lives in Settings.
-- R43. Audio keeps playing when the app is backgrounded, except in Silent mode, where the app may suspend and the session's timing recovers on return.
+- R43. The app makes no sound while it isn't open. When the rower leaves mid-row (switching apps or locking the phone), all its sound stops and the session keeps time. (Revised 2026-11-13 and 2026-11-15: sound used to keep playing in the background.)
+  - Instead, iOS notifications warn of each push and pickup still to come: "Ready oars · Push 2 starts in 10 s" or "Pickup coming · Pickup starts in 10 s", with the war horn as their sound, 10 s before it starts. They are cancelled when the rower comes back, and on the next app launch.
+  - Back in the app, the sound starts again at the current moment; nothing missed while away plays late.
+  - The ease-off bells (R36) follow live heart rate, so they can't be scheduled and don't sound while the app isn't open. The screen shows ease-off on return.
+  - Notification sounds follow the ringer switch and Focus. Without notification permission, the background is simply silent.
 
 **After the session**
 
@@ -298,8 +304,9 @@ The current SwiftUI app does not solve this. It is a stock-looking interval time
 - AE2. **Covers R15.** Given a remembered length of 30 min, when the rower changes today's easy row to 20 min, the next easy-row card shows 20 min.
 - AE3. **Covers R14, R15.** Given a remembered length of 30 min in week 2 or later, the weekly long row shows "Long row · 45 min" and can be shortened on the card.
 - AE4. **Covers R41.** Given music playing at session start:
-  - the sea, drum loop and crew murmur are silent, with a notice;
-  - the horn, drum count, push-start strike and bells still play and duck the music.
+  - the sea, drum and crew murmur play about 6 dB quieter, and no notice shows;
+  - the horn, drum count, push-start strike and bells play at full level and duck the music;
+  - when the music stops, the sea, drum and crew murmur fade back to full.
 - AE5. **Covers R21.** Given a missed Wednesday easy row, Saturday shows that easy row ("Waiting from Wed"), Saturday's own session moves to the next rowing day, nothing is doubled up, and the ship has not moved.
 - AE6. **Covers R9, R21.** Given a rower who rowed a hard session Monday and whose next waiting session on Tuesday is also hard, Tuesday shows the next easy row instead and the hard session follows it.
 - AE7. **Covers R30.** Given no heart-rate strap, during a push the gauge shows an effort cue such as "7–8 of 10 · single words only" in place of bpm, and at 90 s the hold signal sounds with a "Hold this effort" banner.
@@ -315,6 +322,10 @@ The current SwiftUI app does not solve this. It is a stock-looking interval time
 - AE17. **Covers R49, R62.** Given a rower with days Mon/Wed/Sat who finishes onboarding on a Tuesday, the rest-day state offers "Row it now". Rowing it moves the ship, and Wednesday shows the next session.
 - AE18. **Covers R60.** Given a 4x4 rower in week 5 back after 30 days away, the plan resumes at week 3 and the warning screen shows again before the first row.
 - AE19. **Covers R37.** Given a rower with an age-estimated max of 184 whose last three hard sessions all missed the push zone, session complete offers to lower max HR.
+- AE20. **Covers R43.** Given a rower in the warm-up who switches to their music app at 4:40:
+  - all of the app's sound stops;
+  - at 4:50 a notification "Pickup coming · Pickup starts in 10 s" arrives with the war horn sound;
+  - when they return at 5:05, the sound picks up at 5:05, the pending notifications are cleared, and the gauge shows the right time.
 
 ---
 

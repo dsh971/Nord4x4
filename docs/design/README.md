@@ -60,7 +60,7 @@ The casual boards (1.3c, 2.11, 2.11f, 3.9, 3.10, 3.11) show a second rower on th
 | 3.2b | Push above 95%: three bells, border glow, Ease off chip | `screens/3.2b-rowing-ease-off.png` | R36, R40, R50 |
 | 3.3 | Push warning, 10 s to the push (the horn follows at 6 s) | `screens/3.3-rowing-horn-cue.png` | R27, R39, R40, R51 |
 | 3.4 | Easy row | `screens/3.4-rowing-easy.png` | R13, R27, R28, R50 |
-| 3.5 | Pause sheet with the stop line and music notice | `screens/3.5-rowing-pause.png` | R32, R41, R42, R54, R61, AE4 |
+| 3.5 | Pause sheet with the stop line and music notice (board out of date: R41 now lowers ambience with no notice, 2026-11-13) | `screens/3.5-rowing-pause.png` | R32, R42, R54, R61 |
 | 3.6 | No strap: effort guidance | `screens/3.6-rowing-no-strap.png` | R30, AE7 |
 | 3.7 | Strap lost mid-session | `screens/3.7-rowing-strap-lost.png` | R30 |
 | 3.8 | Row freely | `screens/3.8-rowing-row-freely.png` | R20, R52 |

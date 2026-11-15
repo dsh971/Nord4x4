@@ -103,7 +103,7 @@ All 64 origin requirements carry forward (R11 is now a deferral). Grouped for tr
   - The signal table (no spoken voice).
   - Signals never mute.
   - Sound modes and the mixer.
-  - Background audio, except in Silent.
+  - No sound while the app isn't open; notifications warn of pushes and pickups instead (R43, revised 2026-11-15).
 - **R44–R46, R53, R54. After the session.**
   - The landfall moment and stats.
   - The benchmark retest, Apple Health, the 1–5 rating, and Partly rowed.
@@ -943,19 +943,20 @@ nor4x4-app/
   - **Full ship:** ambience and signals.
   - **Cues only:** signals only.
   - **Silent:** nothing plays, and the session may suspend.
-- **Music:** when other audio plays, ambience mutes, a notice appears, and signals still play and duck the music (or mix over it, per the U4a decision). Stopping the music restores the previous mode, unless the rower picked one.
+- **Music:** when other audio plays, ambience drops about 6 dB (the exact level is set by ear on the phone), and signals still play at full level and duck the music (or mix over it, per the U4a decision). Stopping the music fades ambience back to full. No notice is shown. This applies only in Full ship; Cues only and Silent are never changed by music.
 - **Interruptions:** a phone call pauses the session (U6), and the audio clock is re-mapped on return.
 
 **Test scenarios:**
-- Covers AE4. With music playing at the start, ambience gains are zero and the notice shows; the horn, drum count, push-start strike and bells still play.
-- Music stopping mid-session returns to the previous mode, unless the rower picked one.
+- Covers AE4. With music playing at the start, ambience plays about 6 dB down and no notice shows; the horn, drum count, push-start strike and bells play at full level.
+- Music stopping mid-session fades ambience back to full; a chosen Cues only or Silent is untouched.
+- Covers AE20. Leaving the app stops all sound and schedules the warning notifications; returning cancels them and starts the sound at the current moment.
 - Silent mode plays nothing, and the session still advances after a simulated suspend.
 - A horn cue is scheduled at the audio-clock time of the push start minus 6 s; after a simulated interruption the mapping is rebuilt and the next cue lands within 50 ms of its session time.
 - A cue more than 2 s stale after resume is dropped.
 - The ease-off bells play once per push however long HR stays high.
 - Setting Crew to 0 in the mixer mutes the murmur in Full ship mode only.
 
-**Verification:** On device with Spotify playing and the screen locked, the signals are audible over the music (ducked or mixed), and the music stays at its volume once the session ends.
+**Verification:** On device with Spotify playing, the signals are audible over the music (ducked or mixed), and the music stays at its volume once the session ends. With the phone locked, the app is silent and the warning notifications arrive (R43, revised 2026-11-15).
 
 ### U20. Session end: landfall, Partly rowed, benchmark retest
 

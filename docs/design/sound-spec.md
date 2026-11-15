@@ -27,7 +27,7 @@ The rower's music stays ducked for 1 s after a signal's file ends (`DUCK_HOLD_MS
 
 ## Ambience
 
-Loops that play under the signals in Full ship mode (R42), and mute while the rower's own music plays (R41).
+Loops that play under the signals in Full ship mode (R42), and play about 6 dB quieter while the rower's own music plays (R41). Signals are never lowered. Nothing plays while the app isn't open (R43): notifications with the war horn sound warn of pushes and pickups instead.
 
 | Layer | File | Plays | Notes |
 |---|---|---|---|

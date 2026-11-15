@@ -12,6 +12,8 @@ const config: ExpoConfig = {
   userInterfaceStyle: 'light',
   ios: {
     bundleIdentifier: 'com.dsh971.nor4x4',
+    // The free Apple ID's personal team; set here so every prebuild keeps signing for the phone.
+    appleTeamId: '9H86AVQA6B',
     supportsTablet: false,
     infoPlist: {
       // Usage strings ready for the U4b strap and Apple Health spike.

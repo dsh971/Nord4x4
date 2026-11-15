@@ -127,6 +127,16 @@ describe('RowingSession', () => {
     expect(sound.views).toHaveLength(updatesSoFar);
   });
 
+  it('drives no sound once its sound is cleared, while the row keeps time', () => {
+    const { clock, session, sound } = startedSession();
+    rowTo(session, clock, 0, 4 * MINUTE);
+    session.setSound(null);
+    const updatesSoFar = sound.views.length;
+    const away = rowTo(session, clock, 4 * MINUTE, 6 * MINUTE);
+    expect(sound.views).toHaveLength(updatesSoFar);
+    expect(away.at(-1)?.sessionMs).toBe(6 * MINUTE);
+  });
+
   it('freezes on pause with its reason, and ends as Partly rowed from the pause sheet', () => {
     const { clock, session } = startedSession();
     rowTo(session, clock, 0, 5 * MINUTE);

@@ -331,6 +331,14 @@ Asked for during the G6b phone check: with the app in the background, the sea ke
   - A row killed by iOS in the background keeps its scheduled notifications until the next launch.
   - App Review: background audio stays declared but is now never used in the background. Whether to drop the background mode is decided at TestFlight in M3, with Silent mode (R43, KTD19).
 
+- **Status (2026-11-15, paused overnight; uncommitted):**
+  - Built: `expo-notifications` installed; `app.config.ts` plugin (horn sound, no remote notifications); `src/features/rowing/workWarnings.ts`; `src/services/notifications/warningNotifications.ts`; `setSound(null)` in `rowingSession.ts`; leave and return in `useRowingSession.ts`; launch clean-up in `app/_layout.tsx`. `ios/` regenerated with `npx expo prebuild --platform ios`.
+  - Tests: `workWarnings.test.ts` (3), `useRowingSession.test.tsx` (4; 3 fail against the old hook, the Control Centre one is a guard), and a `setSound(null)` case in `rowingSession.test.ts`. The first `rowingSessionSound.test.ts` case already covers a fresh engine started mid-row, so no separate engine guard was added. `npx jest` 195/195, `npx tsc --noEmit` and `npm run lint` clean.
+  - Simulator: builds with no push entitlement and `war-horn.wav` bundled; leaving and returning mid-row keeps time and shows no error.
+  - Simulator, 2026-11-16: with the app in the background from 0:05, "Pickup coming · Pickup starts in 10 s" arrived at 4:52, about 2 s late; back in the app at 6:18 the clock was right and nothing errored. Permission had already been granted on the simulator, so the prompt itself is unseen.
+  - **Code review (2026-11-16, four models), fixed:** leaving during Get seated now schedules warnings, since the row starts by itself; notification calls run through one queue in the adapter, and warnings carry fixed ids (`push-2`, `pickup-1`), so a quick leave and return can't leave stray horns; warnings use exact-time triggers fixed at the moment of leaving; the sound follows one `reconcileSound()` from (away, phase), which also stops the sea starting under the pause sheet when a row is paused while its engine loads; tests now load the engine on cue and mock `expo-notifications` itself, and fail without each fix (the generation guard included). Left for your call: skipping scheduling quietly when permission is refused, separating notification errors from `soundError`, and installing the in-app handler at module scope.
+  - Still open: your phone check after `npm run ios:device` (including the permission prompt on first Get seated), then commit on your OK.
+
 ### G6c · Give pickups the push's screen cues (proposed 2026-11-12, revised after review; build after G6b's phone check)
 
 After G6b, a pickup sounds like a push in miniature, but on screen it is still thinner than a push, and the warm-up's countdown doesn't say what it counts to. That is likely why the warm-up read as "warm-up, then a slower warm-up again".

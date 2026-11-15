@@ -89,8 +89,8 @@ export class RowingSession {
     this.timings = segmentTimings(plan);
   }
 
-  /** Connects the audio engine once it has loaded; until then the row runs silent. */
-  setSound(sound: SessionSoundCues): void {
+  /** Connects the audio engine once it has loaded, or clears it while the rower is away (R43); silent while null. */
+  setSound(sound: SessionSoundCues | null): void {
     this.sound = sound;
   }
 

@@ -25,8 +25,15 @@ const config: ExpoConfig = {
   },
   plugins: [
     'expo-router',
-    // Background audio keeps a session's sound running with the screen locked (KTD7).
+    // The app is silent while it isn't open (R43, revised 2026-11-15); whether to drop this mode is
+    // decided at TestFlight in M3.
     ['react-native-audio-api', { iosBackgroundMode: true }],
+    // Local warnings stand in for the sound while the rower is away (R43). No remote notifications,
+    // so no push entitlement, which a free Apple ID can't sign.
+    [
+      'expo-notifications',
+      { sounds: ['./assets/audio/war-horn.wav'], enableRemoteNotifications: false },
+    ],
     // Embedded at build time; iOS names each font by its PostScript name (src/design/typography.ts).
     [
       'expo-font',

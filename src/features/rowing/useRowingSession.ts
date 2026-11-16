@@ -34,12 +34,6 @@ function isRowGoingOn(phase: SessionPhase): boolean {
   return phase === 'getSeated' || phase === 'rowing';
 }
 
-// Warnings are only a stand-in while the rower is away, so a failure is logged rather than shown
-// as a sound error on the rowing screen.
-function logWarningFailure(what: string): (error: unknown) => void {
-  return (error) => console.error(`${what} failed`, error);
-}
-
 function describeError(error: unknown): string {
   return error instanceof Error ? error.message : String(error);
 }
@@ -127,7 +121,7 @@ export function useRowingSession(plan: SessionPlan, heartFeed: HeartFeed | null)
   useEffect(() => {
     isClosedRef.current = false;
     reconcileSound();
-    askForWarningPermission().catch(logWarningFailure('Asking for notifications'));
+    void askForWarningPermission();
     return () => {
       isClosedRef.current = true;
       reconcileSound();
@@ -142,14 +136,14 @@ export function useRowingSession(plan: SessionPlan, heartFeed: HeartFeed | null)
         reconcileSound();
         const left = session.tick();
         if (isRowGoingOn(left.phase)) {
-          scheduleWarnings(
+          void scheduleWarnings(
             workWarningsFrom(segmentTimings(plan), left.sessionMs),
             leftAtWallMs,
-          ).catch(logWarningFailure('Scheduling warnings'));
+          );
         }
       } else if (appState === 'active' && isAwayRef.current) {
         isAwayRef.current = false;
-        clearWarnings().catch(logWarningFailure('Clearing warnings'));
+        void clearWarnings();
         setView(session.tick());
         reconcileSound();
       }

@@ -121,8 +121,8 @@ describe('useRowingSession away from the app (R43)', () => {
     expect(scheduledWarnings()[0]).toEqual({ id: 'pickup-1', atWallMs: WALL_MS + 305 * SECOND });
   });
 
-  it('logs a failed warning without saying the sound failed', async () => {
-    const consoleError = jest.spyOn(console, 'error').mockImplementation(() => undefined);
+  it('never shows a failed warning as a sound error', async () => {
+    jest.spyOn(console, 'error').mockImplementation(() => undefined);
     jest
       .mocked(Notifications.scheduleNotificationAsync)
       .mockRejectedValueOnce(new Error('no scheduler'));
@@ -130,7 +130,6 @@ describe('useRowingSession away from the app (R43)', () => {
     nowMs = 4 * MINUTE;
     await switchApp('background');
     expect(result.current.soundError).toBeNull();
-    expect(consoleError).toHaveBeenCalledWith('Scheduling warnings failed', expect.any(Error));
   });
 
   it('leaves the sound playing when Control Centre is pulled down', async () => {

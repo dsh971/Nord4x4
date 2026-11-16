@@ -1,6 +1,7 @@
 import * as Notifications from 'expo-notifications';
 
 import {
+  askForWarningPermission,
   clearWarnings,
   hideWarningsInApp,
   scheduleWarnings,
@@ -32,6 +33,8 @@ jest.mock('expo-notifications', () => ({
   ),
 }));
 
+const BROKEN = new Error('native call failed');
+
 const WARNINGS: WarningNotification[] = [
   { id: 'pickup-1', secondsFromNow: 10, title: 'Pickup coming', body: 'Pickup starts in 10 s' },
 ];
@@ -39,6 +42,10 @@ const WARNINGS: WarningNotification[] = [
 beforeEach(() => {
   mockCalls.length = 0;
   jest.mocked(Notifications.scheduleNotificationAsync).mockClear();
+});
+
+afterEach(() => {
+  jest.restoreAllMocks();
 });
 
 describe('warning notifications (R43)', () => {
@@ -55,13 +62,45 @@ describe('warning notifications (R43)', () => {
     });
   });
 
-  it('schedules nothing, and raises no error, when the rower refused notifications', async () => {
+  it('cancels old warnings but schedules none, and raises no error, without permission', async () => {
     jest.mocked(Notifications.getPermissionsAsync).mockResolvedValueOnce({
       granted: false,
     } as Notifications.NotificationPermissionsStatus);
-    await expect(scheduleWarnings(WARNINGS, 0)).resolves.toBeUndefined();
-    expect(Notifications.scheduleNotificationAsync).not.toHaveBeenCalled();
+    const scheduled = scheduleWarnings(WARNINGS, 0);
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    expect(mockCalls).toEqual(['cancel']);
+    mockFinishScheduling();
+    await expect(scheduled).resolves.toBeUndefined();
   });
+
+  it.each([
+    {
+      what: 'Scheduling warnings',
+      breakIt: () =>
+        jest.mocked(Notifications.scheduleNotificationAsync).mockRejectedValueOnce(BROKEN),
+      run: () => scheduleWarnings(WARNINGS, 0),
+    },
+    {
+      what: 'Clearing warnings',
+      breakIt: () =>
+        jest.mocked(Notifications.dismissAllNotificationsAsync).mockRejectedValueOnce(BROKEN),
+      run: clearWarnings,
+    },
+    {
+      what: 'Asking for notifications',
+      breakIt: () =>
+        jest.mocked(Notifications.requestPermissionsAsync).mockRejectedValueOnce(BROKEN),
+      run: askForWarningPermission,
+    },
+  ])(
+    'logs a failure in $what and never rejects, so no caller can show it as a sound error',
+    async ({ what, breakIt, run }) => {
+      const consoleError = jest.spyOn(console, 'error').mockImplementation(() => undefined);
+      breakIt();
+      await expect(run()).resolves.toBeUndefined();
+      expect(consoleError).toHaveBeenCalledWith(`${what} failed`, BROKEN);
+    },
+  );
 
   it('clears only after scheduling still in flight has finished, so a quick return leaves nothing pending', async () => {
     const scheduled = scheduleWarnings(WARNINGS, 0);
@@ -82,5 +121,17 @@ describe('warning notifications (R43)', () => {
       shouldShowBanner: false,
       shouldShowList: false,
     });
+  });
+
+  it('logs a warning the app failed to hide, rather than dropping it', () => {
+    const consoleError = jest.spyOn(console, 'error').mockImplementation(() => undefined);
+    hideWarningsInApp();
+    const handler = jest.mocked(Notifications.setNotificationHandler).mock.calls.at(-1)?.[0];
+    handler?.handleError?.('pickup-1', BROKEN);
+    expect(consoleError).toHaveBeenCalledWith(
+      'Hiding a warning in the app failed',
+      'pickup-1',
+      BROKEN,
+    );
   });
 });

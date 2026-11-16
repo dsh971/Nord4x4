@@ -10,7 +10,14 @@ jest.mock('expo-notifications', () => ({
 }));
 
 describe('root layout', () => {
-  it('hides warnings in the app as soon as it loads, before anything renders', () => {
+  it('installs the handler that hides warnings in the app as soon as it loads', async () => {
     expect(Notifications.setNotificationHandler).toHaveBeenCalledTimes(1);
+    const handler = jest.mocked(Notifications.setNotificationHandler).mock.calls[0]?.[0];
+    await expect(handler?.handleNotification({} as Notifications.Notification)).resolves.toEqual({
+      shouldPlaySound: false,
+      shouldSetBadge: false,
+      shouldShowBanner: false,
+      shouldShowList: false,
+    });
   });
 });

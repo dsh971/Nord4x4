@@ -44,6 +44,7 @@ export async function askForWarningPermission(): Promise<boolean> {
 /**
  * Replaces any pending warnings with these, each at an exact time counted from `leftAtWallMs`, the
  * moment the rower left, so slow native calls don't push them late. The war horn is their sound.
+ * A rower who refused notifications gets none, and no error: that was their choice.
  */
 export function scheduleWarnings(
   warnings: readonly WarningNotification[],
@@ -51,6 +52,10 @@ export function scheduleWarnings(
 ): Promise<void> {
   return inOrder(async () => {
     await Notifications.cancelAllScheduledNotificationsAsync();
+    const { granted } = await Notifications.getPermissionsAsync();
+    if (!granted) {
+      return;
+    }
     await Promise.all(
       warnings.map((warning) =>
         Notifications.scheduleNotificationAsync({

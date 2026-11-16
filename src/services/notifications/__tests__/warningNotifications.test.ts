@@ -14,6 +14,7 @@ jest.mock('expo-notifications', () => ({
   SchedulableTriggerInputTypes: { DATE: 'date' },
   setNotificationHandler: jest.fn(),
   requestPermissionsAsync: jest.fn(),
+  getPermissionsAsync: jest.fn(() => Promise.resolve({ granted: true })),
   cancelAllScheduledNotificationsAsync: jest.fn(() => {
     mockCalls.push('cancel');
     return Promise.resolve();
@@ -43,8 +44,7 @@ beforeEach(() => {
 describe('warning notifications (R43)', () => {
   it('replaces pending warnings with each one by its id, the war horn, at an exact time from leaving', async () => {
     const scheduled = scheduleWarnings(WARNINGS, 1_000_000);
-    await Promise.resolve();
-    await Promise.resolve();
+    await new Promise((resolve) => setTimeout(resolve, 0));
     mockFinishScheduling();
     await scheduled;
     expect(mockCalls).toEqual(['cancel', 'schedule pickup-1']);
@@ -53,6 +53,14 @@ describe('warning notifications (R43)', () => {
       content: { title: 'Pickup coming', body: 'Pickup starts in 10 s', sound: 'war-horn.wav' },
       trigger: { type: 'date', date: new Date(1_010_000) },
     });
+  });
+
+  it('schedules nothing, and raises no error, when the rower refused notifications', async () => {
+    jest.mocked(Notifications.getPermissionsAsync).mockResolvedValueOnce({
+      granted: false,
+    } as Notifications.NotificationPermissionsStatus);
+    await expect(scheduleWarnings(WARNINGS, 0)).resolves.toBeUndefined();
+    expect(Notifications.scheduleNotificationAsync).not.toHaveBeenCalled();
   });
 
   it('clears only after scheduling still in flight has finished, so a quick return leaves nothing pending', async () => {

@@ -12,6 +12,7 @@ jest.mock('expo-notifications', () => ({
   SchedulableTriggerInputTypes: { DATE: 'date' },
   setNotificationHandler: jest.fn(),
   requestPermissionsAsync: jest.fn(() => Promise.resolve({ granted: true })),
+  getPermissionsAsync: jest.fn(() => Promise.resolve({ granted: true })),
   cancelAllScheduledNotificationsAsync: jest.fn(() => Promise.resolve()),
   dismissAllNotificationsAsync: jest.fn(() => Promise.resolve()),
   scheduleNotificationAsync: jest.fn(() => Promise.resolve('id')),
@@ -118,6 +119,18 @@ describe('useRowingSession away from the app (R43)', () => {
     nowMs = 5 * SECOND;
     await switchApp('background');
     expect(scheduledWarnings()[0]).toEqual({ id: 'pickup-1', atWallMs: WALL_MS + 305 * SECOND });
+  });
+
+  it('logs a failed warning without saying the sound failed', async () => {
+    const consoleError = jest.spyOn(console, 'error').mockImplementation(() => undefined);
+    jest
+      .mocked(Notifications.scheduleNotificationAsync)
+      .mockRejectedValueOnce(new Error('no scheduler'));
+    const { result } = await openRow();
+    nowMs = 4 * MINUTE;
+    await switchApp('background');
+    expect(result.current.soundError).toBeNull();
+    expect(consoleError).toHaveBeenCalledWith('Scheduling warnings failed', expect.any(Error));
   });
 
   it('leaves the sound playing when Control Centre is pulled down', async () => {

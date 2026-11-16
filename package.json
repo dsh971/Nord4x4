@@ -10,7 +10,8 @@
     "ios:device": "xcodebuild -workspace ios/Nor4x4.xcworkspace -scheme Nor4x4 -configuration Debug -destination generic/platform=iOS -derivedDataPath ios/build -allowProvisioningUpdates -quiet build && expo run:ios --device --binary ios/build/Build/Products/Debug-iphoneos/Nor4x4.app",
     "test": "jest",
     "typecheck": "tsc --noEmit",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "e2e:away": "e2e/run.sh away-from-app"
   },
   "dependencies": {
     "@shopify/react-native-skia": "2.14.0",

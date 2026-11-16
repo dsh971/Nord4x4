@@ -1,0 +1,62 @@
+# G6b′ on the simulator: one real row of the slice, left twice (R43, AE20). Run with
+# npm run e2e:away (about 8 min). Sound, the permission ask (Maestro grants it at launch), the lock
+# screen and Control Centre stay a phone check.
+#
+# Each warning is timed by the app's own session clock, read the moment the rower comes back on
+# the banner, so Maestro's own delays can't pass or fail it:
+# 1. Leaving in Get seated: pickup 1's warning lands at 4:50 (25:10 left); back by 5:00 (25:00 left).
+# 2. Leaving during pickup 1: pickup 2's warning lands at 6:50 (23:10 left); back by 7:00 (23:00 left).
+# After each return the row carries on into the pickup.
+appId: com.dsh971.nor4x4
+---
+- launchApp:
+    stopApp: true
+- tapOn:
+    text: "http://.*8081.*"
+    optional: true
+- openLink: "nor4x4://session/slice"
+- tapOn:
+    text: "Open"
+    optional: true
+- tapOn:
+    text: "Continue"
+    optional: true
+- tapOn:
+    text: "Close"
+    optional: true
+- extendedWaitUntil:
+    visible: "Start now"
+    timeout: 30000
+- pressKey: home
+
+- extendedWaitUntil:
+    visible: "(?s).*Pickup coming.*Pickup starts in 10 s.*"
+    timeout: 330000
+- takeScreenshot: 1-pickup-1-warning
+- launchApp:
+    stopApp: false
+# A short timeout: a warning 10 s early would read 25:20 and take 10 s to count into the window.
+- extendedWaitUntil:
+    visible: "Session · 25:(0\\d|10) left"
+    timeout: 4000
+- takeScreenshot: 2-back-at-pickup-1-warning
+- extendedWaitUntil:
+    visible: "Session · 24:[45]\\d left"
+    timeout: 20000
+- takeScreenshot: 3-in-pickup-1
+- pressKey: home
+
+- extendedWaitUntil:
+    visible: "(?s).*Pickup coming.*Pickup starts in 10 s.*"
+    timeout: 150000
+- takeScreenshot: 4-pickup-2-warning
+- launchApp:
+    stopApp: false
+- extendedWaitUntil:
+    visible: "Session · 23:(0\\d|10) left"
+    timeout: 4000
+- takeScreenshot: 5-back-at-pickup-2-warning
+- extendedWaitUntil:
+    visible: "Session · 22:[45]\\d left"
+    timeout: 20000
+- takeScreenshot: 6-in-pickup-2

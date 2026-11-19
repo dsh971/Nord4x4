@@ -1,4 +1,4 @@
-# G6b′ on the simulator: one real row of the slice, left twice (R43, AE20). Run with
+# G6b′ and G6b″ on the simulator: one real row of the slice, left twice (R43, AE20). Run with
 # npm run e2e:away (about 8 min). Sound, the permission ask (Maestro grants it at launch), the lock
 # screen and Control Centre stay a phone check.
 #
@@ -28,6 +28,11 @@ appId: com.dsh971.nor4x4
     visible: "Start now"
     timeout: 30000
 - pressKey: home
+# G6b″: the silent notice that the row goes on, due 1 s after leaving.
+- extendedWaitUntil:
+    visible: "(?s).*Row still going.*Open for sound.*"
+    timeout: 10000
+- takeScreenshot: 0-still-rowing
 
 - extendedWaitUntil:
     visible: "(?s).*Pickup coming.*Pickup starts in 10 s.*"

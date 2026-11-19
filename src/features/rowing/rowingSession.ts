@@ -42,6 +42,8 @@ export type RowingView = {
   /** Session time: negative during Get seated. */
   readonly sessionMs: number;
   readonly getSeatedRemainingMs: number;
+  /** The whole session during Get seated; null for a row with no end (Row freely). */
+  readonly sessionRemainingMs: number | null;
   readonly gauge: GaugeModel | null;
   readonly banner: Banner | null;
   readonly summary: SessionSummary | null;
@@ -114,6 +116,7 @@ export class RowingSession {
       pauseReason: this.pauseReason,
       sessionMs,
       getSeatedRemainingMs: snapshot.getSeatedRemainingMs,
+      sessionRemainingMs: snapshot.sessionRemainingMs,
       gauge: describeGauge(this.plan, snapshot, this.heart),
       banner: snapshot.phase === 'rowing' ? this.bannerAt(sessionMs) : null,
       summary: this.summary,

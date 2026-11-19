@@ -111,14 +111,20 @@ describe('useRowingSession away from the app (R43)', () => {
     nowMs = 4 * MINUTE + 40 * SECOND;
     await switchApp('background');
     expect(engines[0]?.stop).toHaveBeenCalled();
-    expect(scheduledWarnings()[0]).toEqual({ id: 'pickup-1', atWallMs: WALL_MS + 10 * SECOND });
+    expect(scheduledWarnings().slice(0, 2)).toEqual([
+      { id: 'still-rowing', atWallMs: WALL_MS + SECOND },
+      { id: 'pickup-1', atWallMs: WALL_MS + 10 * SECOND },
+    ]);
   });
 
   it('schedules the warnings when leaving during Get seated, since the row starts by itself', async () => {
     await openRow({ isStarted: false });
     nowMs = 5 * SECOND;
     await switchApp('background');
-    expect(scheduledWarnings()[0]).toEqual({ id: 'pickup-1', atWallMs: WALL_MS + 305 * SECOND });
+    expect(scheduledWarnings().slice(0, 2)).toEqual([
+      { id: 'still-rowing', atWallMs: WALL_MS + SECOND },
+      { id: 'pickup-1', atWallMs: WALL_MS + 305 * SECOND },
+    ]);
   });
 
   it('never shows a failed warning as a sound error', async () => {

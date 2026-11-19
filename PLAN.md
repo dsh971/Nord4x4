@@ -338,7 +338,36 @@ Asked for during the G6b phone check: with the app in the background, the sea ke
   - Simulator, 2026-11-16: with the app in the background from 0:05, "Pickup coming · Pickup starts in 10 s" arrived at 4:52, about 2 s late; back in the app at 6:18 the clock was right and nothing errored. Permission had already been granted on the simulator, so the prompt itself is unseen.
   - **Code review (2026-11-16, four models), fixed:** leaving during Get seated now schedules warnings, since the row starts by itself; notification calls run through one queue in the adapter, and warnings carry fixed ids (`push-2`, `pickup-1`), so a quick leave and return can't leave stray horns; warnings use exact-time triggers fixed at the moment of leaving; the sound follows one `reconcileSound()` from (away, phase), which also stops the sea starting under the pause sheet when a row is paused while its engine loads; tests now load the engine on cue and mock `expo-notifications` itself, and fail without each fix (the generation guard included). Also done, on your go-ahead: without permission (refused, or not answered yet) no warnings are scheduled and that is no error; the in-app handler is installed when `app/_layout.tsx` loads.
   - **Second code review (2026-11-16, four models), fixed:** the notifications adapter owns its failures, logging them and never rejecting, so no caller can show one as `soundError`; the in-app handler logs a warning it failed to hide (iOS shows it anyway after 3 s); the tests check the handler's flags and fail on their own assertions. Left as is, by your earlier choice: warning failures are logged, not shown to the rower.
-  - The visible part of the phone check runs as `npm run e2e:away` on the simulator (`e2e/away-from-app.yaml`, `e2e/run.sh`), timed by the app's own clock. Still open: your phone check after `npm run ios:device` for what it can't see: the permission prompt, silence when you leave, the horn, the lock screen, Control Centre and the Get seated layout.
+  - The visible part of the phone check runs as `npm run e2e:away` on the simulator (`e2e/away-from-app.yaml`, `e2e/run.sh`), timed by the app's own clock. Phone check (2026-11-18, you): everything worked as expected: the permission prompt, silence when you leave, the horn, the lock screen, Control Centre and the Get seated layout.
+
+### G6b″ · Say the row is still going when the rower leaves (proposed 2026-11-18; build before G6c)
+
+Raised after G6b′: once the rower leaves mid-row, nothing says the row goes on until the next warning, which can be minutes away. Of a notice on leaving, a Live Activity and background sound, you chose the notice on leaving (2026-11-18). A Live Activity stays an idea for later; background sound would undo R43.
+
+- **Proposed defaults (change any before I start):**
+  - About 1 s after leaving (the existing minimum lead), one notification: "Row still going" / "Session · 25:10 left · Open for sound". The time is the session time left, as the rowing screen shows it. A row with no end (Row freely) says just "Open for sound".
+  - It is sent whenever warnings are: the row is going on (Get seated or rowing), not paused or finished. During Get seated it reads the full session time, since the row hasn't started.
+  - It makes no sound, so it can't be mistaken for a pickup's horn. Its title and body show on two lines. It shows as a banner over the other app, or on the lock screen.
+  - It doesn't count down: iOS notifications are snapshots. It goes when the rower returns, with the warnings, and on the next launch.
+  - It is needed only when the app has permission, as with the warnings.
+- **Shape:**
+  - `WarningNotification` gains `isSilent`; the adapter leaves out the war horn for a silent one. Its fixed id is `still-rowing`, so a quick leave and return replaces it rather than duplicating it.
+  - A pure `stillRowingNotice(sessionLeftMs)` beside `workWarningsFrom` builds it, using the screen's `formatClock`. The hook puts it first in the list it already schedules on leaving. Clearing on return already cancels and dismisses everything, so return needs no change.
+- **Docs:** R43 in `docs/brainstorms/2026-10-29-nor4x4-rebuild-requirements.md` adds the notice; AE20 adds it at 4:41.
+- **Files:**
+  - `src/services/notifications/warningNotifications.ts`: `isSilent` on `WarningNotification`.
+  - `src/features/rowing/workWarnings.ts`: `stillRowingNotice`.
+  - `src/features/rowing/useRowingSession.ts`: schedule it first on leaving.
+- **Tests:**
+  - `workWarnings.test.ts`: at 25:10 left the body reads "Session · 25:10 left · Open for sound"; with no end it reads "Open for sound"; it is silent and 1 s out.
+  - `warningNotifications.test.ts`: a silent warning is scheduled with no sound; the horn stays on the others.
+  - `useRowingSession.test.tsx`: leaving mid-row schedules `still-rowing` first, 1 s after leaving; leaving while paused schedules nothing (existing test).
+  - Each fails without the change. Then `npx tsc --noEmit && npx jest && npm run lint`, and `npm run e2e:away`: the flow gains a check that the "Row still going" banner shows within a few seconds of leaving.
+- **Status (2026-11-18, uncommitted):** built as planned. `e2e/away-from-app.yaml` checks the banner after the first leave and passed (the banner read "Session · 30:00 left · Open for sound", left in Get seated).
+  - **Code review (2026-11-18, four models), fixed:** expo-notifications drops a date trigger's milliseconds on iOS, so a 1 s notice could land in the past and be refused, and every warning could come up to 1 s early; trigger times are now rounded up to the whole second. The notice takes the session machine's time left (`sessionRemainingMs` on `RowingView`) and shares `sessionLeftLabel` with the screen, instead of working it out again. Each notification states its sound (`'warHorn' | 'none'`), so none gets the horn by default. The Get seated test checks the notice too. R43 and AE20 give the title and body apart, and say the time is from the moment of leaving.
+  - Left as is, your call: a notice still says "Row still going" if the row ends while you're away; it goes when you return.
+  - `npx jest` 214/214; `npx tsc --noEmit` and `npm run lint` clean. Removing the silent sound, the notice or the rounding each fails its test.
+- **Phone check (after G6b′'s, which passed):** leave at about 4:30: the "Row still going" banner arrives at once, silently, over the other app and on the lock screen; the pickup warning at 4:50 still has the horn; on return both are gone.
 
 ### G6c · Give pickups the push's screen cues (proposed 2026-11-12, revised after review; build after G6b's phone check)
 

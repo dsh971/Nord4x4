@@ -36,7 +36,13 @@ jest.mock('expo-notifications', () => ({
 const BROKEN = new Error('native call failed');
 
 const WARNINGS: WarningNotification[] = [
-  { id: 'pickup-1', secondsFromNow: 10, title: 'Pickup coming', body: 'Pickup starts in 10 s' },
+  {
+    id: 'pickup-1',
+    secondsFromNow: 10,
+    title: 'Pickup coming',
+    body: 'Pickup starts in 10 s',
+    sound: 'warHorn',
+  },
 ];
 
 beforeEach(() => {
@@ -60,6 +66,45 @@ describe('warning notifications (R43)', () => {
       content: { title: 'Pickup coming', body: 'Pickup starts in 10 s', sound: 'war-horn.wav' },
       trigger: { type: 'date', date: new Date(1_010_000) },
     });
+  });
+
+  it('schedules a silent warning with no sound, and keeps the war horn on the others', async () => {
+    jest
+      .mocked(Notifications.scheduleNotificationAsync)
+      .mockImplementationOnce(() => Promise.resolve('still-rowing'));
+    const scheduled = scheduleWarnings(
+      [
+        {
+          id: 'still-rowing',
+          secondsFromNow: 1,
+          title: 'Row still going',
+          body: 'Open for sound',
+          sound: 'none',
+        },
+        ...WARNINGS,
+      ],
+      0,
+    );
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    mockFinishScheduling();
+    await scheduled;
+    const sounds = jest
+      .mocked(Notifications.scheduleNotificationAsync)
+      .mock.calls.map(([request]) => [request.identifier, request.content.sound]);
+    expect(sounds).toEqual([
+      ['still-rowing', false],
+      ['pickup-1', 'war-horn.wav'],
+    ]);
+  });
+
+  it('rounds each time up to the whole second iOS keeps, so none comes early or lands in the past', async () => {
+    const scheduled = scheduleWarnings(WARNINGS, 1_000_950);
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    mockFinishScheduling();
+    await scheduled;
+    expect(Notifications.scheduleNotificationAsync).toHaveBeenCalledWith(
+      expect.objectContaining({ trigger: { type: 'date', date: new Date(1_011_000) } }),
+    );
   });
 
   it('cancels old warnings but schedules none, and raises no error, without permission', async () => {

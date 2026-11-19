@@ -11,7 +11,7 @@ import {
   scheduleWarnings,
 } from '../../services/notifications/warningNotifications';
 import { RowingSession, type HeartFeed, type RowingView } from './rowingSession';
-import { workWarningsFrom } from './workWarnings';
+import { stillRowingNotice, workWarningsFrom } from './workWarnings';
 
 // About ten ticks a second: banners and the gauge move on whole seconds, and sounds are scheduled ahead.
 const TICK_MS = 100;
@@ -137,7 +137,10 @@ export function useRowingSession(plan: SessionPlan, heartFeed: HeartFeed | null)
         const left = session.tick();
         if (isRowGoingOn(left.phase)) {
           void scheduleWarnings(
-            workWarningsFrom(segmentTimings(plan), left.sessionMs),
+            [
+              stillRowingNotice(left.sessionRemainingMs),
+              ...workWarningsFrom(segmentTimings(plan), left.sessionMs),
+            ],
             leftAtWallMs,
           );
         }

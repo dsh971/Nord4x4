@@ -1,6 +1,7 @@
 import { SLICE_PLAN } from '../../../content/slicePlan';
 import { FAKE_MAX_HEART_RATE, fakeHeartRate } from '../../../dev/fakeHeartTrace';
 import { HR_SLICE, MINUTE, PUSH_2_STARTS, SECOND } from '../../../dev/rowingStates/sliceMoments';
+import { rowFreelyPlan } from '../../../domain/session/__tests__/fixtures';
 import { ManualClock } from '../../../domain/session/clock';
 import type { SessionView } from '../../../services/audio/audioEngine';
 import { RowingSession, type RowingView, type SessionSoundCues } from '../rowingSession';
@@ -125,6 +126,16 @@ describe('RowingSession', () => {
     const updatesSoFar = sound.views.length;
     rowTo(session, clock, 0, 5 * SECOND);
     expect(sound.views).toHaveLength(updatesSoFar);
+  });
+
+  it('gives the session time left: the whole session in Get seated, and none for Row freely', () => {
+    const clock = new ManualClock();
+    const seated = new RowingSession(SLICE_PLAN, clock, null);
+    expect(seated.tick().sessionRemainingMs).toBe(30 * MINUTE);
+    seated.startNow();
+    clock.advanceBy(4 * MINUTE + 50 * SECOND);
+    expect(seated.tick().sessionRemainingMs).toBe(25 * MINUTE + 10 * SECOND);
+    expect(new RowingSession(rowFreelyPlan(), clock, null).tick().sessionRemainingMs).toBeNull();
   });
 
   it('drives no sound once its sound is cleared, while the row keeps time', () => {

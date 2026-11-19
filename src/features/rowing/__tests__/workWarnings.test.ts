@@ -1,7 +1,7 @@
 import { SLICE_PLAN } from '../../../content/slicePlan';
 import { MINUTE, SECOND } from '../../../dev/rowingStates/sliceMoments';
 import { segmentTimings } from '../../../domain/session/sessionPlan';
-import { workWarningsFrom } from '../workWarnings';
+import { stillRowingNotice, workWarningsFrom } from '../workWarnings';
 
 const timings = segmentTimings(SLICE_PLAN);
 
@@ -9,16 +9,41 @@ describe('workWarningsFrom', () => {
   it('lists every push and pickup still to come, 10 s ahead of each, in order', () => {
     const warnings = workWarningsFrom(timings, 4 * MINUTE + 40 * SECOND);
     expect(warnings).toEqual([
-      { id: 'pickup-1', secondsFromNow: 10, title: 'Pickup coming', body: 'Pickup starts in 10 s' },
+      {
+        id: 'pickup-1',
+        secondsFromNow: 10,
+        title: 'Pickup coming',
+        body: 'Pickup starts in 10 s',
+        sound: 'warHorn',
+      },
       {
         id: 'pickup-2',
         secondsFromNow: 130,
         title: 'Pickup coming',
         body: 'Pickup starts in 10 s',
+        sound: 'warHorn',
       },
-      { id: 'push-1', secondsFromNow: 310, title: 'Ready oars', body: 'Push 1 starts in 10 s' },
-      { id: 'push-2', secondsFromNow: 670, title: 'Ready oars', body: 'Push 2 starts in 10 s' },
-      { id: 'push-3', secondsFromNow: 1030, title: 'Ready oars', body: 'Push 3 starts in 10 s' },
+      {
+        id: 'push-1',
+        secondsFromNow: 310,
+        title: 'Ready oars',
+        body: 'Push 1 starts in 10 s',
+        sound: 'warHorn',
+      },
+      {
+        id: 'push-2',
+        secondsFromNow: 670,
+        title: 'Ready oars',
+        body: 'Push 2 starts in 10 s',
+        sound: 'warHorn',
+      },
+      {
+        id: 'push-3',
+        secondsFromNow: 1030,
+        title: 'Ready oars',
+        body: 'Push 3 starts in 10 s',
+        sound: 'warHorn',
+      },
     ]);
   });
 
@@ -29,6 +54,7 @@ describe('workWarningsFrom', () => {
       secondsFromNow: 120.5,
       title: 'Pickup coming',
       body: 'Pickup starts in 10 s',
+      sound: 'warHorn',
     });
   });
 
@@ -41,5 +67,21 @@ describe('workWarningsFrom', () => {
 
   it('has nothing to warn of in the cool-down', () => {
     expect(workWarningsFrom(timings, 26 * MINUTE)).toEqual([]);
+  });
+});
+
+describe('stillRowingNotice', () => {
+  it('says, silently and a second after leaving, that the row goes on, with the time left on leaving', () => {
+    expect(stillRowingNotice(25 * MINUTE + 10 * SECOND)).toEqual({
+      id: 'still-rowing',
+      secondsFromNow: 1,
+      title: 'Row still going',
+      body: 'Session · 25:10 left · Open for sound',
+      sound: 'none',
+    });
+  });
+
+  it('gives no time for a row with no end', () => {
+    expect(stillRowingNotice(null).body).toBe('Open for sound');
   });
 });

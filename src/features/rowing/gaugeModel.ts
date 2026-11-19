@@ -92,6 +92,11 @@ export function formatClock(ms: number, rounding: 'up' | 'down' = 'up'): string 
   return `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, '0')}`;
 }
 
+/** "Session · 25:10 left", as the rowing screen shows the session's time left. */
+export function sessionLeftLabel(ms: number): string {
+  return `Session · ${formatClock(ms)} left`;
+}
+
 /** The gauge's clock as text, rounded the right way for its direction. */
 export function formatGaugeClock(clock: GaugeModel['clock']): string {
   return formatClock(clock.ms, clock.kind === 'rowed' ? 'down' : 'up');

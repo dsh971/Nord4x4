@@ -224,6 +224,7 @@ The current SwiftUI app does not solve this. It is a stock-looking interval time
   A per-layer mixer (Sea, Drum, Crew, Signals) lives in Settings.
 - R43. The app makes no sound while it isn't open. When the rower leaves mid-row (switching apps or locking the phone), all its sound stops and the session keeps time. (Revised 2026-11-13 and 2026-11-15: sound used to keep playing in the background.)
   - Instead, iOS notifications warn of each push and pickup still to come: "Ready oars · Push 2 starts in 10 s" or "Pickup coming · Pickup starts in 10 s", with the war horn as their sound, 10 s before it starts. They are cancelled when the rower comes back, and on the next app launch.
+  - About a second after leaving, a silent notification says the row goes on. Its title is "Row still going" and its body "Session · 25:10 left · Open for sound", with the session time left at the moment of leaving (Row freely, with no end, says just "Open for sound"). It doesn't count down, and it is cleared with the warnings. (Added 2026-11-18.)
   - Back in the app, the sound starts again at the current moment; nothing missed while away plays late.
   - The ease-off bells (R36) follow live heart rate, so they can't be scheduled and don't sound while the app isn't open. The screen shows ease-off on return.
   - Notification sounds follow the ringer switch and Focus. Without notification permission, the background is simply silent.
@@ -324,6 +325,7 @@ The current SwiftUI app does not solve this. It is a stock-looking interval time
 - AE19. **Covers R37.** Given a rower with an age-estimated max of 184 whose last three hard sessions all missed the push zone, session complete offers to lower max HR.
 - AE20. **Covers R43.** Given a rower in the warm-up who switches to their music app at 4:40:
   - all of the app's sound stops;
+  - at about 4:41 a silent notification arrives, titled "Row still going", reading "Session · 25:20 left · Open for sound" (the time left when they left);
   - at 4:50 a notification "Pickup coming · Pickup starts in 10 s" arrives with the war horn sound;
   - when they return at 5:05, the sound picks up at 5:05, the pending notifications are cleared, and the gauge shows the right time.
 

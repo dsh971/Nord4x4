@@ -9,7 +9,7 @@ import { useIsPortrait } from '../../design/useIsPortrait';
 import type { Banner } from './banners';
 import { CornerGauge } from './CornerGauge';
 import { EdgeGlow } from './EdgeGlow';
-import { formatClock, type GaugeModel } from './gaugeModel';
+import { type GaugeModel, sessionLeftLabel } from './gaugeModel';
 import { SignalBanner } from './SignalBanner';
 
 // How long a press must last to pause: long enough that a stray touch at the catch doesn't (R32).
@@ -54,7 +54,7 @@ export function RowingOverlay({
       </Text>
       {gauge.sessionLeftMs !== null ? (
         <Text variant="bodyLarge" style={styles.label} testID="session-left">
-          Session · {formatClock(gauge.sessionLeftMs)} left
+          {sessionLeftLabel(gauge.sessionLeftMs)}
         </Text>
       ) : null}
     </View>

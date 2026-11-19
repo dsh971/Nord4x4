@@ -89,15 +89,20 @@ function isCalled(workStartMs: number, sessionMs: number): boolean {
   return sessionMs >= warningStartsAtMs(workStartMs) && sessionMs < workStartMs;
 }
 
-/** Whether a push is being called at `sessionMs`: from its warning until the push starts (R27, R40). */
-export function isPushCalled(pushStartsMs: readonly number[], sessionMs: number): boolean {
+/** Whether a push or pickup is being called at `sessionMs`: from its warning until it starts (R27, R40). */
+export function isWorkCalled(workStartsMs: readonly number[], sessionMs: number): boolean {
   'worklet';
-  for (const startMs of pushStartsMs) {
+  for (const startMs of workStartsMs) {
     if (isCalled(startMs, sessionMs)) {
       return true;
     }
   }
   return false;
+}
+
+/** When each push and pickup starts, as plain numbers the UI thread can hold for `isWorkCalled`. */
+export function workStartsOf(timings: readonly SegmentTiming[]): number[] {
+  return timings.flatMap(({ segment, startMs }) => (isWorkSegment(segment.type) ? [startMs] : []));
 }
 
 /** The push or pickup being called at `sessionMs`, from its warning until it starts (R40), if any. */

@@ -1,12 +1,13 @@
-import { isPushCalled, type SessionSnapshot } from '../../domain/session/sessionMachine';
+import { calledWorkAt, type SessionSnapshot } from '../../domain/session/sessionMachine';
 import {
   isWorkSegment,
-  pushPositionAt,
   segmentTimings,
+  workPositionAt,
   type SegmentTiming,
   type SegmentType,
   type SessionPlan,
   type StrokeRateRange,
+  type WorkSegmentType,
 } from '../../domain/session/sessionPlan';
 import type { BarKind, BarSegment } from '../../design/components/SegmentBars';
 import type { ZoneState } from '../../design/components/ZoneChip';
@@ -31,8 +32,8 @@ export type GaugeModel = {
   readonly clock: { readonly kind: 'left' | 'rowed'; readonly ms: number };
   /** The widest clock this session can show, so the gauge is sized once and never jumps mid-row. */
   readonly widestClock: '0:00' | '00:00';
-  /** Persimmon from the next push's 10 s warning until it starts (board 3.3). */
-  readonly clockTone: 'ink' | 'push';
+  /** Persimmon from the next push's or pickup's 10 s warning until it starts (board 3.3). */
+  readonly clockTone: 'ink' | 'work';
   readonly body:
     | { readonly kind: 'effort'; readonly guide: EffortGuide }
     | {
@@ -41,10 +42,14 @@ export type GaugeModel = {
         readonly zone: ZoneState | null;
         readonly target: { readonly lowBpm: number; readonly highBpm: number } | null;
       };
-  /** The stroke rate to aim for, always shown (G6a), and in a rest the push coming next. */
+  /** The stroke rate to aim for, always shown (G6a), and outside work the push or pickup coming next. */
   readonly footer: {
     readonly rate: StrokeRateRange;
-    readonly nextPush: { readonly pushNumber: number; readonly pushMs: number } | null;
+    readonly nextWork: {
+      readonly kind: WorkSegmentType;
+      readonly number: number;
+      readonly ms: number;
+    } | null;
   };
   /** R61's cool-down line, or null outside the cool-down. */
   readonly note: string | null;
@@ -58,7 +63,7 @@ export type GaugeModel = {
 const BUILD_AFTER_MS = 90_000;
 const BUILD_MIN_PUSH_MS = 180_000;
 
-// A push's eyebrow also says which push it is, e.g. "Push 2 of 3".
+// A push's or pickup's eyebrow also says which it is, e.g. "Push 2 of 3" or "Pickup 1 of 2".
 const EYEBROWS: Record<SegmentType, string> = {
   push: 'Push',
   pickup: 'Pickup',
@@ -92,6 +97,22 @@ export function formatClock(ms: number, rounding: 'up' | 'down' = 'up'): string 
   return `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, '0')}`;
 }
 
+/** A push or pickup named in running copy: "left in this pickup", "Next push 1". */
+export const WORK_NOUNS: Record<WorkSegmentType, string> = { push: 'push', pickup: 'pickup' };
+
+/** "20 seconds", "3 minutes" or "1 minute 30 seconds" for VoiceOver, which reads "0:20" as a time of day. */
+export function spokenLength(ms: number): string {
+  const seconds = Math.round(ms / 1000);
+  const minutes = Math.floor(seconds / 60);
+  const rest = seconds % 60;
+  return [
+    minutes > 0 ? `${minutes} minute${minutes === 1 ? '' : 's'}` : '',
+    rest > 0 ? `${rest} second${rest === 1 ? '' : 's'}` : '',
+  ]
+    .filter(Boolean)
+    .join(' ');
+}
+
 /** "Session · 25:10 left", as the rowing screen shows the session's time left. */
 export function sessionLeftLabel(ms: number): string {
   return `Session · ${formatClock(ms)} left`;
@@ -120,13 +141,13 @@ export function describeGauge(
     return null;
   }
   const { segment } = timing;
-  const push = pushPositionAt(plan, index);
+  const work = workPositionAt(plan, index);
   const clock =
     snapshot.segmentRemainingMs === null
       ? { kind: 'rowed' as const, ms: snapshot.sessionElapsedMs - timing.startMs }
       : { kind: 'left' as const, ms: snapshot.segmentRemainingMs };
   const next = timings[index + 1];
-  const nextPush = next?.segment.type === 'push' ? pushPositionAt(plan, index + 1) : null;
+  const nextWork = isWorkSegment(segment.type) ? null : workPositionAt(plan, index + 1);
   const body: GaugeModel['body'] =
     plan.coachingMode === 'hr' && heart !== null
       ? describeHeart(timing, snapshot.sessionElapsedMs - timing.startMs, heart)
@@ -134,20 +155,22 @@ export function describeGauge(
 
   return {
     segmentType: segment.type,
-    eyebrow: push ? `Push ${push.index + 1} of ${push.count}` : EYEBROWS[segment.type],
+    eyebrow: work
+      ? `${EYEBROWS[work.kind]} ${work.index + 1} of ${work.count}`
+      : EYEBROWS[segment.type],
     eyebrowTone: isWorkSegment(segment.type) ? 'push' : 'steady',
     clock,
     widestClock: hasLongClock(timings) ? '00:00' : '0:00',
     clockTone:
-      clock.kind === 'left' && isPushCalled(pushStartsOf(timings), snapshot.sessionElapsedMs)
-        ? 'push'
+      clock.kind === 'left' && calledWorkAt(timings, snapshot.sessionElapsedMs) !== undefined
+        ? 'work'
         : 'ink',
     body,
     footer: {
       rate: segment.strokeRateRange,
-      nextPush:
-        segment.type === 'rest' && nextPush !== null && next !== undefined && next.endMs !== null
-          ? { pushNumber: nextPush.index + 1, pushMs: next.endMs - next.startMs }
+      nextWork:
+        nextWork !== null && next !== undefined && next.endMs !== null
+          ? { kind: nextWork.kind, number: nextWork.index + 1, ms: next.endMs - next.startMs }
           : null,
     },
     note: segment.type === 'coolDown' ? COOL_DOWN_LINE : null,
@@ -156,10 +179,6 @@ export function describeGauge(
     sessionElapsedMs: snapshot.sessionElapsedMs,
     sessionLeftMs: snapshot.sessionRemainingMs,
   };
-}
-
-function pushStartsOf(timings: readonly SegmentTiming[]): number[] {
-  return timings.flatMap(({ segment, startMs }) => (segment.type === 'push' ? [startMs] : []));
 }
 
 // Row freely counts up without end, and a segment over 599 s starts at 10:00 once its seconds round up.
@@ -223,9 +242,13 @@ export function countWord(count: number): string {
   return COUNT_WORDS[count - 1] ?? String(count);
 }
 
-/** Get seated's one-line plan, e.g. "Three 3′ pushes · 10′ warm-up first" (board 3.1a). */
+/**
+ * Get seated's one-line plan, e.g. "Three 3′ pushes · 10′ warm-up first, with two pickups" (board
+ * 3.1a), so the warm-up's pickups don't come as a surprise.
+ */
 export function summarizePlan(plan: SessionPlan): string {
-  const pushes = segmentTimings(plan).filter(({ segment }) => segment.type === 'push');
+  const timings = segmentTimings(plan);
+  const pushes = timings.filter(({ segment }) => segment.type === 'push');
   const firstPush = pushes[0];
   if (firstPush === undefined || firstPush.endMs === null) {
     return 'An easy row at your own pace';
@@ -234,5 +257,15 @@ export function summarizePlan(plan: SessionPlan): string {
   const pushMinutes = (firstPush.endMs - firstPush.startMs) / 60_000;
   const warmUpMinutes = firstPush.startMs / 60_000;
   const pushText = `${count} ${pushMinutes}′ push${pushes.length === 1 ? '' : 'es'}`;
-  return warmUpMinutes > 0 ? `${pushText} · ${warmUpMinutes}′ warm-up first` : pushText;
+  if (warmUpMinutes <= 0) {
+    return pushText;
+  }
+  const pickups = timings.filter(
+    ({ segment, startMs }) => segment.type === 'pickup' && startMs < firstPush.startMs,
+  ).length;
+  const pickupText =
+    pickups === 0
+      ? ''
+      : `, with ${pickups === 1 ? 'one pickup' : `${countWord(pickups).toLowerCase()} pickups`}`;
+  return `${pushText} · ${warmUpMinutes}′ warm-up first${pickupText}`;
 }

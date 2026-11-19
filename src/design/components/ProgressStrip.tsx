@@ -1,7 +1,7 @@
 import { StyleSheet, View } from 'react-native';
 
 import { colors, radius } from '../tokens';
-import { isWork, SegmentBars, type BarSegment } from './SegmentBars';
+import { isWork, SegmentBars, type BarKind, type BarSegment } from './SegmentBars';
 
 const BAR_HEIGHT = 18;
 const EASY_HEIGHT = 10;
@@ -26,21 +26,25 @@ function locate(segments: readonly BarSegment[], elapsedMs: number): Position {
   return { activeIndex: segments.length - 1, rowedShare: 1, sessionShare };
 }
 
-/** Says where the rower is, e.g. "push 2 of 3 in progress", for VoiceOver. */
+// Copy, not the bar kinds' names: a kind may be renamed without changing what VoiceOver says.
+const WHERE: Record<BarKind, string> = {
+  push: 'push',
+  pickup: 'pickup',
+  rest: 'rest',
+  easy: 'easy rowing',
+};
+
+/** Says where the rower is, e.g. "push 2 of 3 in progress" or "pickup 1 of 2 in progress", for VoiceOver. */
 function describe(segments: readonly BarSegment[], { activeIndex, rowedShare }: Position): string {
   const active = segments[activeIndex];
   if (!active || (activeIndex === segments.length - 1 && rowedShare >= 1)) {
     return 'Session progress: complete';
   }
-  const pushes = segments.filter((segment) => segment.kind === 'push');
-  const where =
-    active.kind === 'push'
-      ? `push ${pushes.indexOf(active) + 1} of ${pushes.length}`
-      : active.kind === 'pickup'
-        ? 'a pickup'
-        : active.kind === 'rest'
-          ? 'rest'
-          : 'easy rowing';
+  const ofKind = segments.filter((segment) => segment.kind === active.kind);
+  const isCounted = active.kind === 'push' || active.kind === 'pickup';
+  const where = isCounted
+    ? `${WHERE[active.kind]} ${ofKind.indexOf(active) + 1} of ${ofKind.length}`
+    : WHERE[active.kind];
   return `Session progress: ${where} in progress`;
 }
 

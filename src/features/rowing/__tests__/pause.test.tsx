@@ -4,7 +4,12 @@ import { SLICE_PLAN } from '../../../content/slicePlan';
 import { STOP_LINE } from '../copy';
 import { describeGauge } from '../gaugeModel';
 import { PauseSheet } from '../PauseSheet';
-import { machineAt, PUSH_2_AT_1_48_LEFT } from '../../../dev/rowingStates/sliceMoments';
+import {
+  machineAt,
+  MINUTE,
+  PUSH_2_AT_1_48_LEFT,
+  SECOND,
+} from '../../../dev/rowingStates/sliceMoments';
 
 /** The gauge as the pause sheet gets it: from a session paused mid-push, with 1:48 left. */
 function pausedGauge() {
@@ -61,6 +66,24 @@ describe('pause sheet (R32, R61)', () => {
       },
     );
     expect(onEndSession).toHaveBeenCalledTimes(1);
+  });
+
+  it('says "left in this pickup" for a pickup', async () => {
+    const machine = machineAt(5 * MINUTE + 10 * SECOND);
+    machine.pause('longPress');
+    const gauge = describeGauge(SLICE_PLAN, machine.snapshot(), null);
+    if (gauge === null) throw new Error('No gauge while paused');
+    await render(
+      <PauseSheet
+        gauge={gauge}
+        reason="longPress"
+        onResume={() => undefined}
+        onEndSession={() => undefined}
+      />,
+    );
+
+    expect(screen.getByText('Paused · Pickup 1 of 2')).toBeOnTheScreen();
+    expect(screen.getByText('left in this pickup')).toBeOnTheScreen();
   });
 
   it('says why the row paused', async () => {

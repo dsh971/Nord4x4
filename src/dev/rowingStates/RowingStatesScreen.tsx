@@ -1,4 +1,4 @@
-import { useEffect, useState, type ReactNode } from 'react';
+import { Fragment, useEffect, useState, type ReactNode } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -92,27 +92,35 @@ function paused(): ReactNode {
   );
 }
 
-const LIVE_FROM_MS = REST_10_S_BEFORE_PUSH_2 - 20 * SECOND;
 const LIVE_LOOP_MS = 60 * SECOND;
 
 /**
- * The slice rowing in real time from 30 s before push 2, through the war horn into the push, looping
- * each minute: the one state where the scene changes state and rate as you watch.
+ * The slice rowing in real time from `fromMs`, looping each minute: the states where the scene changes
+ * state and rate as you watch, without rowing up to them.
  */
-function LiveRow() {
-  const [sessionMs, setSessionMs] = useState(LIVE_FROM_MS);
+function LiveRow({ fromMs }: { fromMs: number }) {
+  const [sessionMs, setSessionMs] = useState(fromMs);
   useEffect(() => {
     const startedAt = Date.now();
     const timer = setInterval(() => {
-      setSessionMs(LIVE_FROM_MS + ((Date.now() - startedAt) % LIVE_LOOP_MS));
+      setSessionMs(fromMs + ((Date.now() - startedAt) % LIVE_LOOP_MS));
     }, 100);
     return () => clearInterval(timer);
-  }, []);
+  }, [fromMs]);
   return rowing(sessionMs);
 }
 
 const STATES: { name: string; render: () => ReactNode }[] = [
-  { name: 'Live · rest, war horn, into push 2', render: () => <LiveRow /> },
+  {
+    name: 'Live · rest, war horn, into push 2',
+    render: () => <LiveRow fromMs={REST_10_S_BEFORE_PUSH_2 - 20 * SECOND} />,
+  },
+  {
+    name: 'Live · warm-up, war horn, into pickup 1',
+    render: () => <LiveRow fromMs={4 * MINUTE + 30 * SECOND} />,
+  },
+  { name: 'Warm-up · next pickup 1', render: () => rowing(2 * MINUTE) },
+  { name: 'Warm-up · last stretch, next push 1', render: () => rowing(9 * MINUTE) },
   { name: 'Push 2 · effort (board 3.6)', render: () => rowing(PUSH_2_AT_1_48_LEFT) },
   {
     name: 'Push 2 · heart rate in zone (3.2)',
@@ -143,6 +151,10 @@ const STATES: { name: string; render: () => ReactNode }[] = [
     render: () => rowing(5 * MINUTE + SECOND, { banner: SIGNAL_BANNERS.pickupStart }),
   },
   {
+    name: 'Pickup 1 · heart rate in zone',
+    render: () => rowing(5 * MINUTE + 10 * SECOND, { heart: heart(160) }),
+  },
+  {
     name: 'Pickup ends · back to easy',
     render: () => rowing(5 * MINUTE + 21 * SECOND, { banner: SIGNAL_BANNERS.pickupEnd }),
   },
@@ -168,7 +180,8 @@ export function RowingStatesScreen() {
   const frameRate = useFrameRate();
   return (
     <View style={styles.screen}>
-      {state?.render()}
+      {/* Keyed by state, so stepping between the two live loops starts the second afresh. */}
+      <Fragment key={state?.name}>{state?.render()}</Fragment>
       <SafeAreaView style={styles.captionArea} pointerEvents="box-none">
         <Pressable
           onPress={() => setIndex((current) => current + 1)}

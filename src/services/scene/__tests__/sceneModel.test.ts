@@ -33,10 +33,17 @@ describe('sceneStateAt (R27)', () => {
     expect(sceneStateAt(TIMELINE, PUSH_STARTS + 7 * MINUTE)).toBe('easy');
   });
 
-  it("raises the oars from a push's 10 s warning, but not before a pickup", () => {
+  it("raises the oars from a push's 10 s warning", () => {
     expect(sceneStateAt(TIMELINE, PUSH_STARTS - 10 * SECOND)).toBe('horn');
     expect(sceneStateAt(TIMELINE, PUSH_STARTS - 10 * SECOND - 1)).toBe('easy');
-    expect(sceneStateAt(TIMELINE, 2 * MINUTE - 5 * SECOND)).toBe('easy');
+  });
+
+  it("raises them from a pickup's 10 s warning too, until it starts", () => {
+    const pickupStarts = 2 * MINUTE + 1_300;
+    expect(sceneStateAt(TIMELINE, pickupStarts - 10 * SECOND - 1)).toBe('easy');
+    expect(sceneStateAt(TIMELINE, pickupStarts - 10 * SECOND)).toBe('horn');
+    expect(sceneStateAt(TIMELINE, pickupStarts)).toBe('work');
+    expect(sceneStateAt(TIMELINE, pickupStarts + 20 * SECOND)).toBe('easy');
   });
 
   it('is calm during Get seated and after the row', () => {

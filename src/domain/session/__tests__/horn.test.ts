@@ -1,4 +1,6 @@
-import { hornCueAtMs, isPushCalled, warningStartsAtMs } from '../sessionMachine';
+import { SLICE_PLAN } from '../../../content/slicePlan';
+import { hornCueAtMs, isWorkCalled, warningStartsAtMs, workStartsOf } from '../sessionMachine';
+import { segmentTimings } from '../sessionPlan';
 
 describe('the warning and the war horn (R39, R40)', () => {
   it('shows the warning 10 s before a push or pickup, but never before the row starts', () => {
@@ -11,12 +13,21 @@ describe('the warning and the war horn (R39, R40)', () => {
     expect(hornCueAtMs(4_000)).toBe(0);
   });
 
+  it('calls a pickup the same way: from 4:50 until it starts at 5:00', () => {
+    const workStarts = workStartsOf(segmentTimings(SLICE_PLAN));
+    expect(workStarts.slice(0, 3)).toEqual([300_000, 420_000, 600_000]);
+    expect(isWorkCalled(workStarts, 289_999)).toBe(false);
+    expect(isWorkCalled(workStarts, 290_000)).toBe(true);
+    expect(isWorkCalled(workStarts, 299_999)).toBe(true);
+    expect(isWorkCalled(workStarts, 300_000)).toBe(false);
+  });
+
   it('calls a push from its warning until the push starts, and not after', () => {
     const pushStarts = [600_000, 960_000];
-    expect(isPushCalled(pushStarts, 589_999)).toBe(false);
-    expect(isPushCalled(pushStarts, 590_000)).toBe(true);
-    expect(isPushCalled(pushStarts, 599_999)).toBe(true);
-    expect(isPushCalled(pushStarts, 600_000)).toBe(false);
-    expect(isPushCalled(pushStarts, 955_000)).toBe(true);
+    expect(isWorkCalled(pushStarts, 589_999)).toBe(false);
+    expect(isWorkCalled(pushStarts, 590_000)).toBe(true);
+    expect(isWorkCalled(pushStarts, 599_999)).toBe(true);
+    expect(isWorkCalled(pushStarts, 600_000)).toBe(false);
+    expect(isWorkCalled(pushStarts, 955_000)).toBe(true);
   });
 });

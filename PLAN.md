@@ -418,6 +418,11 @@ After G6b, a pickup sounds like a push in miniature, but on screen it is still t
   - `pause.test.tsx`: a pause in a pickup says "left in this pickup".
   - `ProgressStrip.test.tsx`: "pickup 1 of 2".
   - Then `npx tsc --noEmit && npx jest && npm run lint`.
+- **Status (2026-11-18, uncommitted):** built as planned.
+  - Code: pickups carry the push zone; `workPositionAt`; `isWorkCalled` and `workStartsOf` replace `isPushCalled` and the scene's and gauge's push-only start lists; the gauge's eyebrow, clock colour (`work`), `nextWork` footer and summary; the footer's one VoiceOver label and text-size cap; "left in this pickup"; "pickup 1 of 2" on the strip; four new dev states (live loop from 4:30, warm-up at 2:00 and 9:51, heart-rate pickup).
+  - Docs: R27, R29, R51 and F2 step 3; the plan doc's segment zones and scene-state scenario; the design README's 3.3 and 3.3p captions and the 3.1a drift note.
+  - Tests: `npx jest` 227/227; `npx tsc --noEmit` and `npm run lint` clean. Run against the last commit, all 19 new or changed tests fail. The cross-check steps through the slice every 0.5 s and finds the clock, the oars and the banner always agree.
+  - **Code review (2026-11-19, four models), fixed:** one definition of work (`WorkSegmentType`, with `isWorkSegment` narrowing to it); `pushPositionAt` is a filter on `workPositionAt`, not a second search; the gauge clock reads `calledWorkAt`, the banner's own function, and only the oars keep `isWorkCalled`; on-screen words come from a copy map (`WORK_NOUNS`, the strip's `WHERE`), not type names; `spokenLength` sits beside `formatClock` with its own test, and the push footer's VoiceOver label is checked; a 4-minute pickup pins "never Build" (it fails without the push-only check); the 9:51 dev state moved to 9:00, out of push 1's warning; the dev states are keyed, so the two live loops don't share a clock. `npx jest` 229/229; tsc and lint clean.
 - **Phone check:**
   - The live loop into pickup 1. Judge whether raised oars before a 20 s pickup make it feel bigger than it is. The oars freeze for 10 s while you're rowing easy, then jump to the catch at 5:00. Compare with 9:50 before push 1.
   - The warm-up gauge in landscape at the largest text size: the footer fits, and the smaller stroke rate still reads at 1 m.

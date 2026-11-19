@@ -4,20 +4,27 @@ import { Text } from '../../design/components/Text';
 import { ZoneChip } from '../../design/components/ZoneChip';
 import { colors, radius, space } from '../../design/tokens';
 import { GaugeDigits, gaugeDigitsWidth } from './GaugeDigits';
-import { formatClock, formatGaugeClock, type GaugeModel } from './gaugeModel';
+import {
+  formatClock,
+  formatGaugeClock,
+  spokenLength,
+  WORK_NOUNS,
+  type GaugeModel,
+} from './gaugeModel';
 
 // The landscape panel's width (U17); a clock of 10:00 or more widens it rather than shrink below R29.
 const GAUGE_WIDTH = 224;
 const PANEL_INSET = 2 * space.sm + 2;
 // "Rate 26–28 spm" fills about 146 of the panel's 198 pt; larger text would push it out of the panel.
+// The "Next pickup 1 · 0:20" line is about as wide, so it takes the same cap.
 const RATE_MAX_FONT_SCALE = 1.3;
 
 // Copy, not the model's words: the label may change without renaming the union.
 const CLOCK_LABELS: Record<GaugeModel['clock']['kind'], string> = { left: 'left', rowed: 'rowed' };
 
 /**
- * The gauge (R29): segment, time left, effort or heart rate, and the stroke rate to aim for. In a
- * rest the rate shrinks to a small line so the next push still fits the landscape panel's height. In
+ * The gauge (R29): segment, time left, effort or heart rate, and the stroke rate to aim for. Outside
+ * work the rate shrinks to a small line so the next push or pickup fits the landscape panel's height. In
  * landscape it is a corner panel sized for the session's widest clock (board 3.2), and the rowing
  * overlay shows the cool-down line beside it; in portrait it stretches across as a band holding that
  * line too. The band keeps the panel's stacking until U17 lays it out as board 3.2p.
@@ -44,7 +51,7 @@ export function CornerGauge({ gauge, isBand = false }: { gauge: GaugeModel; isBa
       <GaugeDigits
         text={clock}
         variant="gaugeTime"
-        color={gauge.clockTone === 'push' ? 'textPush' : 'textPrimary'}
+        color={gauge.clockTone === 'work' ? 'textPush' : 'textPrimary'}
         testID="gauge-time"
       />
       <View style={styles.rule} />
@@ -98,7 +105,7 @@ export function CornerGauge({ gauge, isBand = false }: { gauge: GaugeModel; isBa
           {gauge.note}
         </Text>
       ) : null}
-      {gauge.footer.nextPush ? (
+      {gauge.footer.nextWork ? (
         <>
           <Text
             variant="caption"
@@ -109,12 +116,23 @@ export function CornerGauge({ gauge, isBand = false }: { gauge: GaugeModel; isBa
           >
             Rate {rate.low}–{rate.high} spm
           </Text>
-          <View style={styles.reading}>
-            <Text variant="headline" color="textPush" style={styles.footerNumber}>
+          <View
+            style={styles.reading}
+            accessible
+            accessibilityLabel={`Next: ${WORK_NOUNS[gauge.footer.nextWork.kind]} ${gauge.footer.nextWork.number}, ${spokenLength(gauge.footer.nextWork.ms)}`}
+            testID="gauge-next"
+          >
+            <Text
+              variant="headline"
+              color="textPush"
+              style={styles.footerNumber}
+              maxFontSizeMultiplier={RATE_MAX_FONT_SCALE}
+            >
               Next
             </Text>
-            <Text variant="body" color="textSecondary">
-              push {gauge.footer.nextPush.pushNumber} · {formatClock(gauge.footer.nextPush.pushMs)}
+            <Text variant="body" color="textSecondary" maxFontSizeMultiplier={RATE_MAX_FONT_SCALE}>
+              {WORK_NOUNS[gauge.footer.nextWork.kind]} {gauge.footer.nextWork.number} ·{' '}
+              {formatClock(gauge.footer.nextWork.ms)}
             </Text>
           </View>
         </>

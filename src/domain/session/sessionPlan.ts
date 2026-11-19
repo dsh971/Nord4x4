@@ -49,8 +49,11 @@ export type SegmentTiming =
   | { readonly segment: TimedSegment; readonly startMs: number; readonly endMs: number }
   | { readonly segment: OpenSegment; readonly startMs: number; readonly endMs: null };
 
+/** The kinds of segment that are work: pushes, and the pickups inside a warm-up. */
+export type WorkSegmentType = Extract<SegmentType, 'push' | 'pickup'>;
+
 /** Whether a kind of segment is work: pushes, and the pickups inside a warm-up. */
-export function isWorkSegment(type: SegmentType): boolean {
+export function isWorkSegment(type: SegmentType): type is WorkSegmentType {
   return type === 'push' || type === 'pickup';
 }
 
@@ -110,14 +113,33 @@ export function plannedLengthMs(plan: SessionPlan): number | null {
   return last?.endMs ?? null;
 }
 
-/** Which push a segment is, counting from 0, out of how many; null if it isn't a push (R29, R36). */
+/** Which push or pickup a segment is among its own kind, counting from 0, out of how many; null if it isn't work (R29). */
+export function workPositionAt(
+  plan: SessionPlan,
+  segmentIndex: number,
+): {
+  readonly kind: WorkSegmentType;
+  readonly index: number;
+  readonly count: number;
+} | null {
+  const type = plan.segments[segmentIndex]?.type;
+  if (type === undefined || !isWorkSegment(type)) {
+    return null;
+  }
+  const ofKind: number[] = plan.segments.flatMap((segment: Segment, index) =>
+    segment.type === type ? [index] : [],
+  );
+  return { kind: type, index: ofKind.indexOf(segmentIndex), count: ofKind.length };
+}
+
+/**
+ * Which push a segment is, counting from 0, out of how many; null if it isn't a push. Pickups never
+ * count: the ease-off bells ring once per push (R36).
+ */
 export function pushPositionAt(
   plan: SessionPlan,
   segmentIndex: number,
 ): { readonly index: number; readonly count: number } | null {
-  const pushes: number[] = plan.segments.flatMap((segment: Segment, index) =>
-    segment.type === 'push' ? [index] : [],
-  );
-  const index = pushes.indexOf(segmentIndex);
-  return index === -1 ? null : { index, count: pushes.length };
+  const work = workPositionAt(plan, segmentIndex);
+  return work?.kind === 'push' ? { index: work.index, count: work.count } : null;
 }

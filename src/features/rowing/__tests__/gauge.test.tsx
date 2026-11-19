@@ -112,6 +112,7 @@ describe('rowing gauge, boards 3.3 and R61', () => {
     const next = screen.getByText('Next');
     expect(StyleSheet.flatten(next.props.style).fontFamily).toBe(typography.headline.fontFamily);
     expect(screen.getByText('push 2 · 3:00')).toBeOnTheScreen();
+    expect(screen.getByTestId('gauge-next')).toHaveAccessibleName('Next: push 2, 3 minutes');
     // A small rate line, so the next push fits the landscape panel's height.
     const rate = screen.getByTestId('gauge-rate');
     expect(rate).toHaveAccessibleName('Stroke rate 18 to 22 per minute');
@@ -121,6 +122,17 @@ describe('rowing gauge, boards 3.3 and R61', () => {
       includeHiddenElements: true,
     })[0];
     expect(StyleSheet.flatten(digit?.props.style).color).toBe(colors.textPush);
+  });
+
+  it('names the next pickup in the warm-up, read by VoiceOver as one line and capped in size', async () => {
+    await renderOverlay(2 * MINUTE);
+
+    expect(screen.getByText('pickup 1 · 0:20')).toBeOnTheScreen();
+    const next = screen.getByTestId('gauge-next');
+    expect(next).toHaveAccessibleName('Next: pickup 1, 20 seconds');
+    for (const text of within(next).getAllByText(/./, { includeHiddenElements: true })) {
+      expect(text.props.maxFontSizeMultiplier).toBeLessThanOrEqual(1.3);
+    }
   });
 
   it('tells the rower to keep paddling in the cool-down: in the band in portrait, beside the panel in landscape', async () => {

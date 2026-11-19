@@ -27,29 +27,29 @@ export const EASY_RATE: RowingRate = {
   strokeRateRange: { low: 18, high: 22 },
 };
 
-/** One timed segment, with the rate and scene its type rows at; only pushes carry a heart-rate zone. */
+/** One timed segment, with the rate and scene its type rows at; only work (pushes and pickups) carries a heart-rate zone. */
 export function timedSegment(
   type: TimedSegment['type'],
   durationMs: number,
-  pushZone: HeartRateZone | null = null,
+  workZone: HeartRateZone | null = null,
 ): TimedSegment {
   const isWork = isWorkSegment(type);
   return {
     type,
     durationMs,
-    targetZone: type === 'push' ? pushZone : null,
+    targetZone: isWork ? workZone : null,
     ...(isWork ? PUSH_RATE : EASY_RATE),
     scene: isWork ? 'work' : type === 'rest' ? 'rest' : 'easy',
   };
 }
 
-/** The 10-minute warm-up of every hard session, with two 20 s pickups (R10). */
-export function warmUpWithPickups(): TimedSegment[] {
+/** The 10-minute warm-up of every hard session, with two 20 s pickups aimed at the pushes' zone (R10). */
+export function warmUpWithPickups(pickupZone: HeartRateZone): TimedSegment[] {
   return [
     timedSegment('warmUp', 5 * MINUTE),
-    timedSegment('pickup', 20 * SECOND),
+    timedSegment('pickup', 20 * SECOND, pickupZone),
     timedSegment('warmUp', 100 * SECOND),
-    timedSegment('pickup', 20 * SECOND),
+    timedSegment('pickup', 20 * SECOND, pickupZone),
     timedSegment('warmUp', 160 * SECOND),
   ];
 }
@@ -70,7 +70,11 @@ export function hardSession(options: {
     work.push(timedSegment('push', options.pushMs, options.pushZone));
   }
   return {
-    segments: [...warmUpWithPickups(), ...work, timedSegment('coolDown', 5 * MINUTE)],
+    segments: [
+      ...warmUpWithPickups(options.pushZone),
+      ...work,
+      timedSegment('coolDown', 5 * MINUTE),
+    ],
     getSeatedHoldMs: DEFAULT_GET_SEATED_HOLD_MS,
     coachingMode: options.coachingMode,
   };

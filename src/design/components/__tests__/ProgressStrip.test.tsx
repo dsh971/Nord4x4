@@ -51,6 +51,11 @@ describe('ProgressStrip', () => {
     expect(screen.getByLabelText('Session progress: easy rowing in progress')).toBeOnTheScreen();
   });
 
+  it('numbers a pickup for VoiceOver, as it numbers a push', async () => {
+    await render(<ProgressStrip segments={WEEK_3} elapsedMs={310_000} />);
+    expect(screen.getByLabelText('Session progress: pickup 1 of 2 in progress')).toBeOnTheScreen();
+  });
+
   it('holds the marker at the end of the last segment once the session is over', async () => {
     await render(<ProgressStrip segments={WEEK_3} elapsedMs={5_000_000} />);
 

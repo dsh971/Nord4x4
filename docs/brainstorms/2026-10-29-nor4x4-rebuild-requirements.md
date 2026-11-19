@@ -162,16 +162,17 @@ The current SwiftUI app does not solve this. It is a stock-looking interval time
   - horn cue (oars raised, horn at the prow);
   - easy (calm water, low sun).
 
-  Pickups use the work state; warm-up and cool-down use the easy state.
+  Pickups use the work state; warm-up and cool-down use the easy state. The horn cue state runs from a push's or pickup's 10 s warning until it starts. (Revised 2026-11-18: pickups had only the work state.)
 - R28. Easy-row scenery changes with each leg of the voyage.
 - R29. A corner gauge shows time remaining in the segment and in the session, heart rate, zone state, and the drum's target stroke rate (no stroke rate is measured in v1).
   - Time and heart rate are readable at 1 m: at least 9 mm cap height for time and 6 mm for heart rate on the device.
   - The zone chip is at least 22 pt.
+  - Outside work, the gauge names the push or pickup coming next and its length, e.g. "Next pickup 1 · 0:20". A pickup is named by its place among the pickups, "Pickup 1 of 2", as a push is.
 - R50. Zone state is shown as a word plus a shape, never color alone: "Ease off ▲", "In zone", "Build ▼", and "Recovering" during rests (no arrow).
   - "Build ▼" never appears in the first 90 s of a push, in pushes shorter than 3 minutes, or when max HR is estimated from age.
 - R30. Without a heart-rate strap, with heart-rate medication (R5), or when a strap drops ("Strap lost"), the gauge shows effort guidance instead of bpm. The guidance is perceived effort on a 1–10 scale plus a talk test. 90 s into each push, the hold signal (a short distinct sound, R40) and a "Hold this effort" banner tell the rower to settle.
 - R31. A progress strip at least 12 pt tall shows every segment, including warm-up pickups, with a marker for now, legible over the painting. Push segments are taller than steady ones, so the strip doesn't rely on color alone.
-- R51. Every audio cue has a visual twin (R40). The war horn's twin is the warning banner that went up 4 s before it and stays until the push or pickup starts.
+- R51. Every audio cue has a visual twin (R40). The war horn's twin is the warning banner that went up 10 s before the push or pickup, 4 s before the horn, and stays until it starts.
 - R52. All timers in rowing mode show time remaining, except Row freely, which has no end and shows time rowed.
 - R32. Pausing never needs a precise tap: a long press anywhere pauses. The pause sheet offers Resume, Restart this push (during a push), sound mode, and End session, which needs a hold to confirm.
 - R33. Landscape and portrait are both first-class layouts.
@@ -273,7 +274,7 @@ The current SwiftUI app does not solve this. It is a stock-looking interval time
   - **Steps:**
     1. The warning screen on the first row, then the strap prompt if never asked.
     2. Get seated with the stroke demo and the stop line.
-    3. Warm-up with pickups: "Pickup coming" 10 s before each, the horn 6 s before, the double strike and "Pickup" at the start, and the low horn and "Back to easy" at the end.
+    3. Warm-up with pickups: "Pickup coming", the persimmon clock and the raised oars 10 s before each, the horn 6 s before, the double strike and "Pickup" at the start, and the low horn and "Back to easy" at the end.
     4. For each push: "Ready oars" and the edge pulse 10 s before, the horn 6 s before, the double drum strike and "Pull" at the start, the work scene, the end-of-push horn, and the rest scene.
     5. Cool-down.
     6. Session complete with the rating, then back to the route.

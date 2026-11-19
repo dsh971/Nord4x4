@@ -246,7 +246,7 @@ stateDiagram-v2
   PartlyRowed --> [*]
 ```
 
-Each segment carries a type, duration, target zone, target stroke rate and scene state.
+Each segment carries a type, duration, target zone, target stroke rate and scene state. Pushes and pickups carry the session's push zone; other segments carry none.
 - **Types:** warm-up, pickup, push, rest, easy, steady, cool-down, benchmark, or open.
 - **Scene states:** work, rest, horn, easy, swell or rough.
 - **Open segments:** Row freely is a single open segment with no end; it counts up.
@@ -914,7 +914,7 @@ nor4x4-app/
 - **Art:** the builder produces the slice art. Final art is commissioned or self-made after M1 (see `STRATEGY.md` costs).
 
 **Test scenarios:**
-- A push maps to the work state, a rest to rest, and the 10 s before a push to the horn state.
+- A push maps to the work state, a rest to rest, and the 10 s before a push or a pickup to the horn state.
 - Covers R58. Casual Intermediate maps to swell, Hard to rough, and Easy to calm; warm-up and cool-down map to calm.
 - Leg index 3 returns a different palette and landmark set from leg 2.
 - At 27 spm, one oar cycle completes every 2.22 s.

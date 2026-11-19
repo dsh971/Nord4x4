@@ -3,11 +3,12 @@ import { Animated, Pressable, ScrollView, StyleSheet, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import type { PauseReason } from '../../domain/session/sessionMachine';
+import { isWorkSegment } from '../../domain/session/sessionPlan';
 import { Button } from '../../design/components/Button';
 import { Text } from '../../design/components/Text';
 import { colors, radius, space } from '../../design/tokens';
 import { STOP_LINE } from './copy';
-import { formatGaugeClock, type GaugeModel } from './gaugeModel';
+import { formatGaugeClock, WORK_NOUNS, type GaugeModel } from './gaugeModel';
 
 // How long End session must be held, so a rower who meant Resume can't end the row (R32).
 const END_HOLD_MS = 1_500;
@@ -55,7 +56,7 @@ export function PauseSheet({
             <Text variant="bodyLarge" color="textSecondary">
               {gauge.clock.kind === 'rowed'
                 ? 'rowed'
-                : `left in this ${gauge.segmentType === 'push' ? 'push' : 'stretch'}`}
+                : `left in this ${isWorkSegment(gauge.segmentType) ? WORK_NOUNS[gauge.segmentType] : 'stretch'}`}
             </Text>
           </View>
           <Text variant="body" color="textSecondary">

@@ -1,5 +1,5 @@
 import { timedSegment } from '../sessionBuilders';
-import { pushPositionAt, validateSessionPlan } from '../sessionPlan';
+import { pushPositionAt, validateSessionPlan, workPositionAt } from '../sessionPlan';
 import { fourByFourPlan } from './fixtures';
 
 describe('pushPositionAt', () => {
@@ -20,6 +20,22 @@ describe('pushPositionAt', () => {
     expect(pushPositionAt(plan, 1)).toBeNull();
     expect(pushPositionAt(plan, 6)).toBeNull();
     expect(pushPositionAt(plan, plan.segments.length)).toBeNull();
+  });
+});
+
+describe('workPositionAt', () => {
+  const plan = fourByFourPlan();
+
+  it('counts pushes and pickups each among their own kind', () => {
+    expect(workPositionAt(plan, 1)).toEqual({ kind: 'pickup', index: 0, count: 2 });
+    expect(workPositionAt(plan, 3)).toEqual({ kind: 'pickup', index: 1, count: 2 });
+    expect(workPositionAt(plan, 7)).toEqual({ kind: 'push', index: 1, count: 4 });
+  });
+
+  it('is null for easy rowing, rests and indexes past the end', () => {
+    expect(workPositionAt(plan, 0)).toBeNull();
+    expect(workPositionAt(plan, 6)).toBeNull();
+    expect(workPositionAt(plan, plan.segments.length)).toBeNull();
   });
 });
 

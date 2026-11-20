@@ -17,7 +17,8 @@ Open Nor4x4 (a dev build) and tap **Row the slice** on the start screen. It is w
 - Phone in landscape on the rower's holder, about 1 m away, as for a real session.
 - Volume where you would have it; note whether your own music was playing.
 - Ring/silent switch noted: Silent mode keeps every cue on screen (R40) but plays nothing.
-- The app opens? Free signing lapses after 7 days: rebuild with `npx expo run:ios --device`.
+- Metro running on the Mac (`npx expo start --dev-client`) and the phone on the same Wi-Fi: the dev build loads its JavaScript from Metro, so it can't row without it.
+- The app opens? Free signing lapses after 7 days: rebuild with `npm run ios:device`.
 
 ## The row log
 
@@ -45,12 +46,15 @@ What each column asks:
 ## Things to listen and look for
 
 - The drum: soft single hits in the warm-up, then "tap · tap · BOOM" in pushes, landing with the oars' catch.
-- The war horn 10 s before each push: the drum stops under it, the oars rise, a horn shows at the prow, and "Ready oars" appears.
+- 10 s before each push, "Ready oars" appears with an edge pulse and the clock turns persimmon; 10 s before each pickup, "Pickup coming" does the same (G6b, G6c).
+- The war horn 6 s before each push and pickup: the drum stops under it, the oars rise, and a horn shows at the prow.
+- In the warm-up, the gauge's footer names what comes next ("Next pickup 1 · 0:20"), and each pickup reads "Pickup 1 of 2".
 - The double taiko strike at each push, and the falling horn as it ends.
 - "Hold this effort" with its wood clack 90 s into each push (effort mode only).
 - Levels: the bell and wood clack against the drum; the sea and crew under everything.
 - A long press pauses everything; the pause sheet ends the row only with a hold.
 - The frame rate: the scene should never stutter.
+- Leaving the app mid-row (e.g. to change music): the sound stops, a silent "Row still going" notice comes after about 1 s, and each warning arrives as a notification with the horn. Note how often you left and whether that was enough (it decides the Live Activity idea in `PLAN.md`).
 
 ## Known limits of the slice
 

@@ -491,6 +491,35 @@ Raised after G6b″: the "Row still going" banner leaves the screen after a few 
   - How it starts, updates and ends. It would replace or sit beside the G6b″ notice, the R43 warnings, and a row that ends while away.
 - **Size:** a phone rebuild and more than 3 files, so it gets its own plan section and your approval before any code.
 
+### H · Your coaching decisions, and the rehearsal's questions, in the coach packet (approved and done 2026-11-20; docs only)
+
+Raised while preparing the U1 coach review. A rehearsal of the packet's five questions (a model playing a coach, not a review) led to two decisions from you, plus new questions for the real coach. Both decisions are product calls, so they change the requirements now. Every number stays a draft until the coach answers (R17).
+
+**Your decisions (2026-11-20):**
+- **Beginners are coached by effort.** On the Beginner voyage, perceived effort leads every row, whatever the strap or max HR; heart rate shows only as information. From week 5, heart rate may lead, but only with a strap and a known (not age-estimated) max. Today effort leads only without a strap, with heart-rate medication, or with an estimated max (requirements' line 42, R30, KTD21).
+- **One hard session a week stays the default.** In weeks 5–8 the rower may be offered an optional second hard session, never the default. Whether to offer it, and when, is a question for the coach.
+
+**New questions for the coach (proposals, not requirement changes):**
+- Ease off relative to the session's target band (its top plus a margin, held 20–30 s) instead of a flat 95% for 15 s, since in weeks 6–8 the target reaches 95%.
+- Let the ease-off fire again when HR drops back and climbs over again, at most once a minute, instead of once per push.
+- Advance the program by completion and felt effort, not the calendar: offer to repeat the week after a push session that felt 9–10 out of 10 or was stopped early.
+- A stroke-rate ceiling in beginner pushes (about 24–28 spm), a damper note (3–5), and a technique row before the first hard session.
+- Benchmark wording: "steady but strong", not "as far as you can".
+
+**Files:**
+- `docs/brainstorms/2026-10-29-nor4x4-rebuild-requirements.md`: the coaching-mode line (line 42), R30, and R10's note on the hard-session count.
+- `docs/plans/2026-10-29-001-feat-nor4x4-expo-rebuild-plan.md`: KTD21 adds the Beginner voyage and its week to what sets `coachingMode`.
+- `docs/review/coach-review.md`: section 9's questions 1 and 2 state your position for the coach to confirm or challenge; the new questions join sections 3–5 and 9.
+
+**No code changes.** The slice is week 3 of the Beginner voyage and already coached by effort. The "fake heart rate" slice stays as a dev check of the glow, not a beginner row.
+
+**Verification:**
+```
+grep -n -i 'beginner' docs/brainstorms/2026-10-29-nor4x4-rebuild-requirements.md | grep -i effort   # the new rule is stated
+grep -n 'KTD21' docs/plans/2026-10-29-001-feat-nor4x4-expo-rebuild-plan.md                          # names the voyage and week
+```
+Plus a read-through that the packet's numbers still match the requirements (the Phase A check).
+
 ## Verification (whole milestone)
 
 ```

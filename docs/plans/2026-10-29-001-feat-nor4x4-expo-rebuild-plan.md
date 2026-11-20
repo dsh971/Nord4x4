@@ -190,7 +190,7 @@ M1 is a hard gate: if the slice isn't fun, the scene and sound change before M2 
   - The SQLite file lives in the app's container, so iPhone backups include it.
   - "Export my rows" (R63) writes a CSV to the iOS share sheet.
   - iCloud sync is the first item after v1.
-- KTD21. **Effort leads when bpm can't be trusted.** One `coachingMode` value (`hr` or `effort`) comes from the profile: max-HR source, medication, and strap state. The gauge, zone states, scoring and copy all read it.
+- KTD21. **Effort leads when bpm can't be trusted.** One `coachingMode` value (`hr` or `effort`) comes from the profile and the plan: max-HR source, medication, strap state, and on the Beginner voyage the week (effort in weeks 1–4; from week 5, `hr` only with a strap and a known max; decided 2026-11-20). The gauge, zone states, scoring and copy all read it.
 
 ---
 

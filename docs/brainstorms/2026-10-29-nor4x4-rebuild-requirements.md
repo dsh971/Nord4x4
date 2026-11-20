@@ -40,6 +40,7 @@ The current SwiftUI app does not solve this. It is a stock-looking interval time
 - **Value before setup.** Onboarding asks only what the first session needs. The safety warning and sensor pairing come at the first "Set out".
 - **Safety before targets.**
   - When max HR is estimated, or heart-rate medication makes bpm unreliable, perceived effort leads and heart rate is only information.
+  - On the Beginner voyage, perceived effort leads every row and heart rate is only information. From week 5, heart rate may lead with a strap and a known max (decided 2026-11-20).
   - Warning symptoms always mean stop.
 - **Shuimo, adapted with color.**
   - Silk ground, ink type hierarchy, Noto Serif SC display and Inter body, square corners, malachite primary actions.
@@ -101,6 +102,8 @@ The current SwiftUI app does not solve this. It is a stock-looking interval time
 | 6 | 4×4′ / 3′ | 85–95% | 40 min | 2 |
 | 7 | 4×4′, plus an optional fifth push | 90–95% | 40 min, or 47 with the fifth push | 2 |
 | 8 | Final 4×4′ | 90–95% | 40 min | 1 (the benchmark row, R45) |
+
+  One hard session a week is the default (decided 2026-11-20). Weeks 5–8 may offer an optional second hard session, never the default; whether and when is for the coach review (R17).
 
 - R11. Intermediate and Expert voyages are deferred until after v1 (see Scope Boundaries).
 - R12. "Short on time" swaps any hard session for a 1×4 session of 19 minutes (10 min warm-up, one 4-minute push, 5 min cool-down). The swap counts as completing that hard session.
@@ -170,7 +173,7 @@ The current SwiftUI app does not solve this. It is a stock-looking interval time
   - Outside work, the gauge names the push or pickup coming next and its length, e.g. "Next pickup 1 · 0:20". A pickup is named by its place among the pickups, "Pickup 1 of 2", as a push is.
 - R50. Zone state is shown as a word plus a shape, never color alone: "Ease off ▲", "In zone", "Build ▼", and "Recovering" during rests (no arrow).
   - "Build ▼" never appears in the first 90 s of a push, in pushes shorter than 3 minutes, or when max HR is estimated from age.
-- R30. Without a heart-rate strap, with heart-rate medication (R5), or when a strap drops ("Strap lost"), the gauge shows effort guidance instead of bpm. The guidance is perceived effort on a 1–10 scale plus a talk test. 90 s into each push, the hold signal (a short distinct sound, R40) and a "Hold this effort" banner tell the rower to settle.
+- R30. Without a heart-rate strap, with heart-rate medication (R5), when a strap drops ("Strap lost"), with an age-estimated max, or in weeks 1–4 of the Beginner voyage, the gauge shows effort guidance instead of bpm; any heart reading shows only as information (decided 2026-11-20). The guidance is perceived effort on a 1–10 scale plus a talk test. 90 s into each push, the hold signal (a short distinct sound, R40) and a "Hold this effort" banner tell the rower to settle.
 - R31. A progress strip at least 12 pt tall shows every segment, including warm-up pickups, with a marker for now, legible over the painting. Push segments are taller than steady ones, so the strip doesn't rely on color alone.
 - R51. Every audio cue has a visual twin (R40). The war horn's twin is the warning banner that went up 10 s before the push or pickup, 4 s before the horn, and stays until it starts.
 - R52. All timers in rowing mode show time remaining, except Row freely, which has no end and shows time rowed.

@@ -15,7 +15,7 @@ Every number below is a draft (R17). Nothing in the program engine is built unti
 - **Two paths:**
   - **Train with the 4x4:** an 8-week Beginner program, three rows a week, building to the Norwegian 4×4 (4 × 4 min hard, 3 min easy).
   - **Just row:** no program; the rower picks Easy, Intermediate or Hard and a length each time.
-- **Heart rate:** zones are a percentage of max HR. Max HR is estimated as **208 − 0.7 × age** (Tanaka), or the rower types a known max. With no strap, or with heart-rate medication, the app coaches by perceived effort instead.
+- **Heart rate:** zones are a percentage of max HR. Max HR is estimated as **208 − 0.7 × age** (Tanaka), or the rower types a known max. With no strap, with heart-rate medication, with an age-estimated max, or in weeks 1–4 of the Beginner voyage, the app coaches by perceived effort instead.
 
 Please mark each item **Keep**, **Change** (with the new value) or **Discuss**, and answer the questions in section 9.
 
@@ -167,11 +167,13 @@ The 4×4 comes from Helgerud 2007 (moderately trained men). Tjønna 2013 compare
 
 ## 9. Questions
 
-1. Should perceived effort or heart rate lead for beginners whose max HR is only estimated from age?
-2. Is one hard session a week enough in weeks 5–8, or should there be two?
-3. Is the 95%-for-15-s ease-off right, and should it fire more than once per push?
-4. Is 8 weeks the right length for the Beginner voyage?
-5. Anything in sections 1–7 you would not let a new rower do without supervision?
+1. **Our position:** on the Beginner voyage, perceived effort leads every row and heart rate is only information. From week 5, heart rate may lead, but only with a strap and a known (not age-estimated) max. Do you agree, and is week 5 the right point?
+2. **Our position:** one hard session a week, with easy rows filling the rest. In weeks 5–8 we may offer an optional second hard session, never as the default. Should we, and when should it be offered?
+3. In weeks 6–8 the push target reaches 95%, so a flat 95%-for-15-s ease-off fires at the goal itself. Would you rather trigger it at the top of the session's target band plus a margin, held 20–30 s? And should it fire again (at most once a minute) when HR drops back and climbs over again, instead of once per push?
+4. Is 8 weeks the right length for the Beginner voyage? Should the program advance by completion and felt effort instead of the calendar, offering to repeat the week after a push session that felt 9–10 out of 10 or was stopped early?
+5. For rowers training alone: should beginner pushes have a stroke-rate ceiling (we'd suggest about 24–28 spm), a damper note (3–5), and a technique row before the first hard session?
+6. For the benchmark row (5b): is "steady but strong" the right instruction, rather than "as far as you can at 20 spm"?
+7. Anything in sections 1–7 you would not let a new rower do without supervision?
 
 ---
 
@@ -190,5 +192,7 @@ _Fill in after the review._
 3.
 4.
 5.
+6.
+7.
 
 **Requirements updated:** _commit or date, once the origin requirements match this review._

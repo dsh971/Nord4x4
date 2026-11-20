@@ -7,6 +7,14 @@ describe('signal sounds', () => {
     expect(SIGNAL_SOUNDS.pickupStart).toEqual(SIGNAL_SOUNDS.pushStart);
     expect(SIGNAL_SOUNDS.pickupEnd).toEqual(SIGNAL_SOUNDS.pushEnd);
   });
+
+  it('ends work with the gong, so the war horn only ever means work coming', () => {
+    expect(SIGNAL_SOUNDS.pushEnd.sound).toBe('end-gong');
+    const hornSignals = Object.entries(SIGNAL_SOUNDS).filter(
+      ([, signal]) => signal.sound === 'war-horn',
+    );
+    expect(hornSignals.map(([kind]) => kind)).toEqual(['horn']);
+  });
 });
 
 describe('drum gap', () => {

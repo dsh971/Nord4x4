@@ -6,6 +6,7 @@ import { segmentTimings } from '../../../domain/session/sessionPlan';
 import { wavFileMs } from '../../../services/audio/__tests__/wavFileMs';
 import { AudioEngine } from '../../../services/audio/audioEngine';
 import { LOOKAHEAD_MS } from '../../../services/audio/drumSchedule';
+import { DUCK_HOLD_MS } from '../../../services/audio/signalSounds';
 import { RowingSession } from '../rowingSession';
 
 // Jest resolves every bundled file to one stub, so each file is mocked as its own name instead.
@@ -17,7 +18,7 @@ jest.mock('../../../services/audio/assets', () => {
 
 const mockFileSeconds: Record<string, number> = {
   'war-horn': wavFileMs('war-horn.wav') / 1000,
-  'push-end-horn': wavFileMs('push-end-horn.wav') / 1000,
+  'end-gong': wavFileMs('end-gong.wav') / 1000,
   'push-start-strike': wavFileMs('push-start-strike.wav') / 1000,
 };
 const mockSetSystemOptions = jest.fn();
@@ -43,6 +44,8 @@ jest.mock('react-native-audio-api', () => {
 });
 
 const HORN_MS = hornCueAtMs(PUSH_2_STARTS);
+const PUSH_2_ENDS =
+  segmentTimings(SLICE_PLAN).find(({ startMs }) => startMs === PUSH_2_STARTS)?.endMs ?? 0;
 
 type MusicChange = { readonly isDucked: boolean; readonly atMs: number };
 
@@ -136,5 +139,18 @@ describe('the rowing session ducking the music', () => {
     const changesBeforeResume = musicChanges.length;
     tickTo(PUSH_2_STARTS + 3 * SECOND);
     expectOneDuckFromHornThroughStrike(musicChanges.slice(changesBeforeResume));
+  });
+
+  it('keeps the drum and music down at a push end only until the gong ends (G6d)', async () => {
+    const { musicChanges, tickTo } = await rowWithSoundFrom(PUSH_2_ENDS - 3 * SECOND);
+    tickTo(PUSH_2_ENDS + 8 * SECOND);
+    const [duck, release] = musicChanges;
+    expect(duck?.isDucked).toBe(true);
+    expect(duck?.atMs).toBeGreaterThanOrEqual(PUSH_2_ENDS - 100);
+    expect(duck?.atMs).toBeLessThanOrEqual(PUSH_2_ENDS);
+    // The release follows the drum's gap, which is the gong file's length, so this ties the beat's return to it.
+    expect(release?.isDucked).toBe(false);
+    expect(release?.atMs).toBeCloseTo(PUSH_2_ENDS + wavFileMs('end-gong.wav') + DUCK_HOLD_MS, -2);
+    expect(musicChanges).toHaveLength(2);
   });
 });

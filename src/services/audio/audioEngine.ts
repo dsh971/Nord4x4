@@ -81,7 +81,7 @@ export class AudioEngine {
     };
     this.gains = {
       'war-horn': gainFor('war-horn'),
-      'push-end-horn': gainFor('push-end-horn'),
+      'end-gong': gainFor('end-gong'),
       'push-start-strike': gainFor('push-start-strike'),
       'hold-signal': gainFor('hold-signal'),
       'drum-catch': gainFor('drum-catch'),

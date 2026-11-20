@@ -11,7 +11,8 @@ export type SignalSound = {
 };
 
 const PUSH_START: SignalSound = { sound: 'push-start-strike' };
-const PUSH_END: SignalSound = { sound: 'push-end-horn' };
+// One sound ends every push and pickup, so the horn only ever means work coming (G6d).
+const WORK_END: SignalSound = { sound: 'end-gong' };
 
 /** Each signal's sound, as in docs/design/sound-spec.md. Their visual twins live in the rowing feature. */
 export const SIGNAL_SOUNDS = {
@@ -20,8 +21,8 @@ export const SIGNAL_SOUNDS = {
   pushStart: PUSH_START,
   pickupStart: PUSH_START,
   holdEffort: { sound: 'hold-signal' },
-  pushEnd: PUSH_END,
-  pickupEnd: PUSH_END,
+  pushEnd: WORK_END,
+  pickupEnd: WORK_END,
   easeOff: { sound: 'ease-off-bell', repeat: { times: 3, spacingMs: 600 } },
 } as const satisfies Record<SignalKind, SignalSound>;
 

@@ -380,7 +380,7 @@ nor4x4-app/
 **Files:**
 - Create: `docs/design/sound-spec.md`
 - Create: `assets/audio/`, containing:
-  - the war horn and the push-end horn;
+  - the war horn and the end gong;
   - the three-bell ease-off and a drum hit (for the count-in);
   - one drum loop and one calm sea bed;
   - the push-start strike and the hold signal.
@@ -388,7 +388,7 @@ nor4x4-app/
 **Approach:**
 - Inventory every sound in two groups, each signal paired with its visual twin (R40, R51):
   - **ambience:** sea beds for calm, swell and rough water; drum loops; wordless crew murmur;
-  - **signals:** horn, push-end horn, bells, drum count, push-start strike, hold signal, landfall.
+  - **signals:** horn, end gong, bells, drum count, push-start strike, hold signal, landfall.
 - Record the loudness targets, loop lengths, file format, and the source and license of every file (CC0 or royalty-free libraries).
 - The slice must not run on stock stand-ins, since sound is half the bet it tests.
 
@@ -938,7 +938,7 @@ nor4x4-app/
 
 **Approach:**
 - **Ambience** (sea bed by sea state, drum loop at the target rate, crew murmur) is a set of gain-controlled loops.
-- **Signals** (horn, push-end horn, drum count, push-start strike, hold signal, bells, landfall) are one-shots scheduled ahead on the audio clock.
+- **Signals** (horn, end gong, drum count, push-start strike, hold signal, bells, landfall) are one-shots scheduled ahead on the audio clock.
 - **Sound modes:**
   - **Full ship:** ambience and signals.
   - **Cues only:** signals only.

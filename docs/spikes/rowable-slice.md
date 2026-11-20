@@ -49,7 +49,7 @@ What each column asks:
 - 10 s before each push, "Ready oars" appears with an edge pulse and the clock turns persimmon; 10 s before each pickup, "Pickup coming" does the same (G6b, G6c).
 - The war horn 6 s before each push and pickup: the drum stops under it, the oars rise, and a horn shows at the prow.
 - In the warm-up, the gauge's footer names what comes next ("Next pickup 1 · 0:20"), and each pickup reads "Pickup 1 of 2".
-- The double taiko strike at each push, and the falling horn as it ends.
+- The double taiko strike at each push, and the gong as it ends (the falling horn until 2026-11-20).
 - "Hold this effort" with its wood clack 90 s into each push (effort mode only).
 - Levels: the bell and wood clack against the drum; the sea and crew under everything.
 - A long press pauses everything; the pause sheet ends the row only with a hold.

@@ -1,10 +1,11 @@
 """Build the slice's sound assets in assets/audio/ (see docs/design/sound-spec.md).
 
-The horns, push-start strike and hold signal are synthesized here. The drum, bell, sea and crew are cut from
-CC0 recordings that you download from Freesound first (links in the spec). Needs ffmpeg and macOS afconvert.
+The war horn, push-start strike and hold signal are synthesized here. The drum, bell, end gong, sea and crew
+are cut from CC0 recordings that you download from Freesound first (links in the spec). Needs ffmpeg and macOS
+afconvert.
 
-Run: python3 -I docs/design/tools/build_sounds.py --drum <83977 mp3> --bell <370007 wav> --sea <637945 flac>
-     --crew <480808 wav>
+Run: python3 -I docs/design/tools/build_sounds.py --drum <83977 mp3> --bell <370007 wav> --gong <213096 wav>
+     --sea <637945 flac> --crew <480808 wav>
 """
 import argparse
 import hashlib
@@ -25,13 +26,14 @@ PEAK = 0.89  # about -1 dBFS, so the decoder never clips
 SIZE_BUDGET_BYTES = 8_000_000
 ASSETS_DIR = Path(__file__).resolve().parents[3] / "assets" / "audio"
 EXPECTED_FILES = frozenset({
-    "war-horn.wav", "push-end-horn.wav", "push-start-strike.wav", "hold-signal.wav", "drum-catch.wav",
+    "war-horn.wav", "end-gong.wav", "push-start-strike.wav", "hold-signal.wav", "drum-catch.wav",
     "drum-tap.wav", "ease-off-bell.wav", "sea-calm.m4a", "crew-murmur.m4a",
 })
 # The Freesound originals the cuts were chosen on; a preview or re-upload would silently cut different sounds.
 ORIGINAL_SHA256 = {
     "drum": "ff5540715c98255de6fefe5004cfb0a67c01291717720c27f56d6595ab9053b3",
     "bell": "4a5124919245feaf3fef307a6c5db0ceb647d1f2c9f4fa9356509ed8a9577fcb",
+    "gong": "ec72e086f8cda5eea43eafc500b605e5b9814b6501dfe3f44b97802edff820f4",
     "sea": "a0eaa38da6b86de506058d379cd049e58633b2de8f6de6ceef6eb37b61c87278",
     "crew": "ac087628b186bac95908546335e909b3bb090a68965ca5e118dc1e1ba23762a6",
 }
@@ -121,17 +123,6 @@ def valley_reverb(samples: list[float], tail_seconds: float, wet: float) -> list
     ]
 
 
-def sag(samples: list[float], semitones: float, from_seconds: float) -> list[float]:
-    """Bend the pitch down by up to `semitones` after `from_seconds`, like a horn player running out of breath."""
-    seconds = len(samples) / RATE
-    out, position = [], 0.0
-    while position < len(samples) - 1:
-        share = max(0.0, (position / RATE - from_seconds) / (seconds - from_seconds))
-        out.append(samples[int(position)])
-        position += 2 ** (-semitones * share / 12)
-    return out
-
-
 def drum_hit(seed: int) -> list[float]:
     """One taiko hit: a skin whose pitch falls from 180 to 95 Hz, plus the slap of the hand (drum-1 "taiko")."""
     rng = random.Random(seed)
@@ -176,12 +167,6 @@ OAR_SHAFTS = [(310, 1, 0.045), (760, 0.7, 0.03), (1450, 0.35, 0.015)]
 def war_horn() -> list[float]:
     """horn-5 "war horn": 3.2 s at 73 Hz with a light growl and a valley tail. Sounds 6 s before a push or pickup, after the silent 10 s warning."""
     return valley_reverb(growl(horn(seconds=3.2, attack=0.5, release=0.7, **WAR_HORN), 34, 0.25), 2.0, 0.55)
-
-
-def push_end_horn() -> list[float]:
-    """end-2 "falling war horn": the same horn sagging five semitones over its last 1.5 s, so it reads as done."""
-    blast = sag(horn(seconds=2.4, attack=0.3, release=0.9, **WAR_HORN), 5, 0.9)
-    return valley_reverb(growl(blast, 34, 0.2), 1.8, 0.55)
 
 
 def push_start_strike() -> list[float]:
@@ -324,9 +309,9 @@ def check_size_budget(out_dir: Path, budget_bytes: int = SIZE_BUDGET_BYTES) -> i
     return total
 
 
-def build(drum: Path, bell: Path, sea: Path, crew: Path, out_dir: Path) -> None:
+def build(drum: Path, bell: Path, gong: Path, sea: Path, crew: Path, out_dir: Path) -> None:
     """Build every slice asset in a staging folder, check it, then move the files into `out_dir` together."""
-    for name, path in (("drum", drum), ("bell", bell), ("sea", sea), ("crew", crew)):
+    for name, path in (("drum", drum), ("bell", bell), ("gong", gong), ("sea", sea), ("crew", crew)):
         check_original(name, path)
     out_dir.mkdir(parents=True, exist_ok=True)
     # Staging sits beside out_dir so the final moves are renames on one disk, and a failed build changes nothing.
@@ -335,7 +320,6 @@ def build(drum: Path, bell: Path, sea: Path, crew: Path, out_dir: Path) -> None:
         drum_samples = decode(drum, 1)
         one_shots = {
             "war-horn": war_horn(),
-            "push-end-horn": push_end_horn(),
             "push-start-strike": push_start_strike(),
             "hold-signal": hold_signal(),
             # The drum audition's clip 3: the recording's low opening hit on the catch, its higher hit
@@ -343,6 +327,9 @@ def build(drum: Path, bell: Path, sea: Path, crew: Path, out_dir: Path) -> None:
             "drum-catch": cut_hit(drum_samples, 0.02),
             "drum-tap": cut_hit(drum_samples, 3.18),
             "ease-off-bell": first_strike(decode(bell, 1), 1.8),
+            # The G6d audition's clip 2: the recording's first 2.5 s, so the drum is back after about a
+            # stroke (2026-11-20). It swells rather than strikes, so it is cut from its start, not an onset.
+            "end-gong": fade_edges(decode(gong, 1)[: int(2.5 * RATE)], onset=0.004, tail=0.8),
         }
         for name, samples in one_shots.items():
             write_wav(staged / f"{name}.wav", normalize(samples))
@@ -367,11 +354,12 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--drum", type=Path, required=True, help="theredshore 83977, rowrow, original MP3")
     parser.add_argument("--bell", type=Path, required=True, help="radwoc 370007, chromatic handbells, original WAV")
+    parser.add_argument("--gong", type=Path, required=True, help="soundsexciting 213096, gong with flute, original WAV")
     parser.add_argument("--sea", type=Path, required=True, help="kyles 637945, lake waves at boats, original FLAC")
     parser.add_argument("--crew", type=Path, required=True, help="craigsmith 480808, men murmuring, original WAV")
     parser.add_argument("--out", type=Path, default=ASSETS_DIR)
     args = parser.parse_args()
-    build(args.drum, args.bell, args.sea, args.crew, args.out)
+    build(args.drum, args.bell, args.gong, args.sea, args.crew, args.out)
 
 
 if __name__ == "__main__":

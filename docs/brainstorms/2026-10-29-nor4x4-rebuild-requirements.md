@@ -199,7 +199,7 @@ The current SwiftUI app does not solve this. It is a stock-looking interval time
 - R38. Rowing mode layers sound in two groups:
   - **Ambience:** a sea bed that matches the scene, a drum loop at the target stroke rate, and a wordless crew murmur during work (effort grunts and exhales on the stroke; no intelligible words).
   - **Signals:** the cues in R40.
-- R39. Signals include a war horn before each push and each warm-up pickup, a low horn note at the end of each, and a landfall sound at the finish. The horn sounds 6 s before, after a silent 10 s warning, so the warning reads as a warning and the horn as "now" (revised 2026-11-10).
+- R39. Signals include a war horn before each push and each warm-up pickup, a short gong at the end of each (a falling horn until 2026-11-20), and a landfall sound at the finish. The horn sounds 6 s before, after a silent 10 s warning, so the warning reads as a warning and the horn as "now" (revised 2026-11-10).
 - R40. Signals replace any human voice. Each has an on-screen twin: a banner that shows for about 3 s, readable at 1 m, at the moment its sound plays, so Silent mode keeps every cue. The 10 s warnings differ: a banner with no sound that stays up until the push or pickup starts, so it covers the horn at 6 s.
 
 | Moment | Sound | On screen |
@@ -210,8 +210,8 @@ The current SwiftUI app does not solve this. It is a stock-looking interval time
 | Push starts | Double drum strike + drum lifts to push tempo | "Pull" |
 | Pickup starts | Double drum strike + drum lifts to push tempo | "Pickup" |
 | 90 s into a push (effort guidance, R30) | Hold signal: a short distinct sound (wooden clapper or single gong stroke, picked by listening test) | "Hold this effort" |
-| Push ends | One low horn note + drum slows | "Rest" |
-| Pickup ends | One low horn note + drum slows | "Back to easy" |
+| Push ends | Short gong + drum slows | "Rest" |
+| Pickup ends | Short gong + drum slows | "Back to easy" |
 | Above 95% max for 15 s | Three bell strikes | Charcoal border glow + "Ease off ▲" |
 | Session ends | Landfall sound | Session complete |
 
@@ -277,8 +277,8 @@ The current SwiftUI app does not solve this. It is a stock-looking interval time
   - **Steps:**
     1. The warning screen on the first row, then the strap prompt if never asked.
     2. Get seated with the stroke demo and the stop line.
-    3. Warm-up with pickups: "Pickup coming", the persimmon clock and the raised oars 10 s before each, the horn 6 s before, the double strike and "Pickup" at the start, and the low horn and "Back to easy" at the end.
-    4. For each push: "Ready oars" and the edge pulse 10 s before, the horn 6 s before, the double drum strike and "Pull" at the start, the work scene, the end-of-push horn, and the rest scene.
+    3. Warm-up with pickups: "Pickup coming", the persimmon clock and the raised oars 10 s before each, the horn 6 s before, the double strike and "Pickup" at the start, and the gong and "Back to easy" at the end.
+    4. For each push: "Ready oars" and the edge pulse 10 s before, the horn 6 s before, the double drum strike and "Pull" at the start, the work scene, the gong at its end, and the rest scene.
     5. Cool-down.
     6. Session complete with the rating, then back to the route.
   - **Covered by:** R5, R6, R23–R44, R50–R53, R61

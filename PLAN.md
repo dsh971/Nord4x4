@@ -129,7 +129,7 @@ npx tsc --noEmit && npm run lint && npx jest
   - Ease-off bells: H1, "chromatic handbells 12 tones g1" by radwoc (https://freesound.org/people/radwoc/sounds/370007/, CC0, 48 kHz/24-bit studio WAV), its single-tone strike played three times 0.6 s apart. Synthesized bells were rejected; the original WAV needs a free Freesound account to download. The original is downloaded and cut (2026-11-05).
   - Push-start strike: strike-1 "double taiko", two quick taiko hits, solo (synthesized, `push_start_strike` in `build_sounds.py`).
   - Drum during signals: the drum pauses while a signal plays and picks up on the next stroke (audition B).
-  - Push-end horn: end-2 "falling war horn", the war horn whose pitch sags five semitones over its last 1.5 s, so it can't be mistaken for the push warning (synthesized, `push_end_horn` in `build_sounds.py`, 2026-11-05).
+  - Push-end horn: end-2 "falling war horn", the war horn whose pitch sags five semitones over its last 1.5 s, so it can't be mistaken for the push warning (synthesized, `push_end_horn` in `build_sounds.py`, 2026-11-05). Replaced by the end gong on 2026-11-20 (G6d).
   - Rejected: a crowd send-off before the row (Jorvik parade, 2026-11-05). It would blunt the war horn, mask the count-in and wear thin with repetition.
   - Calm sea: S2, "lake waves lapping at boats" by kyles (https://freesound.org/people/kyles/sounds/637945/, CC0).
   - Wordless crew: C2, "men murmuring" by craigsmith (https://freesound.org/people/craigsmith/sounds/480808/, CC0), 8 dB under the sea as heard, with both loudness-matched first (audition `S2+C2-crew-minus-8dB`, 2026-11-05).
@@ -490,6 +490,29 @@ Raised after G6b″: the "Row still going" banner leaves the screen after a few 
   - Whether a free Apple ID's signing allows the widget extension. If not, it waits for the paid account in M3.
   - How it starts, updates and ends. It would replace or sit beside the G6b″ notice, the R43 warnings, and a row that ends while away.
 - **Size:** a phone rebuild and more than 3 files, so it gets its own plan section and your approval before any code.
+
+### G6d · A new sound for "Rest" and "Back to easy" (approved and built 2026-11-20; phone check open)
+
+Raised in the G6 phone checks: you don't like the falling horn at the end of a pickup or a push. Today both ends play the push-end horn (the war horn sagging five semitones, 4.4 s), then the drum slows. You suggested a gong, or Freesound 213096, "Gong with flute" by SoundsExciting: CC0, 5.0 s, stereo 44.1 kHz WAV, needing a free Freesound login to download.
+
+**Step 1 · Audition, nothing in the app changes.**
+- `docs/design/tools/build_sounds.py` gains 2–3 synthesized gong candidates (struck, inharmonic partials with a long decay), using the same `struck()` builder as the hold signal. Ours, so no licence to check.
+- The Freesound gong joins at full length and cut to about 2.5 s. Its SHA-256 is pinned like the other originals, and it is converted to mono 48 kHz and loudness-matched.
+- Each candidate is mixed into two 20 s clips over the drum and sea: the end of pickup 1 into easy rowing, and the end of a push into the rest. You listen on the phone's speaker and pick. The clips go in the scratchpad, not the repo.
+
+**Step 2 · Wire the pick in** (after you choose).
+- `assets/audio/end-gong.wav`, built by the script.
+- `src/services/audio/assets.ts` and `audioEngine.ts`: the new sound and its gain.
+- `src/services/audio/signalSounds.ts`: `pushEnd` and `pickupEnd` both play it. The push-end horn file and its build step are deleted, as nothing plays them.
+- `docs/design/sound-spec.md`: the signal table, the file table with source and licence, and the design note that pickups use the push's sounds.
+- **Tests:** `pushEnd` and `pickupEnd` play the new sound and never the war horn (fails on today's code). A new scenario in `rowingSessionSound.test.ts` rows across push 2's end and checks the music comes back when the gong's file ends plus the duck hold, so the drum's return is tied to the file's length (fails with a longer end sound).
+- No phone rebuild: Metro serves the new file to the dev build.
+
+**Decided (2026-11-20):** one new sound for both ends, so the horn only ever means work coming and the banners ("Rest", "Back to easy") tell the ends apart. The Freesound gong (downloaded, SHA-256 `ec72e086…f820f4`) is auditioned at full length (5.0 s) and cut to about 2.5 s with a fade, since the drum stays quiet for as long as a signal plays.
+
+**Verification:** `python3 -m unittest discover -s docs/design/tools`, `npx jest`, `npx tsc --noEmit`, `npm run lint`, then the live loop into pickup 1 on the phone (it runs to the pickup's end in about 50 s).
+
+**Status (2026-11-20):** you picked clip 2, the flute gong cut to 2.5 s. Built: `assets/audio/end-gong.wav` from the build script (the candidates stayed in a scratchpad script, so only the winner is in the repo); `push-end-horn.wav` and its synthesis deleted; both end cues play the gong at gain 0.6, about as loud as the horn was. The recording swells rather than strikes, so the cut runs from its very start with a 4 ms fade-in and a 0.8 s fade-out (the sound tests caught a click when it was cut from a detected onset). Both new Jest tests fail with the horn wired back in. A four-model review (2026-11-20) found the drum-gap test missing, the onset workaround and a few stale doc lines; all fixed. Left as is: the gong starts about 20 ms after its cue, as the bell already does, which a swelling sound off the drum grid doesn't show. Open: the phone check.
 
 ### H · Your coaching decisions, and the rehearsal's questions, in the coach packet (approved and done 2026-11-20; docs only)
 

@@ -61,14 +61,14 @@ The 4x4 program does vary its effort, but on a fixed schedule the rower soon lea
 
 - R4. The storm follows a hidden arc. It builds after the warm-up, peaks in the middle third of the storm, and eases before the cool-down.
 - R5. Surge lengths and the lulls between them are drawn at random inside the arc, so no two storm rows run the same. Toward the peak, lulls shorten and surges lengthen.
-- R6. Each length has a cap on total surge time, and each surge has a minimum and maximum length. Each lull has a minimum too, never shorter than the end horn and the next surge's horn together (about 10.4 s), so the two never overlap. The random draw stays inside all three.
-- R7. Each surge is signalled like a push (R39, R40), in storm wording: the 10 s warning reads "Rough water ahead", the horn sounds at 6 s, the start strike opens the surge, and the end horn closes it with "Calm water ahead".
+- R6. Each length has a cap on total surge time, and each surge has a minimum and maximum length. Each lull has a minimum too, never shorter than the end gong and the next surge's horn together (about 10.4 s), so the two never overlap. The random draw stays inside all three.
+- R7. Each surge is signalled like a push (R39, R40), in storm wording: the 10 s warning reads "Rough water ahead", the horn sounds at 6 s, the start strike opens the surge, and the end gong closes it with "Calm water ahead".
 - R8. The storm breaks as its own moment when the cool-down begins: the scene clears, a distinct sound plays, and a banner says the storm has passed. No surge follows it.
 
 **The screen during a storm**
 
 - R9. The progress strip shows three blocks, warm-up, storm and cool-down, with a marker for now. It never shows individual surges.
-- R10. During a lull, the gauge shows "Lull" and the time rowed, with no countdown or footer for the next surge. During a surge, it shows "Surge n" with no total, and counts the surge's time up. The rower learns a surge's length only when the end horn sounds. Get seated's plan line gives no surge count.
+- R10. During a lull, the gauge shows "Lull" and the time rowed, with no countdown or footer for the next surge. During a surge, it shows "Surge n" with no total, and counts the surge's time up. The rower learns a surge's length only when the end gong sounds. Get seated's plan line gives no surge count.
 - R11. Coaching follows effort throughout: Intermediate in lulls and Hard in surges, as perceived effort and the talk test (R30). With a strap, bpm shows as a reading only, with no zone to reach.
 - R12. A storm row carries every safety rule of a Hard casual row: the R61 safety line, the ease-off bells and glow (R36), and pause (R32).
 - R13. The gauge, surge clock and coaching text keep the contrast and position they have in standard scenes, including through rain and lightning. The storm scene is designed around them.
@@ -91,7 +91,7 @@ The 4x4 program does vary its effort, but on a fixed schedule the rower soon lea
 
 - AE1. **Covers R1.** Given a casual rower whose last row was Easy at 20 min, when they choose Storm, the note "A mix of Intermediate and Hard rowing" shows, the length picker moves to 30 min, and only 30 and 45 min are offered.
 - AE2. **Covers R5, R6.** Given two 45-minute storm rows, their surge lengths and spacing differ, and each row's total surge time is within the hard-time cap for a 45-minute row (R6).
-- AE3. **Covers R9, R10.** Given a rower in a lull, the gauge shows "Lull" and the time rowed, and no time to the next surge. When the surge starts, it shows "Surge 3" and a clock counting up from 0:00, which stops when the end horn sounds.
+- AE3. **Covers R9, R10.** Given a rower in a lull, the gauge shows "Lull" and the time rowed, and no time to the next surge. When the surge starts, it shows "Surge 3" and a clock counting up from 0:00, which stops when the end gong sounds.
 - AE4. **Covers R7, R18.** Given a surge whose "Rough water ahead" warning is up, no thunder sounds until the start strike has finished.
 - AE5. **Covers R11.** Given a strap, a surge shows Hard effort guidance with the bpm as a plain reading, and no zone target.
 - AE6. **Covers R8.** Given the last surge has ended, the storm breaks at the cool-down with the scene clearing and its banner, and no further surge comes.

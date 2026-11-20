@@ -4,7 +4,7 @@
  */
 export const SOUND_FILES = {
   'war-horn': require('../../../assets/audio/war-horn.wav') as number,
-  'push-end-horn': require('../../../assets/audio/push-end-horn.wav') as number,
+  'end-gong': require('../../../assets/audio/end-gong.wav') as number,
   'push-start-strike': require('../../../assets/audio/push-start-strike.wav') as number,
   'hold-signal': require('../../../assets/audio/hold-signal.wav') as number,
   'drum-catch': require('../../../assets/audio/drum-catch.wav') as number,
@@ -28,12 +28,13 @@ export const SOUND_ONSET_MS: Partial<Record<SoundName, number>> = {
 
 /**
  * Each sound's starting playback gain. Signals start near-equal in loudness as heard (sound spec:
- * horns and strike about −7 LUFS, drum −10, wood −17, bell −18), so the bell, the R36 safety cue,
+ * horn and strike about −7 LUFS, gong −11, drum −10, wood −17, bell −18), so the bell, the R36 safety cue,
  * isn't lost under the drum. Tuned by ear on the phone.
  */
 export const PLAYBACK_GAIN: Record<SoundName, number> = {
   'war-horn': 0.4,
-  'push-end-horn': 0.4,
+  // −10.8 LUFS at 0.6 plays at about −15 LUFS, as loud as the falling horn it replaced (G6d).
+  'end-gong': 0.6,
   'push-start-strike': 0.4,
   'hold-signal': 1,
   // −12.5 LUFS at 0.6 plays as loud as the old taiko did (−10.1 at 0.45): about −17 LUFS as heard.

@@ -1,6 +1,19 @@
 # PLAN — M1 · Rowable slice (U1–U7)
 
-**Status (2026-11-05):** Phase A done (packet ready; you still need to find and send it to a coach). Phase B done, with the review fixes applied. Phase C done: all five device checks pass, and ducking uses the switch-options release (`docs/spikes/native-modules.md`). Phase D done: the session engine and fake sensors, with tests. Phase E done: tokens, fonts and the slice's components, reviewed and checked on the phone. Cues without voices done. Phase F done (2026-11-05): `docs/design/sound-spec.md` and the slice sounds in `assets/audio/`, built by `docs/design/tools/build_sounds.py`. Phase G under way: G1 to G4 done (slice plan and ease-off, audio engine, overlays, painted scene); G5 done (the drum's lead-in; the session screen at `app/session/slice.tsx`). Now G6: row the slice and log each row in `docs/spikes/rowable-slice.md`, then the M1 go/change verdict.
+**Status (2026-11-19):** Phases A–F done, and G1–G5 done. The G6 build steps are also pushed:
+- G6a: the stroke-rate range.
+- G6b: warnings before pushes and pickups.
+- G6b′: silent while away, with warnings sent as notifications. Phone-checked.
+- G6b″: a "Row still going" notice. Commit 41b6079.
+- G6c: pickups get the push's screen cues. Commit 21a67c9.
+
+Still open:
+- The G6c phone check: the live loop into pickup 1, and the landscape footer at the largest text size.
+- A quick G6b″ check: the banner is silent and the horn still plays.
+
+Then row the slice and log each row in `docs/spikes/rowable-slice.md` for the M1 go/change verdict. G7 waits for that verdict.
+
+**Status (2026-11-05, kept for history):** Phase A done (packet ready; you still need to find and send it to a coach). Phase B done, with the review fixes applied. Phase C done: all five device checks pass, and ducking uses the switch-options release (`docs/spikes/native-modules.md`). Phase D done: the session engine and fake sensors, with tests. Phase E done: tokens, fonts and the slice's components, reviewed and checked on the phone. Cues without voices done. Phase F done (2026-11-05): `docs/design/sound-spec.md` and the slice sounds in `assets/audio/`, built by `docs/design/tools/build_sounds.py`. Phase G under way: G1 to G4 done (slice plan and ease-off, audio engine, overlays, painted scene); G5 done (the drum's lead-in; the session screen at `app/session/slice.tsx`). Now G6: row the slice and log each row in `docs/spikes/rowable-slice.md`, then the M1 go/change verdict.
 
 Goal: reach the M1 gate in `docs/plans/2026-10-29-001-feat-nor4x4-expo-rebuild-plan.md`. One hardcoded session (week 3 Beginner, 3×3′, 30 min) with the scene, drum, horn and crew is rowed on a real erg by you 3–5 times and by two other rowers once each. The go/change verdict goes in `docs/spikes/rowable-slice.md`.
 

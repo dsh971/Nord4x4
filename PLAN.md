@@ -4,12 +4,10 @@
 - G6a: the stroke-rate range.
 - G6b: warnings before pushes and pickups.
 - G6b′: silent while away, with warnings sent as notifications. Phone-checked.
-- G6b″: a "Row still going" notice. Commit 41b6079.
-- G6c: pickups get the push's screen cues. Commit 21a67c9.
+- G6b″: a "Row still going" notice. Commit 41b6079. Phone-checked 2026-11-19.
+- G6c: pickups get the push's screen cues. Commit 21a67c9. Phone-checked 2026-11-19.
 
-Still open:
-- The G6c phone check: the live loop into pickup 1, and the landscape footer at the largest text size.
-- A quick G6b″ check: the banner is silent and the horn still plays.
+Every G6 build step is phone-checked.
 
 Then row the slice and log each row in `docs/spikes/rowable-slice.md` for the M1 go/change verdict. G7 waits for that verdict.
 
@@ -481,6 +479,17 @@ Asked for after the G6 phone checks: automate what can be automated, so physical
 - **Verification:** `npx tsc --noEmit && npx jest && npm run lint`, then `npm run e2e` and `npm run e2e:screens` against a simulator build (`npx expo run:ios`). Proof that each check bites, run once and the result written here:
   - the walkthrough fails when the "Push 2 of 3" label is changed;
   - the screenshot run fails when one overlay margin moves 4 pt, a change no Jest test catches.
+
+### Idea · A Live Activity while the rower is away (raised 2026-11-19; not planned yet, decide after the M1 verdict)
+
+Raised after G6b″: the "Row still going" banner leaves the screen after a few seconds. iOS lets only the rower make banners stay (Settings → Notifications → Nor4x4 → Banner Style → Persistent). An app can't. A Live Activity stays on the lock screen and in the Dynamic Island for the whole time away. It could count down live, for example "Push 2 in 0:42 · Session 18:10 left".
+
+- **Evidence to gather in the M1 rows:** how often you leave the app mid-row, and whether the notice and warnings were enough. Note it in the row log.
+- **Open questions before planning:**
+  - What SDK 58 supports for Live Activities. Fetch the versioned docs; it needs a widget extension added through a config plugin, never by editing `ios/`.
+  - Whether a free Apple ID's signing allows the widget extension. If not, it waits for the paid account in M3.
+  - How it starts, updates and ends. It would replace or sit beside the G6b″ notice, the R43 warnings, and a row that ends while away.
+- **Size:** a phone rebuild and more than 3 files, so it gets its own plan section and your approval before any code.
 
 ## Verification (whole milestone)
 

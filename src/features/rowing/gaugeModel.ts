@@ -32,7 +32,7 @@ export type GaugeModel = {
   readonly clock: { readonly kind: 'left' | 'rowed'; readonly ms: number };
   /** The widest clock this session can show, so the gauge is sized once and never jumps mid-row. */
   readonly widestClock: '0:00' | '00:00';
-  /** Persimmon from the next push's or pickup's 10 s warning until it starts (board 3.3). */
+  /** Persimmon from the next push's or pickup's warning, 13 s before, until it starts (board 3.3, G6e). */
   readonly clockTone: 'ink' | 'work';
   readonly body:
     | { readonly kind: 'effort'; readonly guide: EffortGuide }

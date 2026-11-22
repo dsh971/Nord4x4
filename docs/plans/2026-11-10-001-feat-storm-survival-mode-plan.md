@@ -61,8 +61,8 @@ The 4x4 program does vary its effort, but on a fixed schedule the rower soon lea
 
 - R4. The storm follows a hidden arc. It builds after the warm-up, peaks in the middle third of the storm, and eases before the cool-down.
 - R5. Surge lengths and the lulls between them are drawn at random inside the arc, so no two storm rows run the same. Toward the peak, lulls shorten and surges lengthen.
-- R6. Each length has a cap on total surge time, and each surge has a minimum and maximum length. Each lull has a minimum too, never shorter than the end gong and the next surge's horn together (about 10.4 s), so the two never overlap. The random draw stays inside all three.
-- R7. Each surge is signalled like a push (R39, R40), in storm wording: the 10 s warning reads "Rough water ahead", the horn sounds at 6 s, the start strike opens the surge, and the end gong closes it with "Calm water ahead".
+- R6. Each length has a cap on total surge time, and each surge has a minimum and maximum length. Each lull has a minimum too, never shorter than the end gong and the next surge's horn together so the two never overlap. Re-derive that floor from the signal timings when storm is planned; it is more than the warning's 13 s alone, since the end gong's "Back to easy" banner also needs room. The random draw stays inside all three.
+- R7. Each surge is signalled like a push (R39, R40), in storm wording: the warning (13 s before) reads "Rough water ahead", the horn sounds at 6 s, the start strike opens the surge, and the end gong closes it with "Calm water ahead".
 - R8. The storm breaks as its own moment when the cool-down begins: the scene clears, a distinct sound plays, and a banner says the storm has passed. No surge follows it.
 
 **The screen during a storm**
@@ -79,7 +79,7 @@ The 4x4 program does vary its effort, but on a fixed schedule the rower soon lea
 - R15. The scene and the storm's sound follow the arc's intensity, from gathering through peak to breaking.
 - R16. Under Reduce Motion, the storm keeps its dark sky but has slower rain and a gentler swell. Lightning never flashes more than three times in any one second, and under Reduce Motion it shows as a soft brightening rather than a flash.
 - R17. The storm has its own sound bed of wind and thunder. Wind rises and falls with intensity, and each thunder clap follows a lightning flash on screen.
-- R18. Thunder never sounds inside a surge's 10 s warning, or while a signal is playing, so it can't mask or be mistaken for a signal. Wind sits under signals as the existing sea bed does.
+- R18. Thunder never sounds inside a surge's warning, or while a signal is playing, so it can't mask or be mistaken for a signal. Wind sits under signals as the existing sea bed does.
 
 **Ending and records**
 
@@ -126,7 +126,7 @@ The 4x4 program does vary its effort, but on a fixed schedule the rower soon lea
 
 **Resolve Before Planning**
 
-- The total surge-time cap for 30 and 45 min, the minimum and maximum surge length, and the minimum lull above the 10.4 s signal floor. These come from the coach review.
+- The total surge-time cap for 30 and 45 min, the minimum and maximum surge length, and the minimum lull above the signal floor in R6. These come from the coach review.
 
 **Deferred to Planning**
 
@@ -145,4 +145,4 @@ The 4x4 program does vary its effort, but on a fixed schedule the rower soon lea
   - R61: the safety line.
   - Its deferred list, which defers the effort-reactive scene.
 - `docs/design/sound-spec.md`: the signals, the drum gaps and music ducking that the storm's sound must leave room for.
-- `PLAN.md` G6b: the 10 s warning and 6 s horn that surges reuse.
+- `PLAN.md` G6b and G6e: the 13 s warning (banner off 3 s before) and 6 s horn that surges reuse.

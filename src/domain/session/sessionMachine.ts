@@ -22,7 +22,7 @@ export type WorkCueKind =
 
 /**
  * A signal the audio and screen play together (R40). Get seated count-ins carry their number. The
- * silent 10 s warnings aren't cues: the screen reads them off session time (calledWorkAt).
+ * silent warnings aren't cues: the screen reads them off session time (warningBannerWorkAt).
  */
 export type Cue =
   | { readonly kind: 'countIn'; readonly count: number }
@@ -63,8 +63,10 @@ export function sessionClockMs(snapshot: SessionSnapshot): number {
 export const STALE_CUE_MS = 2_000;
 /** How many drum beats count the rower in at the end of Get seated (R23). */
 export const COUNT_IN_BEATS = 5;
-/** How long before a push or pickup its warning banner shows (R40: "Push or pickup in 10 s"). */
-export const WARNING_LEAD_MS = 10_000;
+/** How long before a push or pickup its warning shows (R40; 10 s until G6e moved it 3 s earlier). */
+export const WARNING_LEAD_MS = 13_000;
+/** How long before the start the warning banner leaves, so the start banner arrives on a clear screen (G6e). */
+export const WARNING_GAP_MS = 3_000;
 /**
  * How long before a push or pickup the war horn sounds. The drum stays quiet for the horn's whole
  * 5.2 s file, so at 6 s the drum is back before the push-start strike.
@@ -87,6 +89,14 @@ export function hornCueAtMs(workStartMs: number): number {
 function isCalled(workStartMs: number, sessionMs: number): boolean {
   'worklet';
   return sessionMs >= warningStartsAtMs(workStartMs) && sessionMs < workStartMs;
+}
+
+/**
+ * Whether the warning banner for work starting at `workStartMs` is up at `sessionMs`: from its
+ * warning until WARNING_GAP_MS before the start, so the start banner lands on a clear screen.
+ */
+export function isWarningBannerUp(workStartMs: number, sessionMs: number): boolean {
+  return sessionMs >= warningStartsAtMs(workStartMs) && sessionMs < workStartMs - WARNING_GAP_MS;
 }
 
 /** Whether a push or pickup is being called at `sessionMs`: from its warning until it starts (R27, R40). */
@@ -112,6 +122,19 @@ export function calledWorkAt(
 ): SegmentTiming | undefined {
   return timings.find(
     (timing) => isWorkSegment(timing.segment.type) && isCalled(timing.startMs, sessionMs),
+  );
+}
+
+/**
+ * The push or pickup whose warning banner is up at `sessionMs`, if any. Each work is checked on its
+ * own window, so one work's 3 s gap can't hide the next one's warning when they sit close.
+ */
+export function warningBannerWorkAt(
+  timings: readonly SegmentTiming[],
+  sessionMs: number,
+): SegmentTiming | undefined {
+  return timings.find(
+    (timing) => isWorkSegment(timing.segment.type) && isWarningBannerUp(timing.startMs, sessionMs),
   );
 }
 const HOLD_EFFORT_AFTER_MS = 90_000;

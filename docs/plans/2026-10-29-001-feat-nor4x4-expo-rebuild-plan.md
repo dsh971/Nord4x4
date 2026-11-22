@@ -237,7 +237,7 @@ flowchart TB
 stateDiagram-v2
   [*] --> GetSeated
   GetSeated --> Segment: hold time ends or Start now
-  Segment --> Segment: segment ends (cue 10 s before a push)
+  Segment --> Segment: segment ends (cue 13 s before a push)
   Segment --> Paused: long press or phone call
   Paused --> Segment: Resume
   Paused --> PartlyRowed: End session (hold to confirm)
@@ -261,7 +261,7 @@ sequenceDiagram
   participant AE as Audio engine
   participant OS as iOS audio session
   participant UI as Rowing screen
-  SM->>UI: push in 10 s: edge pulse + "Ready oars" banner, read off session time (G6b)
+  SM->>UI: push in 13 s: edge pulse + "Ready oars" banner until 3 s before, read off session time (G6b, G6e)
   SM->>AE: cueDue(horn, push in 6s)
   AE->>OS: switch to duckOthers (fallback: stay mixWithOthers)
   AE->>AE: play war horn (ambience dips for the cue)
@@ -914,7 +914,7 @@ nor4x4-app/
 - **Art:** the builder produces the slice art. Final art is commissioned or self-made after M1 (see `STRATEGY.md` costs).
 
 **Test scenarios:**
-- A push maps to the work state, a rest to rest, and the 10 s before a push or a pickup to the horn state.
+- A push maps to the work state, a rest to rest, and the 13 s before a push or a pickup to the horn state.
 - Covers R58. Casual Intermediate maps to swell, Hard to rough, and Easy to calm; warm-up and cool-down map to calm.
 - Leg index 3 returns a different palette and landmark set from leg 2.
 - At 27 spm, one oar cycle completes every 2.22 s.

@@ -38,9 +38,9 @@ const BROKEN = new Error('native call failed');
 const WARNINGS: WarningNotification[] = [
   {
     id: 'pickup-1',
-    secondsFromNow: 10,
+    secondsFromNow: 13,
     title: 'Pickup coming',
-    body: 'Pickup starts in 10 s',
+    body: 'Pickup starts in 13 s',
     sound: 'warHorn',
   },
 ];
@@ -63,8 +63,8 @@ describe('warning notifications (R43)', () => {
     expect(mockCalls).toEqual(['cancel', 'schedule pickup-1']);
     expect(Notifications.scheduleNotificationAsync).toHaveBeenCalledWith({
       identifier: 'pickup-1',
-      content: { title: 'Pickup coming', body: 'Pickup starts in 10 s', sound: 'war-horn.wav' },
-      trigger: { type: 'date', date: new Date(1_010_000) },
+      content: { title: 'Pickup coming', body: 'Pickup starts in 13 s', sound: 'war-horn.wav' },
+      trigger: { type: 'date', date: new Date(1_013_000) },
     });
   });
 
@@ -103,7 +103,7 @@ describe('warning notifications (R43)', () => {
     mockFinishScheduling();
     await scheduled;
     expect(Notifications.scheduleNotificationAsync).toHaveBeenCalledWith(
-      expect.objectContaining({ trigger: { type: 'date', date: new Date(1_011_000) } }),
+      expect.objectContaining({ trigger: { type: 'date', date: new Date(1_014_000) } }),
     );
   });
 

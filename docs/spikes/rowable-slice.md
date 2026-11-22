@@ -46,7 +46,7 @@ What each column asks:
 ## Things to listen and look for
 
 - The drum: soft single hits in the warm-up, then "tap · tap · BOOM" in pushes, landing with the oars' catch.
-- 10 s before each push, "Ready oars" appears with an edge pulse and the clock turns persimmon; 10 s before each pickup, "Pickup coming" does the same (G6b, G6c).
+- 13 s before each push, "Ready oars" appears with an edge pulse and the clock turns persimmon; 13 s before each pickup, "Pickup coming" does the same. The banner leaves 3 s before the start, so "Pull" or "Pickup" arrives on a clear screen (G6b, G6c, G6e).
 - The war horn 6 s before each push and pickup: the drum stops under it, the oars rise, and a horn shows at the prow.
 - In the warm-up, the gauge's footer names what comes next ("Next pickup 1 · 0:20"), and each pickup reads "Pickup 1 of 2".
 - The double taiko strike at each push, and the gong as it ends (the falling horn until 2026-11-20).

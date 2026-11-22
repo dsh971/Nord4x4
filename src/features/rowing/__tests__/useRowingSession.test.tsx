@@ -113,7 +113,7 @@ describe('useRowingSession away from the app (R43)', () => {
     expect(engines[0]?.stop).toHaveBeenCalled();
     expect(scheduledWarnings().slice(0, 2)).toEqual([
       { id: 'still-rowing', atWallMs: WALL_MS + SECOND },
-      { id: 'pickup-1', atWallMs: WALL_MS + 10 * SECOND },
+      { id: 'pickup-1', atWallMs: WALL_MS + 7 * SECOND },
     ]);
   });
 
@@ -123,7 +123,7 @@ describe('useRowingSession away from the app (R43)', () => {
     await switchApp('background');
     expect(scheduledWarnings().slice(0, 2)).toEqual([
       { id: 'still-rowing', atWallMs: WALL_MS + SECOND },
-      { id: 'pickup-1', atWallMs: WALL_MS + 305 * SECOND },
+      { id: 'pickup-1', atWallMs: WALL_MS + 302 * SECOND },
     ]);
   });
 

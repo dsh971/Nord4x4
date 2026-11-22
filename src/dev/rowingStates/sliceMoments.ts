@@ -10,7 +10,7 @@ export const SECOND = 1000;
 export const MINUTE = 60 * SECOND;
 /** Board 3.2: push 2 of 3 with 1:48 left, 12:48 left in the session. */
 export const PUSH_2_AT_1_48_LEFT = 17 * MINUTE + 12 * SECOND;
-/** Board 3.3: the rest 10 s before push 2, as its warning goes up. */
+/** Board 3.3: the rest 10 s before push 2, its warning up (from 13 s before, since G6e). */
 export const REST_10_S_BEFORE_PUSH_2 = 15 * MINUTE + 50 * SECOND;
 export const PUSH_2_STARTS = 16 * MINUTE;
 

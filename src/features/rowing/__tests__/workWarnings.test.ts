@@ -6,54 +6,54 @@ import { stillRowingNotice, workWarningsFrom } from '../workWarnings';
 const timings = segmentTimings(SLICE_PLAN);
 
 describe('workWarningsFrom', () => {
-  it('lists every push and pickup still to come, 10 s ahead of each, in order', () => {
+  it('lists every push and pickup still to come, 13 s ahead of each, in order', () => {
     const warnings = workWarningsFrom(timings, 4 * MINUTE + 40 * SECOND);
     expect(warnings).toEqual([
       {
         id: 'pickup-1',
-        secondsFromNow: 10,
+        secondsFromNow: 7,
         title: 'Pickup coming',
-        body: 'Pickup starts in 10 s',
+        body: 'Pickup starts in 13 s',
         sound: 'warHorn',
       },
       {
         id: 'pickup-2',
-        secondsFromNow: 130,
+        secondsFromNow: 127,
         title: 'Pickup coming',
-        body: 'Pickup starts in 10 s',
+        body: 'Pickup starts in 13 s',
         sound: 'warHorn',
       },
       {
         id: 'push-1',
-        secondsFromNow: 310,
+        secondsFromNow: 307,
         title: 'Ready oars',
-        body: 'Push 1 starts in 10 s',
+        body: 'Push 1 starts in 13 s',
         sound: 'warHorn',
       },
       {
         id: 'push-2',
-        secondsFromNow: 670,
+        secondsFromNow: 667,
         title: 'Ready oars',
-        body: 'Push 2 starts in 10 s',
+        body: 'Push 2 starts in 13 s',
         sound: 'warHorn',
       },
       {
         id: 'push-3',
-        secondsFromNow: 1030,
+        secondsFromNow: 1027,
         title: 'Ready oars',
-        body: 'Push 3 starts in 10 s',
+        body: 'Push 3 starts in 13 s',
         sound: 'warHorn',
       },
     ]);
   });
 
   it('skips a warning due in under a second', () => {
-    const warnings = workWarningsFrom(timings, 4 * MINUTE + 49_500);
+    const warnings = workWarningsFrom(timings, 4 * MINUTE + 46_500);
     expect(warnings[0]).toEqual({
       id: 'pickup-2',
       secondsFromNow: 120.5,
       title: 'Pickup coming',
-      body: 'Pickup starts in 10 s',
+      body: 'Pickup starts in 13 s',
       sound: 'warHorn',
     });
   });
@@ -61,7 +61,7 @@ describe('workWarningsFrom', () => {
   it('counts from a negative session time during Get seated, since the row starts by itself', () => {
     expect(workWarningsFrom(timings, -15 * SECOND)[0]).toMatchObject({
       id: 'pickup-1',
-      secondsFromNow: 305,
+      secondsFromNow: 302,
     });
   });
 

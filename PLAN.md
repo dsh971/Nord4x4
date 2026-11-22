@@ -514,6 +514,40 @@ Raised in the G6 phone checks: you don't like the falling horn at the end of a p
 
 **Status (2026-11-20):** you picked clip 2, the flute gong cut to 2.5 s. Built: `assets/audio/end-gong.wav` from the build script (the candidates stayed in a scratchpad script, so only the winner is in the repo); `push-end-horn.wav` and its synthesis deleted; both end cues play the gong at gain 0.6, about as loud as the horn was. The recording swells rather than strikes, so the cut runs from its very start with a 4 ms fade-in and a 0.8 s fade-out (the sound tests caught a click when it was cut from a detected onset). Both new Jest tests fail with the horn wired back in. A four-model review (2026-11-20) found the drum-gap test missing, the onset workaround and a few stale doc lines; all fixed. Left as is: the gong starts about 20 ms after its cue, as the bell already does, which a swelling sound off the drum grid doesn't show. Open: the phone check.
 
+### G6e · A gap between the warning and the start (approved and built 2026-11-20; phone check open)
+
+Raised in the G6d phone check: "Pickup coming" runs straight into "Pickup", so the two banners almost overlap. "Ready oars" and "Pull" do the same. You chose (2026-11-20) to move the warning 3 s earlier and end it 3 s before the start, for pushes and pickups alike:
+
+| Before the start | Today | After G6e |
+|---|---|---|
+| 13 s | — | Warning banner + edge pulse; clock turns persimmon; oars rise |
+| 10 s | Warning banner + edge pulse; clock persimmon; oars rise | (banner still up) |
+| 6 s | War horn (banner still up) | War horn (banner still up) |
+| 3 s | (banner still up) | Banner and edge pulse off; clock stays persimmon, oars stay up |
+| 0 s | "Pull" / "Pickup" + start strike | "Pull" / "Pickup" + start strike |
+
+**What moves:**
+- **The warning starts at 13 s** (`WARNING_LEAD_MS` 10 000 → 13 000 in `src/domain/session/sessionMachine.ts`). Everything that reads "being called" moves with it: the persimmon clock (`gaugeModel.ts`), the oars and horn at the prow (`sceneModel.ts`, `InkScene.tsx`), and the warning notifications while away (`workWarnings.ts`: sent 13 s before, "Pickup starts in 13 s").
+- **The banner ends 3 s before the start.** A new `WARNING_GAP_MS = 3_000` beside it. `warningBannerAt` in `src/features/rowing/rowingSession.ts` shows the warning only while the work is called and more than 3 s off. The clock and oars carry the last 3 s with no text, so the start banner arrives on a clear screen.
+- **The horn stays at 6 s**, inside the banner, so it keeps its visual twin (R51).
+- **Spacing:** work closer than about 13.4 s to the row's start or to other work would now overlap its signals (was 10.4 s; noted in the G6b review). No plan today comes close.
+
+**Files:** `src/domain/session/sessionMachine.ts` (the lead, the gap, `isWarningBannerUp`, `warningBannerWorkAt`), `src/features/rowing/rowingSession.ts`; comments in `banners.ts`, `gaugeModel.ts`, `InkScene.tsx`, `sceneModel.ts`, `sliceMoments.ts`; `e2e/away-from-app.yaml`; tests in `horn.test.ts`, `rowingSession.test.ts`, `gaugeModel.test.ts`, `gauge.test.tsx`, `sceneModel.test.ts`, `workWarnings.test.ts`, `useRowingSession.test.tsx`, `warningNotifications.test.ts`; docs: requirements (R27, R39, R40, R43, R51, the walkthrough, AE20), `docs/design/sound-spec.md`, the design README's 3.3 caption, `build_sounds.py` (a docstring), the rebuild plan, the storm plan, the row checklist (`docs/spikes/rowable-slice.md`). `workWarnings.ts` needed no change: it reads the lead.
+
+**Tests (each fails on today's code):**
+- The banner: off at 13.1 s before, up at 13 s and at 3.1 s, gone at 3 s and at 0.1 s, and "Pickup" alone at the start; the same for a push. In the session machine: up from 587 000 to 596 999 for work at 600 000.
+- Close work: when one work is in its 3 s gap, the next one's warning still shows.
+- Stalls: a stall jumping past the warning's start shows it; a stall jumping into the gap clears it.
+- The clock: ink just before 13 s, persimmon from exactly 13 s (the edges G6c tests, moved 3 s earlier), and still persimmon through the gap.
+- The scene: horn state from 13 s through the start.
+- Notifications: the first warning in the slice is pickup 1 at 4:47, "Pickup starts in 13 s".
+- The existing G6c cross-check pairs the clock and oars every 0.5 s; the banner gets its own whole-slice check through the real `RowingSession`, every 100 ms at all five pushes and pickups, against fixed 13 s and 3 s offsets: the warning in its window, a fully clear screen in the gap, and no warning anywhere else.
+- The order of the three times: gap (3 s) before horn (6 s) before warning (13 s), so the horn always sounds under its banner.
+
+**Verification:** `npx jest`, `npx tsc --noEmit`, `npm run lint`, `npm run e2e:away` (about 8 minutes), then a real row of the slice on the phone, watching 4:47 to 5:00 (the dev live loop draws no banners, so it can't show the gap).
+
+**Status (2026-11-20):** built. `WARNING_LEAD_MS` is 13 s and `WARNING_GAP_MS` 3 s. Twelve tests that assumed 10 s moved to 13 s; the new gap test (a push and a pickup) fails with no gap, and fourteen tests fail with the lead back at 10 s. Which work's banner is up is `warningBannerWorkAt` in the session machine, beside `calledWorkAt`; each work is checked on its own window, so a close pair can't hide the second warning. The half-second cross-check pairs the clock and oars; a whole-slice sweep checks the banner against fixed offsets at every push and pickup. Mutations (banner ignoring the gap, a 7 s gap, the old first-match lookup) each fail tests. Deferred: a spacing check in `validateSessionPlan`, for when storm or voyage plans could put work close together. `e2e/away-from-app.yaml` waits for "Pickup starts in 13 s" and checks the return at 25:13–25:00 and 23:13–23:00; it passed on 2026-11-20. Reviewed twice by four models; the banner clears 0.2 s before the horn's note ends, kept on purpose. Open: the phone check.
+
 ### H · Your coaching decisions, and the rehearsal's questions, in the coach packet (approved and done 2026-11-20; docs only)
 
 Raised while preparing the U1 coach review. A rehearsal of the packet's five questions (a model playing a coach, not a review) led to two decisions from you, plus new questions for the real coach. Both decisions are product calls, so they change the requirements now. Every number stays a draft until the coach answers (R17).

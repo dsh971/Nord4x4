@@ -4,8 +4,8 @@
 #
 # Each warning is timed by the app's own session clock, read the moment the rower comes back on
 # the banner, so Maestro's own delays can't pass or fail it:
-# 1. Leaving in Get seated: pickup 1's warning lands at 4:50 (25:10 left); back by 5:00 (25:00 left).
-# 2. Leaving during pickup 1: pickup 2's warning lands at 6:50 (23:10 left); back by 7:00 (23:00 left).
+# 1. Leaving in Get seated: pickup 1's warning lands at 4:47 (25:13 left); back by 5:00 (25:00 left).
+# 2. Leaving during pickup 1: pickup 2's warning lands at 6:47 (23:13 left); back by 7:00 (23:00 left).
 # After each return the row carries on into the pickup.
 appId: com.dsh971.nor4x4
 ---
@@ -35,16 +35,17 @@ appId: com.dsh971.nor4x4
 - takeScreenshot: 0-still-rowing
 
 - extendedWaitUntil:
-    visible: "(?s).*Pickup coming.*Pickup starts in 10 s.*"
+    visible: "(?s).*Pickup coming.*Pickup starts in 13 s.*"
     timeout: 330000
 - takeScreenshot: 1-pickup-1-warning
 - launchApp:
     stopApp: false
-# A short timeout: a warning 10 s early would read 25:20 and take 10 s to count into the window.
+# A short timeout: the return must land between 25:13 and 25:00 left. A warning sent 10 s too
+# early (at 25:23 left) would need 10 s to count down into this window, so the 4 s wait fails.
 - extendedWaitUntil:
-    visible: "Session · 25:(0\\d|10) left"
+    visible: "Session · 25:(0\\d|1[0-3]) left"
     timeout: 4000
-- takeScreenshot: 2-back-at-pickup-1-warning
+- takeScreenshot: 2-back-before-pickup-1
 - extendedWaitUntil:
     visible: "Session · 24:[45]\\d left"
     timeout: 20000
@@ -52,15 +53,15 @@ appId: com.dsh971.nor4x4
 - pressKey: home
 
 - extendedWaitUntil:
-    visible: "(?s).*Pickup coming.*Pickup starts in 10 s.*"
+    visible: "(?s).*Pickup coming.*Pickup starts in 13 s.*"
     timeout: 150000
 - takeScreenshot: 4-pickup-2-warning
 - launchApp:
     stopApp: false
 - extendedWaitUntil:
-    visible: "Session · 23:(0\\d|10) left"
+    visible: "Session · 23:(0\\d|1[0-3]) left"
     timeout: 4000
-- takeScreenshot: 5-back-at-pickup-2-warning
+- takeScreenshot: 5-back-before-pickup-2
 - extendedWaitUntil:
     visible: "Session · 22:[45]\\d left"
     timeout: 20000

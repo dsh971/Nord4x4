@@ -3,7 +3,9 @@ import { FAKE_MAX_HEART_RATE, fakeHeartRate } from '../../../dev/fakeHeartTrace'
 import { HR_SLICE, MINUTE, PUSH_2_STARTS, SECOND } from '../../../dev/rowingStates/sliceMoments';
 import { rowFreelyPlan } from '../../../domain/session/__tests__/fixtures';
 import { ManualClock } from '../../../domain/session/clock';
+import { segmentTimings } from '../../../domain/session/sessionPlan';
 import type { SessionView } from '../../../services/audio/audioEngine';
+import { WARNING_BANNERS } from '../banners';
 import { RowingSession, type RowingView, type SessionSoundCues } from '../rowingSession';
 
 class RecordingSound implements SessionSoundCues {
@@ -48,9 +50,9 @@ function startedSession(plan = SLICE_PLAN, withHeart = false) {
 }
 
 describe('RowingSession', () => {
-  it('keeps "Ready oars" up from the warning through the horn until the push, then shows "Pull" for 3 s', () => {
+  it('keeps "Ready oars" up from the warning through the horn, then shows "Pull" for 3 s', () => {
     const { clock, session } = startedSession();
-    const warningAtMs = PUSH_2_STARTS - 10 * SECOND;
+    const warningAtMs = PUSH_2_STARTS - 13 * SECOND;
     rowTo(session, clock, 0, warningAtMs);
     const afterHorn = rowTo(session, clock, warningAtMs, PUSH_2_STARTS - 5 * SECOND);
     expect(afterHorn.at(-1)?.banner).toEqual({ text: 'Ready oars', hasEdgePulse: true });
@@ -71,11 +73,68 @@ describe('RowingSession', () => {
     expect(end.at(-1)?.banner?.text).toBe('Back to easy');
   });
 
-  it('still shows "Ready oars" when a stall drops its warning cue as stale, before the horn sounds', () => {
+  it.each([
+    ['push 2', PUSH_2_STARTS, 'Ready oars', 'Pull'],
+    ['pickup 1', 5 * MINUTE, 'Pickup coming', 'Pickup'],
+  ])(
+    'shows the warning before %s from 13 s to 3 s ahead, then a clear screen until the start banner (G6e)',
+    (_, startMs, warning, start) => {
+      const { clock, session } = startedSession();
+      const views = rowTo(session, clock, 0, startMs + 500);
+      const textAt = (sessionMs: number) => {
+        const view = views.find((candidate) => candidate.sessionMs === sessionMs);
+        expect(view).toBeDefined();
+        return view?.banner?.text ?? null;
+      };
+      expect(textAt(startMs - 13_100)).toBeNull();
+      expect(textAt(startMs - 13_000)).toBe(warning);
+      expect(textAt(startMs - 3_100)).toBe(warning);
+      expect(textAt(startMs - 3_000)).toBeNull();
+      expect(textAt(startMs - 100)).toBeNull();
+      expect(textAt(startMs)).toBe(start);
+    },
+  );
+
+  it('shows the warning from 13 s to 3 s before every push and pickup of the slice, then a clear screen until the start', () => {
     const { clock, session } = startedSession();
-    rowTo(session, clock, 0, PUSH_2_STARTS - 11 * SECOND);
+    const timings = segmentTimings(SLICE_PLAN);
+    const work = timings.filter(
+      ({ segment }) => segment.type === 'push' || segment.type === 'pickup',
+    );
+    const views = rowTo(session, clock, 0, timings.at(-1)?.endMs ?? 0);
+    expect(work.length).toBeGreaterThanOrEqual(5);
+    for (const view of views) {
+      const coming = work.find(
+        ({ startMs }) => view.sessionMs >= startMs - 13_000 && view.sessionMs < startMs,
+      );
+      if (coming === undefined) {
+        const isWarning = Object.values(WARNING_BANNERS).some(
+          ({ text }) => text === view.banner?.text,
+        );
+        expect([view.sessionMs, isWarning]).toEqual([view.sessionMs, false]);
+      } else if (view.sessionMs < coming.startMs - 3_000) {
+        expect([view.sessionMs, view.banner]).toEqual([
+          view.sessionMs,
+          WARNING_BANNERS[coming.segment.type === 'push' ? 'push' : 'pickup'],
+        ]);
+      } else {
+        expect([view.sessionMs, view.banner]).toEqual([view.sessionMs, null]);
+      }
+    }
+  });
+
+  it('shows "Ready oars" when a stall jumps past the moment its warning starts', () => {
+    const { clock, session } = startedSession();
+    rowTo(session, clock, 0, PUSH_2_STARTS - 14 * SECOND);
     clock.advanceBy(4 * SECOND);
     expect(session.tick().banner).toEqual({ text: 'Ready oars', hasEdgePulse: true });
+  });
+
+  it('clears "Ready oars" when a stall jumps into the last 3 s before the push', () => {
+    const { clock, session } = startedSession();
+    rowTo(session, clock, 0, PUSH_2_STARTS - 8 * SECOND);
+    clock.advanceBy(6 * SECOND);
+    expect(session.tick().banner).toBeNull();
   });
 
   it('hides the warning under the pause sheet and shows it again on resume', () => {

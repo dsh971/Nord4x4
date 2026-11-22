@@ -58,7 +58,7 @@ The casual boards (1.3c, 2.11, 2.11f, 3.9, 3.10, 3.11) show a second rower on th
 | 3.1a–d | Get seated: drum count-in and the stop line (one frame per stroke phase). 3.1a's plan line has drifted: the app reads "Three 3′ pushes · 10′ warm-up first, with two pickups" (G6c); redrawn in the next design pass | `screens/3.1a-catch-get-seated.png` … `3.1d-recovery-get-seated.png` | R23, R24, R25, R52, R61 |
 | 3.2 | Push | `screens/3.2-rowing-work.png` | R26, R27, R29, R31, R32, R50, R52 |
 | 3.2b | Push above 95%: three bells, border glow, Ease off chip | `screens/3.2b-rowing-ease-off.png` | R36, R40, R50 |
-| 3.3 | Push or pickup warning, 10 s to it (the horn follows at 6 s) | `screens/3.3-rowing-horn-cue.png` | R27, R39, R40, R51 |
+| 3.3 | Push or pickup warning, as it looks 10 s before the start (the banner is up from 13 s to 3 s before; the horn sounds at 6 s) | `screens/3.3-rowing-horn-cue.png` | R27, R39, R40, R51 |
 | 3.4 | Easy row | `screens/3.4-rowing-easy.png` | R13, R27, R28, R50 |
 | 3.5 | Pause sheet with the stop line and music notice (board out of date: R41 now lowers ambience with no notice, 2026-11-13) | `screens/3.5-rowing-pause.png` | R32, R42, R54, R61 |
 | 3.6 | No strap: effort guidance | `screens/3.6-rowing-no-strap.png` | R30, AE7 |

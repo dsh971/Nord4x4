@@ -11,8 +11,8 @@ One-shots, scheduled ahead on the audio clock. A cue more than 2 s late is dropp
 | Moment | Engine cue | File | Sound | Drum gap | On screen (R40) |
 |---|---|---|---|---|---|
 | Get seated, last 5 s | `countIn` (5 to 1) | `drum-catch.wav` | One deep drum hit per second | None; the drum hasn't started | Big 5-4-3-2-1 |
-| Push or pickup in 10 s | None: read off session time (`calledWorkAt`) | None | Silent; the horn follows | None | Edge pulse + "Ready oars" (push) or "Pickup coming" (pickup), until it starts |
-| Push or pickup in 6 s | `horn` | `war-horn.wav` | War horn: 3.2 s at 73 Hz with a growl, plus a 2 s valley echo | 5.2 s, so the drum is back 0.8 s before the start strike | The 10 s warning, still up |
+| Push or pickup in 13 s | None: read off session time (`warningBannerWorkAt`) | None | Silent; the horn follows | None | Edge pulse + "Ready oars" (push) or "Pickup coming" (pickup), until 3 s before it starts (G6e) |
+| Push or pickup in 6 s | `horn` | `war-horn.wav` | War horn: 3.2 s at 73 Hz with a growl, plus a 2 s valley echo | 5.2 s, so the drum is back 0.8 s before the start strike | The warning, still up |
 | Push starts | `pushStart` | `push-start-strike.wav` | Double taiko strike; the drum then lifts to push tempo | 0.67 s | "Pull" |
 | Pickup starts | `pickupStart` | `push-start-strike.wav` | As a push starts | 0.67 s | "Pickup" |
 | 90 s into a push (effort guidance, R30) | `holdEffort` | `hold-signal.wav` | Two hollow wood knocks, like oar shafts clacking | 0.39 s | "Hold this effort" |

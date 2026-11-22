@@ -33,15 +33,16 @@ describe('sceneStateAt (R27)', () => {
     expect(sceneStateAt(TIMELINE, PUSH_STARTS + 7 * MINUTE)).toBe('easy');
   });
 
-  it("raises the oars from a push's 10 s warning", () => {
-    expect(sceneStateAt(TIMELINE, PUSH_STARTS - 10 * SECOND)).toBe('horn');
-    expect(sceneStateAt(TIMELINE, PUSH_STARTS - 10 * SECOND - 1)).toBe('easy');
+  it("raises the oars from a push's warning 13 s before, and keeps them up through the banner's gap", () => {
+    expect(sceneStateAt(TIMELINE, PUSH_STARTS - 13 * SECOND)).toBe('horn');
+    expect(sceneStateAt(TIMELINE, PUSH_STARTS - 13 * SECOND - 1)).toBe('easy');
+    expect(sceneStateAt(TIMELINE, PUSH_STARTS - 2 * SECOND)).toBe('horn');
   });
 
-  it("raises them from a pickup's 10 s warning too, until it starts", () => {
+  it("raises them from a pickup's warning too, until it starts", () => {
     const pickupStarts = 2 * MINUTE + 1_300;
-    expect(sceneStateAt(TIMELINE, pickupStarts - 10 * SECOND - 1)).toBe('easy');
-    expect(sceneStateAt(TIMELINE, pickupStarts - 10 * SECOND)).toBe('horn');
+    expect(sceneStateAt(TIMELINE, pickupStarts - 13 * SECOND - 1)).toBe('easy');
+    expect(sceneStateAt(TIMELINE, pickupStarts - 13 * SECOND)).toBe('horn');
     expect(sceneStateAt(TIMELINE, pickupStarts)).toBe('work');
     expect(sceneStateAt(TIMELINE, pickupStarts + 20 * SECOND)).toBe('easy');
   });

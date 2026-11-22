@@ -3,7 +3,7 @@ import { INITIAL_EASE_OFF, observeHeartRate, type EaseOffState } from '../../dom
 import type { MonotonicClock } from '../../domain/session/clock';
 import {
   createSessionMachine,
-  calledWorkAt,
+  warningBannerWorkAt,
   sessionClockMs,
   type PauseReason,
   type SessionEvent,
@@ -57,13 +57,14 @@ const HEART_SAMPLE_MS = 1_000;
 /**
  * The warning for the push or pickup about to start, so the horn 6 s before has its visual twin
  * (R51). It follows session time, as the persimmon clock does, so a stall that drops the horn's cue
- * as stale can't take the warning with it.
+ * as stale can't take the warning with it. It leaves a few seconds before the start, while the clock
+ * and oars still say work is coming (G6e).
  */
 function warningBannerAt(timings: readonly SegmentTiming[], sessionMs: number): Banner | null {
-  const called = calledWorkAt(timings, sessionMs);
-  return called === undefined
+  const work = warningBannerWorkAt(timings, sessionMs);
+  return work === undefined
     ? null
-    : WARNING_BANNERS[called.segment.type === 'push' ? 'push' : 'pickup'];
+    : WARNING_BANNERS[work.segment.type === 'push' ? 'push' : 'pickup'];
 }
 
 /**

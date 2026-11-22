@@ -52,12 +52,13 @@ describe('describeGauge', () => {
     });
   });
 
-  it('shows the next push in a rest, the clock in persimmon from its 10 s warning (board 3.3)', () => {
+  it('shows the next push in a rest, the clock in persimmon from its warning 13 s before (board 3.3, G6e)', () => {
     const gauge = gaugeAt(REST_10_S_BEFORE_PUSH_2);
     expect(gauge?.eyebrow).toBe('Rest');
     expect(gauge?.eyebrowTone).toBe('steady');
     expect(gauge?.clockTone).toBe('work');
-    expect(gaugeAt(REST_10_S_BEFORE_PUSH_2 - SECOND)?.clockTone).toBe('ink');
+    expect(gaugeAt(PUSH_2_STARTS - 13 * SECOND)?.clockTone).toBe('work');
+    expect(gaugeAt(PUSH_2_STARTS - 13 * SECOND - 1)?.clockTone).toBe('ink');
     expect(gauge?.footer).toEqual({
       rate: { low: 18, high: 22 },
       nextWork: { kind: 'push', number: 2, ms: 3 * MINUTE },
@@ -82,12 +83,13 @@ describe('describeGauge', () => {
     expect(gaugeAt(5 * MINUTE + 10 * SECOND)?.eyebrowTone).toBe('push');
   });
 
-  it("turns the clock persimmon from a pickup's 10 s warning until it starts, as before a push", () => {
-    expect(gaugeAt(4 * MINUTE + 49_999)?.clockTone).toBe('ink');
-    expect(gaugeAt(4 * MINUTE + 50 * SECOND)?.clockTone).toBe('work');
+  it("turns the clock persimmon from a pickup's warning 13 s before until it starts, gap included", () => {
+    expect(gaugeAt(4 * MINUTE + 46_999)?.clockTone).toBe('ink');
+    expect(gaugeAt(4 * MINUTE + 47 * SECOND)?.clockTone).toBe('work');
+    expect(gaugeAt(4 * MINUTE + 58 * SECOND)?.clockTone).toBe('work');
     expect(gaugeAt(4 * MINUTE + 59_999)?.clockTone).toBe('work');
     expect(gaugeAt(5 * MINUTE)?.clockTone).toBe('ink');
-    expect(gaugeAt(9 * MINUTE + 50 * SECOND)?.clockTone).toBe('work');
+    expect(gaugeAt(9 * MINUTE + 47 * SECOND)?.clockTone).toBe('work');
   });
 
   it('names the push or pickup coming next wherever this stretch is not work', () => {
@@ -124,18 +126,15 @@ describe('describeGauge', () => {
     expect(zoneAt(4 * MINUTE + 100 * SECOND)).toBe('build');
   });
 
-  it('switches the persimmon clock, the raised oars and the warning banner on and off together', () => {
+  // The warning banner is a part of this window, ending 3 s early (G6e): rowingSession.test.ts checks it.
+  it('switches the persimmon clock and the raised oars on and off together, while work is called', () => {
     const timings = segmentTimings(SLICE_PLAN);
     const timeline = toSceneTimeline(timings);
     for (let sessionMs = 0; sessionMs < 30 * MINUTE; sessionMs += 500) {
       const isClockCalling = gaugeAt(sessionMs)?.clockTone === 'work';
       const isOarsRaised = sceneStateAt(timeline, sessionMs) === 'horn';
-      const isBannerUp = calledWorkAt(timings, sessionMs) !== undefined;
-      expect([sessionMs, isClockCalling, isOarsRaised]).toEqual([
-        sessionMs,
-        isBannerUp,
-        isBannerUp,
-      ]);
+      const isCalled = calledWorkAt(timings, sessionMs) !== undefined;
+      expect([sessionMs, isClockCalling, isOarsRaised]).toEqual([sessionMs, isCalled, isCalled]);
     }
   });
 

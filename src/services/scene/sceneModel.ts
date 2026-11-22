@@ -55,7 +55,7 @@ function segmentIndexAt(timeline: SceneTimeline, sessionMs: number): number {
 
 /**
  * The scene state for a moment of the session (R27): each segment's own scene, except from a push's
- * or pickup's 10 s warning until it starts, when the oars are raised. Before and after the row the sea is calm.
+ * or pickup's warning (13 s before) until it starts, when the oars are raised. Before and after the row the sea is calm.
  */
 export function sceneStateAt(timeline: SceneTimeline, sessionMs: number): SceneState {
   'worklet';

@@ -4,8 +4,12 @@ import { AppState, type AppStateStatus } from 'react-native';
 
 import { SLICE_PLAN } from '../../../content/slicePlan';
 import { MINUTE, SECOND } from '../../../dev/rowingStates/sliceMoments';
+import { MAX_SLICE_SPEED, planAtSpeed } from '../../../dev/slicePace';
+import { SpedUpClock } from '../../../dev/spedUpClock';
+import { ManualClock, systemClock } from '../../../domain/session/clock';
 import { AudioEngine } from '../../../services/audio/audioEngine';
-import { useRowingSession } from '../useRowingSession';
+import { STALE_CUE_MS } from '../../../domain/session/sessionMachine';
+import { TICK_MS, useRowingSession } from '../useRowingSession';
 
 jest.mock('../../../services/audio/audioEngine', () => ({ AudioEngine: { load: jest.fn() } }));
 jest.mock('expo-notifications', () => ({
@@ -81,7 +85,9 @@ async function finishLoading() {
 
 /** A row opened at Get seated, with its first engine loaded; `isStarted` taps Start now. */
 async function openRow({ isStarted = true } = {}) {
-  const hook = await renderHook(() => useRowingSession(SLICE_PLAN, null));
+  const hook = await renderHook(() =>
+    useRowingSession(SLICE_PLAN, null, { clock: systemClock, isSoundOn: true }),
+  );
   await finishLoading();
   if (isStarted) {
     await act(async () => {
@@ -201,5 +207,63 @@ describe('useRowingSession away from the app (R43)', () => {
     });
     await finishLoading();
     expect(engines[1]?.start).toHaveBeenCalled();
+  });
+});
+
+describe('useRowingSession on a test clock with sound off (G7a)', () => {
+  it('keeps time by the clock it is given and never loads the sound', async () => {
+    jest.mocked(AudioEngine.load).mockClear();
+    const clock = new ManualClock();
+    const hook = await renderHook(() =>
+      useRowingSession(SLICE_PLAN, null, { clock, isSoundOn: false }),
+    );
+    await act(async () => {
+      hook.result.current.startNow();
+    });
+    clock.advanceBy(65_000);
+    await act(async () => {
+      hook.result.current.pause();
+    });
+    await settle();
+    expect(hook.result.current.view.sessionMs).toBe(65_000);
+    expect(AudioEngine.load).not.toHaveBeenCalled();
+    expect(hook.result.current.soundError).toBeNull();
+  });
+
+  it('keeps the pace it started with, so a new pace can never pair a sped-up clock with sound', async () => {
+    jest.mocked(AudioEngine.load).mockClear();
+    const clock = new ManualClock();
+    const hook = await renderHook(
+      ({ isSoundOn }: { isSoundOn: boolean }) =>
+        useRowingSession(SLICE_PLAN, null, { clock, isSoundOn }),
+      { initialProps: { isSoundOn: false } },
+    );
+    await hook.rerender({ isSoundOn: true });
+    await settle();
+    expect(AudioEngine.load).not.toHaveBeenCalled();
+  });
+
+  it('leaves Get seated at its real length at 10×, so Start now can still be tapped after 2.5 s', async () => {
+    const base = new ManualClock();
+    const clock = new SpedUpClock(base, 10);
+    const hook = await renderHook(() =>
+      useRowingSession(planAtSpeed(SLICE_PLAN, 10), null, { clock, isSoundOn: false }),
+    );
+    base.advanceBy(2_500);
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 150));
+    });
+    expect(hook.result.current.view.phase).toBe('getSeated');
+    await act(async () => {
+      hook.result.current.startNow();
+    });
+    expect(hook.result.current.view.phase).toBe('rowing');
+    expect(hook.result.current.view.sessionMs).toBe(0);
+  });
+});
+
+describe('the top slice speed (G7a)', () => {
+  it('stops where a tick twice as late as usual still leaves every cue in time', () => {
+    expect(MAX_SLICE_SPEED * TICK_MS * 2).toBeLessThanOrEqual(STALE_CUE_MS);
   });
 });

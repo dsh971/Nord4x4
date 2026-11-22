@@ -14,7 +14,7 @@ import { InkScene } from './InkScene';
 import { PauseSheet } from './PauseSheet';
 import { RowingOverlay } from './RowingOverlay';
 import type { HeartFeed } from './rowingSession';
-import { useRowingSession } from './useRowingSession';
+import { useRowingSession, type RowingPace } from './useRowingSession';
 
 /**
  * One row, start to finish (U7): Get seated with its count-in, then the painted scene under the
@@ -24,16 +24,19 @@ import { useRowingSession } from './useRowingSession';
 export function RowingScreen({
   plan,
   heartFeed,
+  pace,
   onDone,
 }: {
   plan: SessionPlan;
   heartFeed: HeartFeed | null;
+  pace: RowingPace;
   onDone: () => void;
 }) {
   useKeepAwake();
   const { view, soundError, startNow, pause, resume, endSession } = useRowingSession(
     plan,
     heartFeed,
+    pace,
   );
   const timings = useMemo(() => segmentTimings(plan), [plan]);
   const bars = useMemo(() => progressBarsOf(plan), [plan]);
